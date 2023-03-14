@@ -27,12 +27,14 @@ class Global {
         int n;
         unsigned int pause;
         unsigned int mainmenu;
+        unsigned int issa_feature;
         Global(){
             xres = 650;
             yres = 450;
             n = 0;
             pause = 0;
             mainmenu = 0;
+            issa_feature = 0;
 
         }
 } g;
@@ -109,7 +111,7 @@ class Circle {
             vel[1] = v1;
         }
 
-} circle;
+} circle, test_ball(10,g.xres/2,g.yres/2,0,0);
 
 class X11_wrapper {
     private:
@@ -151,6 +153,8 @@ int main()
             x11.check_resize(&e);
             x11.check_mouse(&e);
             done = x11.check_keys(&e);
+            if (g.mainmenu == 4)
+                done = 1;
         }
         physics();
         render();
@@ -276,7 +280,14 @@ void X11_wrapper::check_mouse(XEvent *e)
         if (e->xbutton.button==1) {
             if (g.mainmenu == 0) {
                 g.mainmenu = select_option(e->xbutton.x, g.yres - e->xbutton.y);
+            } else if (g.mainmenu == 1) {
+                if (g.issa_feature) {
+                    push_button(&test_ball.vel[0], g.xres, g.yres);
+                }
             }
+        
+
+
             //Left button was pressed.
             //int y = g.yres - e->xbutton.y;
             //make_particle(e->xbutton.x, g.yres - e->xbutton.y);
@@ -321,14 +332,20 @@ int X11_wrapper::check_keys(XEvent *e)
                         alex_feature = 0;
                 }
                 break;
+            case XK_3:
+                if (XK_Shift_L && g.mainmenu == 1) {
+                    g.issa_feature = !g.issa_feature;
+                }
+                break;
             case XK_space:
                 summonball = true;
                 velocity[1] = 8.0f;
                 ball.vel[1] = velocity[1];
                 break;
             case XK_e:
-                if (XK_Shift_L && g.mainmenu != 0)
+                if (XK_Shift_L && g.mainmenu != 0) {
                     g.mainmenu = 0;
+                }
                 break;
             case XK_Escape:
                 //Escape key was pressed
@@ -363,6 +380,16 @@ void physics()
             ball.pos[1] += ball.vel[1];
             ball.vel[1] -= Gravity;
         }
+    }
+    if(g.issa_feature) {
+        if (test_ball.vel[0] < 0) {
+            test_ball.vel[0] = 0;
+        }
+        if (test_ball.vel[0] > 0) {
+            test_ball.vel[0] -= Gravity;
+        }
+    }
+    
         /*for (int i = 0; i < g.n; i++) {
           particle[i].pos[0] += particle[i].vel[0];
           particle[i].pos[1] += particle[i].vel[1];
@@ -416,28 +443,39 @@ void physics()
         if (ball.pos[1] + ball.w > g.yres)
             ball.vel[1] = -ball.vel[1];
 
-    }
+    
 }
 void render()
 {
-    //
+    glClear(GL_COLOR_BUFFER_BIT);
     if (g.mainmenu == 0) {
         prompt titlescreen[4];
         Rect titleprompt[5];
-        glClear(GL_COLOR_BUFFER_BIT);
         for (int i=0; i<4; i++) {
             render_menu(titlescreen[i], titleprompt[i], i, g.xres, g.yres);
         }
         render_title(titleprompt[5],g.xres,g.yres);
         return;
+    } else if (g.mainmenu == 4) {
+        return;
     }
 
-
-
-
-    glClear(GL_COLOR_BUFFER_BIT);
-
-
+    if (g.issa_feature) {
+            int n = 20;
+            double angle = 0.0;
+            double inc = (2.0*3.14)/n;
+            glColor3ub(255,255, 100);
+            glBegin(GL_TRIANGLE_FAN);
+            for (int i = 0; i < n; i++) {
+                test_ball.x = test_ball.r*cos(angle);
+                test_ball.y = test_ball.r*sin(angle);
+                glVertex2f(test_ball.x+test_ball.c[0],test_ball.y + test_ball.c[1]);
+                angle += inc;
+            }
+            glEnd();
+            draw_button(g.xres,g.yres);
+        }
+    //glClear(GL_COLOR_BUFFER_BIT);
     // Draw Box	
     Box highbox = Box(10.0f,325.0f, 550, 10, 0.0f, 0.0f);
     glPushMatrix();
@@ -450,7 +488,6 @@ void render()
     glVertex2f( highbox.w, -highbox.h);
     glEnd();
     glPopMatrix();
-
     // Summon Ball	
     //if (summonball) {
     glPushMatrix();
@@ -464,7 +501,6 @@ void render()
     glEnd();
     glPopMatrix();
     //	}
-
     //Draw particle.
     /*for (int i = 0; i < g.n; i++) {
       glPushMatrix();
@@ -529,7 +565,6 @@ void render()
         angle += inc;
     }
     glEnd();
-
     Circle halfcir = Circle(50.0f, 510 ,335, 0.0f, 0.0f);
     n = 32; 
     angle = 0.0;
@@ -544,7 +579,6 @@ void render()
         angle += inc;
     }
     glEnd();
-
     Rect r[2];
     if (g.pause){
         r[0].bot = g.yres/1.5;
@@ -552,7 +586,6 @@ void render()
         r[0].center = 0;
         ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
     }
-
     r[1].bot = g.yres-35;
     r[1].left = g.xres/2;
     r[1].center = -5;
