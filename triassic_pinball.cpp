@@ -19,6 +19,7 @@ using namespace std;
 #include "fonts.h"
 #include "abotello.h"
 #include "isamara.h"
+#include "xreyes.h"
 //some structures
 
 class Global {
@@ -70,23 +71,6 @@ class Box {
             vel[1] = v1;
         }
 };
-
-class Triangle {
-    public:
-        float vertex1[2],vertex2[2],vertex3[2];
-        Triangle() {
-        }
-        Triangle(float vertx1, float vertx2, float vertx3,
-                float verty1, float verty2, float verty3) {
-            vertex1[0] = vertx1;
-            vertex2[0] = vertx2;
-            vertex3[0] = vertx3;
-            vertex1[1] = verty1;
-            vertex2[1] = verty2;
-            vertex3[1] = verty3;
-        }
-};
-
 
 class Circle {
     public:
@@ -528,8 +512,8 @@ void render()
 
     glEnd();
 
-    Triangle t2 = Triangle(float(g.xres/2+110),400.0f,float(g.xres/2+110),
-            25.0f, 10.0f, 10.0f);
+    Triangle t2 = Triangle(400.0f, 440.0f, 440.0f,
+            10.0f, 25.0f, 10.0f);
     glPushMatrix();
     glBegin(GL_TRIANGLES);
     glColor3f(0.5,0,0);
@@ -539,8 +523,8 @@ void render()
 
     glEnd();
 
-    Triangle t3 = Triangle(375.0f,float(g.xres/2+85),float(g.xres/2+85),
-            25.0f, 10.0f, 25.0f);
+    Triangle t3 = Triangle(375.0f, 335.0f, 335.0f,
+            10.0f, 10.0f, 25.0f);
     glPushMatrix();
     glBegin(GL_TRIANGLES);
     glColor3f(0.5,0,0);
