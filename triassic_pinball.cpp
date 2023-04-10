@@ -24,95 +24,95 @@ using namespace std;
 
 class Global {
     public:
-        int xres, yres;
-        int n;
-        unsigned int pause;
-        unsigned int mainmenu;
-        unsigned int issa_feature;
-        Global(){
-            xres = 650;
-            yres = 450;
-            n = 0;
-            pause = 0;
-            mainmenu = 0;
-            issa_feature = 0;
+	int xres, yres;
+	int n;
+	unsigned int pause;
+	unsigned int mainmenu;
+	unsigned int issa_feature;
+	Global(){
+	    xres = 650;
+	    yres = 450;
+	    n = 0;
+	    pause = 0;
+	    mainmenu = 0;
+	    issa_feature = 0;
 
-        }
+	}
 } g;
 extern int alex_feature;
 extern float velocity[2];
 extern bool summonball;
 class Box {
     public:
-        float w;
-        float h;
-        float pos[2];
-        float vel[2];
-        unsigned char color[3];
-        void set_color ( unsigned char col[3]) {
-            memcpy(color, col, sizeof(unsigned char) *3);
+	float w;
+	float h;
+	float pos[2];
+	float vel[2];
+	unsigned char color[3];
+	void set_color ( unsigned char col[3]) {
+	    memcpy(color, col, sizeof(unsigned char) *3);
 
-        }
-        //float boxr=150.0f/255.0f, boxg=160.0f/255.0f, boxb=220.0f/255.0f;
-        Box(){
-            w = 80.0f;
-            h = 15.0f;
-            pos[0] = 90;
-            pos[1] = 290;
-            vel[0] = 0.0f;
-            vel[1] = 0.0f;
-        }
-        Box(float wid, float hgt, int x, int y, float v0, float v1){
-            w = wid;
-            h = hgt;
-            pos[0] = x;
-            pos[1] = y;
-            vel[0] = v0;
-            vel[1] = v1;
-        }
+	}
+	//float boxr=150.0f/255.0f, boxg=160.0f/255.0f, boxb=220.0f/255.0f;
+	Box(){
+	    w = 80.0f;
+	    h = 15.0f;
+	    pos[0] = 90;
+	    pos[1] = 290;
+	    vel[0] = 0.0f;
+	    vel[1] = 0.0f;
+	}
+	Box(float wid, float hgt, int x, int y, float v0, float v1){
+	    w = wid;
+	    h = hgt;
+	    pos[0] = x;
+	    pos[1] = y;
+	    vel[0] = v0;
+	    vel[1] = v1;
+	}
 }highbox(50.0f,335.0f, 310, 10, 0.0f, 0.0f);
 class Circle {
     public:
-        float r, c[2], x, y, vel[2];
-        unsigned char color[3];
-        void set_color ( unsigned char col[3]) {
-            memcpy(color, col, sizeof(unsigned char) *3);
+	float r, c[2], x, y, vel[2];
+	unsigned char color[3];
+	void set_color ( unsigned char col[3]) {
+	    memcpy(color, col, sizeof(unsigned char) *3);
 
-        }
-        Circle(){
-            r = 70.0f;
-            c[0] = 600.0f;
-            c[1] = 25.0f;
-            vel[0] = 0.0f;
-            vel[1] = 0.0f;
-        }
-        Circle(float radius, int cx,int cy, float v0, float v1) {
-            r = radius;
-            c[0] = cx;
-            c[1] = cy;
-            vel[0] = v0;
-            vel[1] = v1;
-        }
+	}
+	Circle(){
+	    r = 70.0f;
+	    c[0] = 600.0f;
+	    c[1] = 25.0f;
+	    vel[0] = 0.0f;
+	    vel[1] = 0.0f;
+	}
+	Circle(float radius, int cx,int cy, float v0, float v1) {
+	    r = radius;
+	    c[0] = cx;
+	    c[1] = cy;
+	    vel[0] = v0;
+	    vel[1] = v1;
+	}
 
 } circle, test_ball(10,g.xres/2,g.yres/2,0,0), halfcir(50.0f, 310 ,335, 0.0f, 0.0f);
 
 
 class X11_wrapper {
     private:
-        Display *dpy;
-        Window win;
-        GLXContext glc;
+	Display *dpy;
+	Window win;
+	GLXContext glc;
     public:
-        ~X11_wrapper();
-        X11_wrapper();
-        void set_title();
-        bool getXPending();
-        XEvent getXNextEvent();
-        void swapBuffers();
-        void reshape_window(int width, int height);
-        void check_resize(XEvent *e);
-        void check_mouse(XEvent *e);
-        int check_keys(XEvent *e);
+	~X11_wrapper();
+	X11_wrapper();
+	void set_title();
+	bool getXPending();
+	XEvent getXNextEvent();
+	void swapBuffers();
+	void reshape_window(int width, int height);
+	void check_resize(XEvent *e);
+	void check_mouse(XEvent *e);
+	int check_keys(XEvent *e);
 } x11;
 
 //FunctiCircle(float wid, float hgt, int x, int y, float v0, float v1){
@@ -131,19 +131,19 @@ int main()
     //Main loop
     int done = 0;
     while (!done) {
-        //Process external events.
-        while (x11.getXPending()) {
-            XEvent e = x11.getXNextEvent();
-            x11.check_resize(&e);
-            x11.check_mouse(&e);
-            done = x11.check_keys(&e);
-            if (g.mainmenu == 4)
-                done = 1;
-        }
-        physics();
-        render();
-        x11.swapBuffers();
-        usleep(2000);
+	//Process external events.
+	while (x11.getXPending()) {
+	    XEvent e = x11.getXNextEvent();
+	    x11.check_resize(&e);
+	    x11.check_mouse(&e);
+	    done = x11.check_keys(&e);
+	    if (g.mainmenu == 4)
+		done = 1;
+	}
+	physics();
+	render();
+	x11.swapBuffers();
+	usleep(2000);
     }
     cleanup_fonts();
     return 0;
@@ -161,25 +161,25 @@ X11_wrapper::X11_wrapper()
     int w = g.xres, h = g.yres;
     dpy = XOpenDisplay(NULL);
     if (dpy == NULL) {
-        cout << "\n\tcannot connect to X server\n" << endl;
-        exit(EXIT_FAILURE);
+	cout << "\n\tcannot connect to X server\n" << endl;
+	exit(EXIT_FAILURE);
     }
     Window root = DefaultRootWindow(dpy);
     XVisualInfo *vi = glXChooseVisual(dpy, 0, att);
     if (vi == NULL) {
-        cout << "\n\tno appropriate visual found\n" << endl;
-        exit(EXIT_FAILURE);
+	cout << "\n\tno appropriate visual found\n" << endl;
+	exit(EXIT_FAILURE);
     }  
     Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
     XSetWindowAttributes swa;
     swa.colormap = cmap;
     swa.event_mask =
-        ExposureMask | KeyPressMask | KeyReleaseMask |
-        ButtonPress | ButtonReleaseMask |
-        PointerMotionMask |
-        StructureNotifyMask | SubstructureNotifyMask;
+	ExposureMask | KeyPressMask | KeyReleaseMask |
+	ButtonPress | ButtonReleaseMask |
+	PointerMotionMask |
+	StructureNotifyMask | SubstructureNotifyMask;
     win = XCreateWindow(dpy, root, 0, 0, w, h, 0, vi->depth,
-            InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
+	    InputOutput, vi->visual, CWColormap | CWEventMask, &swa);
     set_title();
     glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
 
@@ -229,11 +229,11 @@ void X11_wrapper::check_resize(XEvent *e)
     //The ConfigureNotify is sent by the
     //server if the window is resized.
     if (e->type != ConfigureNotify)
-        return;
+	return;
     XConfigureEvent xce = e->xconfigure;
     if (xce.width != g.xres || xce.height != g.yres) {
-        //Window size did change.
-        reshape_window(xce.width, xce.height);
+	//Window size did change.
+	reshape_window(xce.width, xce.height);
     }
 }
 //-----------------------------------------------------------------------------
@@ -251,46 +251,46 @@ void X11_wrapper::check_mouse(XEvent *e)
 
     //Weed out non-mouse events
     if (e->type != ButtonRelease &&
-            e->type != ButtonPress &&
-            e->type != MotionNotify) {
-        //This is not a mouse event that we care about.
-        return;
+	    e->type != ButtonPress &&
+	    e->type != MotionNotify) {
+	//This is not a mouse event that we care about.
+	return;
     }
     //
     if (e->type == ButtonRelease) {
-        return;
+	return;
     }
     if (e->type == ButtonPress) {
-        if (e->xbutton.button==1) {
-            if (g.mainmenu == 0) {
-                g.mainmenu = select_option(e->xbutton.x, g.yres - e->xbutton.y);
-            } else if (g.mainmenu == 1) {
-                if (g.issa_feature) {
-                    push_button(&test_ball.vel[0], g.xres, g.yres);
-                }
-            }
-        
+	if (e->xbutton.button==1) {
+	    if (g.mainmenu == 0) {
+		g.mainmenu = select_option(e->xbutton.x, g.yres - e->xbutton.y);
+	    } else if (g.mainmenu == 1) {
+		if (g.issa_feature) {
+		    push_button(&test_ball.vel[0], g.xres, g.yres);
+		}
+	    }
 
 
-            //Left button was pressed.
-            //int y = g.yres - e->xbutton.y;
-            //make_particle(e->xbutton.x, g.yres - e->xbutton.y);
-            return;
-        }
-        if (e->xbutton.button==3) {
-            //Right button was pressed.
-            return;
-        }
+
+	    //Left button was pressed.
+	    //int y = g.yres - e->xbutton.y;
+	    //make_particle(e->xbutton.x, g.yres - e->xbutton.y);
+	    return;
+	}
+	if (e->xbutton.button==3) {
+	    //Right button was pressed.
+	    return;
+	}
     }
     if (e->type == MotionNotify) {
-        //The mouse moved!
-        if (savex != e->xbutton.x || savey != e->xbutton.y) {
-            if (!g.pause){
-                savex = e->xbutton.x;
-                savey = e->xbutton.y;
-                //Code placed here will execute whenever the mouse moves.
-            }
-        }
+	//The mouse moved!
+	if (savex != e->xbutton.x || savey != e->xbutton.y) {
+	    if (!g.pause){
+		savex = e->xbutton.x;
+		savey = e->xbutton.y;
+		//Code placed here will execute whenever the mouse moves.
+	    }
+	}
     }
 }
 
@@ -299,42 +299,42 @@ Box ball = Box(5.0f,5.0f, 580, 100, velocity[0], velocity[1]);
 int X11_wrapper::check_keys(XEvent *e)
 {
     if (e->type != KeyPress && e->type != KeyRelease)
-        return 0;
+	return 0;
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
-        switch (key) {
-            case XK_p:
-                g.pause = manage_pstate(g.pause);
-                break;
-            case XK_2:
-                if (XK_Shift_L)
-                    // Key 2 and shift are both pressed down
-                {
-                    if (alex_feature == 0)
-                        alex_feature = 1;
-                    else 
-                        alex_feature = 0;
-                }
-                break;
-            case XK_3:
-                if (XK_Shift_L && g.mainmenu == 1) {
-                    g.issa_feature = !g.issa_feature;
-                }
-                break;
-            case XK_space:
-                summonball = true;
-                velocity[1] = 8.0f;
-                ball.vel[1] = velocity[1];
-                break;
-            case XK_e:
-                if (XK_Shift_L && g.mainmenu != 0) {
-                    g.mainmenu = 0;
-                }
-                break;
-            case XK_Escape:
-                //Escape key was pressed
-                return 1;
-        }
+	switch (key) {
+	    case XK_p:
+		g.pause = manage_pstate(g.pause);
+		break;
+	    case XK_2:
+		if (XK_Shift_L)
+		    // Key 2 and shift are both pressed down
+		{
+		    if (alex_feature == 0)
+			alex_feature = 1;
+		    else 
+			alex_feature = 0;
+		}
+		break;
+	    case XK_3:
+		if (XK_Shift_L && g.mainmenu == 1) {
+		    g.issa_feature = !g.issa_feature;
+		}
+		break;
+	    case XK_space:
+		summonball = true;
+		velocity[1] = 8.0f;
+		ball.vel[1] = velocity[1];
+		break;
+	    case XK_e:
+		if (XK_Shift_L && g.mainmenu != 0) {
+		    g.mainmenu = 0;
+		}
+		break;
+	    case XK_Escape:
+		//Escape key was pressed
+		return 1;
+	}
     }
     return 0;
 }
@@ -356,165 +356,134 @@ void init_opengl(void)
 }
 float Gravity = 0.05;
 Triangle t1 = Triangle(float(g.xres/2+100),350.0f,float(g.xres/2+100),
-            float(g.yres), float(g.yres), 300.0f);
+	float(g.yres), float(g.yres), 300.0f);
 
 Triangle flipper2 = Triangle(180.0f, 140.0f, 140.0f,
-            10.0f, 10.0f, 25.0f);
+	10.0f, 10.0f, 25.0f);
 Triangle flipper1 = Triangle(200.0f, 240.0f, 240.0f,
-            10.0f, 25.0f, 10.0f);
+	10.0f, 25.0f, 10.0f);
 
 
 void physics()
 {
     if(!g.pause){
-        if (summonball) {
-    		if (ball.vel[0] <= 9.0f || ball.vel[1] <= 9.0f) {
-            	ball.pos[0] += ball.vel[0];
-            	ball.pos[1] += ball.vel[1];
-            	ball.vel[1] -= Gravity;
-		}
-        }
+	if (summonball) {
+	    if (ball.vel[0] <= 9.0f || ball.vel[1] <= 9.0f) {
+		ball.pos[0] += ball.vel[0];
+		ball.pos[1] += ball.vel[1];
+		ball.vel[1] -= Gravity;
+	    }
+	}
     }
     if(g.issa_feature) {
-        if (test_ball.vel[0] < 0) {
-            test_ball.vel[0] = 0;
-        }
-        if (test_ball.vel[0] > 0) {
-            test_ball.vel[0] -= Gravity;
-        }
+	if (test_ball.vel[0] < 0) {
+	    test_ball.vel[0] = 0;
+	}
+	if (test_ball.vel[0] > 0) {
+	    test_ball.vel[0] -= Gravity;
+	}
     }
 
 
-        /*for (int i = 0; i < g.n; i++) {
-          particle[i].pos[0] += particle[i].vel[0];
-          particle[i].pos[1] += particle[i].vel[1];
-          particle[i].vel[1] -= Gravity;
-        //check if particle went off screen
-        if (particle[i].pos[1] < 0.0 || particle[i].pos[0] > g.xres) {
-        // optimizing this code below
-        // particle[i] = particle [g.n-1];
-        // g.n= g.n-1;
-        // optimized
-        particle[i] = particle [--g.n];
-        }
-        }
-        */
+    /*for (int i = 0; i < g.n; i++) {
+      particle[i].pos[0] += particle[i].vel[0];
+      particle[i].pos[1] += particle[i].vel[1];
+      particle[i].vel[1] -= Gravity;
+    //check if particle went off screen
+    if (particle[i].pos[1] < 0.0 || particle[i].pos[0] > g.xres) {
+    // optimizing this code below
+    // particle[i] = particle [g.n-1];
+    // g.n= g.n-1;
+    // optimized
+    particle[i] = particle [--g.n];
+    }
+    }
+    */
 
 
-        //check for collision between particles and boxes
-        /*for (int j = 0; j < 5; j++) {
-          if (particle[i].pos[1] < box[j].pos[1]+box[j].h && 
-          particle[i].pos[0] > box[j].pos[0]-box[j].w &&
-          particle[i].pos[0] < box[j].pos[0]+box[j].w &&
-          particle[i].pos[1] > box[j].pos[1]-box[j].h)
-          {
-          particle[i].vel[1] =  -particle[i].vel[1] * 0.3; 
-          particle[i].vel[0] += 0.01; 
-          }
+    //check for collision between particles and boxes
+    /*for (int j = 0; j < 5; j++) {
+      if (particle[i].pos[1] < box[j].pos[1]+box[j].h && 
+      particle[i].pos[0] > box[j].pos[0]-box[j].w &&
+      particle[i].pos[0] < box[j].pos[0]+box[j].w &&
+      particle[i].pos[1] > box[j].pos[1]-box[j].h)
+      {
+      particle[i].vel[1] =  -particle[i].vel[1] * 0.3; 
+      particle[i].vel[0] += 0.01; 
+      }
 
-          }
-          */
+      }
+      */
     /*if (ball.pos[1] < flipper.pos[1]+ flipper.h && 
-          ball.pos[0] > flipper.pos[0]-flipper.w &&
-          ball.pos[0] < flipper.pos[0]+flipper.w &&
-          ball.pos[1] > flipper.pos[1]-flipper.h)
-          {
-          ball.vel[1] =  -ball.vel[1] * 0.7; 
-          ball.vel[0] += 0.03; 
-          }
-*/
+      ball.pos[0] > flipper.pos[0]-flipper.w &&
+      ball.pos[0] < flipper.pos[0]+flipper.w &&
+      ball.pos[1] > flipper.pos[1]-flipper.h)
+      {
+      ball.vel[1] =  -ball.vel[1] * 0.7; 
+      ball.vel[0] += 0.03; 
+      }
+      */
     extern void box_collision(int ballx, int bally, int boxx, int boxy,
-        int w, int h, float *vx, float *vy);
-      //int *vx,*vy;
-      //vx = 
-    box_collision(ball.pos[0], ball.pos[1], highbox.pos[0], highbox.pos[1],
-        highbox.w, highbox.h, &ball.vel[0], &ball.vel[1]);
-
-
-        int dist1,xd1,yd1;
-        xd1 = ball.pos[0] - circle.c[0];
-        yd1 = ball.pos[1] - circle.c[1];
-        dist1 = sqrt((xd1*xd1)+(yd1*yd1));
-        if (dist1 <= circle.r) {
-            if (ball.pos[0] < circle.c[0]) {
-                ball.vel[1] =  -ball.vel[1] * 0.025; 
-                ball.vel[0] = -dist1 * 0.1; 
-            } else {
-                ball.vel[1] =  -ball.vel[1] * 0.025; 
-                ball.vel[0] = dist1 * 0.1; 
-            }
-
-        }
-        int dist2,xd2,yd2;
-	xd2 = ball.pos[0]  - halfcir.c[0];
-        yd2 = ball.pos[1]  - halfcir.c[1];
-        dist2 = sqrt((xd2*xd2)+(yd2*yd2));
-        if (dist2 <= halfcir.r) {
-            if (ball.pos[0] < halfcir.c[0]) {
-		if (ball.vel[1] > 0) {	
-                ball.vel[0] = -dist2 * 0.1; 
-		}
-		else {
-                ball.vel[1] =  -ball.vel[1] * 0.1; 
-                ball.vel[0] = -dist2 * 0.1; 
-		}
-            } else {
-
-		if (ball.vel[1] > 0) {	
-                ball.vel[0] = dist2 * 0.1; 
-		}
-		else {
-                ball.vel[1] =  -ball.vel[1] * 0.1; 
-                ball.vel[0] = -dist2 * 0.1; 
-		}
-            }
-
-        }
-	/*int dist3, xd3, yd3, verx,very,tridist;
-	verx = t1.vertex3[0] - t1.vertex2[0];
-    	hypotenuse = sqrt((verx*verx)+(very*very))
-	very = t1.vertex2[1] - t1.vertex3[1];
-	xd2 = ball.pos[0] - t1.vertex1[0];
-        yd2 = ball.pos[1] - t1.vertex1[1];
-        dist3 = sqrt((xd3*xd3)+(yd3*yd3));
-*/
-
-    	//Triangle(425,450)
-	//	  (350,450)
-	//	  (425,300)
-	int u,w,v;
-        // Checking for wall collision
-        if (ball.pos[0] - ball.w < 0)
-            ball.vel[0] = -ball.vel[0];
-
-        else if (ball.pos[0] + ball.w > g.xres)
-            ball.vel[0] = -ball.vel[0];
-
-        if (ball.pos[1] + ball.h > g.yres)
-            ball.vel[1] = -ball.vel[1];
-
+	    int w, int h, float *vx, float *vy);
     
+    box_collision(ball.pos[0], ball.pos[1], highbox.pos[0], highbox.pos[1],
+	    highbox.w, highbox.h, &ball.vel[0], &ball.vel[1]);
+
+    extern void circle_collision(int ballx, int bally, float cx, float cy,
+	    float r, float *vx, float *vy);
+
+    circle_collision(ball.pos[0], ball.pos[1],circle.c[0], circle.c[1],
+	    circle.r, &ball.vel[0], &ball.vel[1]);
+
+    circle_collision(ball.pos[0], ball.pos[1],halfcir.c[0], halfcir.c[1],
+	    halfcir.r, &ball.vel[0], &ball.vel[1]);
+
+
+    /*int dist3, xd3, yd3, verx,very,tridist;
+      verx = t1.vertex3[0] - t1.vertex2[0];
+      hypotenuse = sqrt((verx*verx)+(very*very))
+      very = t1.vertex2[1] - t1.vertex3[1];
+      xd2 = ball.pos[0] - t1.vertex1[0];
+      yd2 = ball.pos[1] - t1.vertex1[1];
+      dist3 = sqrt((xd3*xd3)+(yd3*yd3));
+      */
+
+    //Triangle(425,450)
+    //	  (350,450)
+    //	  (425,300)
+    int u,w,v;
+    // Checking for wall collision
+    if (ball.pos[0] - ball.w < 0)
+	ball.vel[0] = -ball.vel[0];
+
+    else if (ball.pos[0] + ball.w > g.xres)
+	ball.vel[0] = -ball.vel[0];
+
+    if (ball.pos[1] + ball.h > g.yres)
+	ball.vel[1] = -ball.vel[1];
+
+
 }
 void render()
 {
     glClear(GL_COLOR_BUFFER_BIT);
     if (g.mainmenu == 0) {
-        prompt titlescreen[4];
-        Rect titleprompt[5];
-        for (int i=0; i<4; i++) {
-            render_menu(titlescreen[i], titleprompt[i], i, g.xres, g.yres);
-        }
-        render_title(titleprompt[5],g.xres,g.yres);
-        return;
+	prompt titlescreen[4];
+	Rect titleprompt[5];
+	for (int i=0; i<4; i++) {
+	    render_menu(titlescreen[i], titleprompt[i], i, g.xres, g.yres);
+	}
+	render_title(titleprompt[5],g.xres,g.yres);
+	return;
     } else if (g.mainmenu == 4) {
-        return;
+	return;
     }
     Rect r[2];
     if (g.pause){
-        r[0].bot = g.yres/1.5;
-        r[0].left = g.xres/2;
-        r[0].center = 0;
-        ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
+	r[0].bot = g.yres/1.5;
+	r[0].left = g.xres/2;
+	r[0].center = 0;
+	ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
     }
     r[1].bot = g.yres-35;
     r[1].left = g.xres/2;
@@ -523,20 +492,20 @@ void render()
 
 
     if (g.issa_feature) {
-            int n = 20;
-            double angle = 0.0;
-            double inc = (2.0*3.14)/n;
-            glColor3ub(255,255, 100);
-            glBegin(GL_TRIANGLE_FAN);
-            for (int i = 0; i < n; i++) {
-                test_ball.x = test_ball.r*cos(angle);
-                test_ball.y = test_ball.r*sin(angle);
-                glVertex2f(test_ball.x+test_ball.c[0],test_ball.y + test_ball.c[1]);
-                angle += inc;
-            }
-            glEnd();
-            draw_button(g.xres,g.yres);
-        }
+	int n = 20;
+	double angle = 0.0;
+	double inc = (2.0*3.14)/n;
+	glColor3ub(255,255, 100);
+	glBegin(GL_TRIANGLE_FAN);
+	for (int i = 0; i < n; i++) {
+	    test_ball.x = test_ball.r*cos(angle);
+	    test_ball.y = test_ball.r*sin(angle);
+	    glVertex2f(test_ball.x+test_ball.c[0],test_ball.y + test_ball.c[1]);
+	    angle += inc;
+	}
+	glEnd();
+	draw_button(g.xres,g.yres);
+    }
     //glClear(GL_COLOR_BUFFER_BIT);
     // Draw Box	
     //highbox = Box(10.0f,325.0f, 350, 10, 0.0f, 0.0f);
@@ -552,18 +521,18 @@ void render()
     glPopMatrix();
 
     /*flipper = Box(5.0f,25.0f, 200, 10, 0.0f, 0.0f);
-    glPushMatrix();
-    glColor3ub(250,0,100);
-    glTranslatef(flipper.pos[0], flipper.pos[1], 0.0f);
-    glRotatef(10.0f, 100, 20, 1.0f);
-    glBegin(GL_QUADS);
-    glVertex2f(-flipper.w, -flipper.h);
-    glVertex2f(-flipper.w,  flipper.h);
-    glVertex2f( flipper.w,  flipper.h);
-    glVertex2f( flipper.w, -flipper.h);
-    glEnd();
-    glPopMatrix();
-    */
+      glPushMatrix();
+      glColor3ub(250,0,100);
+      glTranslatef(flipper.pos[0], flipper.pos[1], 0.0f);
+      glRotatef(10.0f, 100, 20, 1.0f);
+      glBegin(GL_QUADS);
+      glVertex2f(-flipper.w, -flipper.h);
+      glVertex2f(-flipper.w,  flipper.h);
+      glVertex2f( flipper.w,  flipper.h);
+      glVertex2f( flipper.w, -flipper.h);
+      glEnd();
+      glPopMatrix();
+      */
 
     // Summon Ball	
     //if (summonball) {
@@ -578,38 +547,14 @@ void render()
     glEnd();
     glPopMatrix();
     //	}
-    
-	/* create triangle*/
-    glPushMatrix();
-    glBegin(GL_TRIANGLES);
-    glColor3f(0.5,0,0);
-    glVertex2f(t1.vertex1[0],t1.vertex1[1]);
-    glVertex2f(t1.vertex2[0],t1.vertex2[1]);
-    glVertex2f(t1.vertex3[0],t1.vertex3[1]);
 
-    glEnd();
-
-        /* create right flipper*/
-    glPushMatrix();
-    glBegin(GL_TRIANGLES);
-    glColor3f(0.5,0,0);
-    glVertex2f(flipper1.vertex1[0],flipper1.vertex1[1]);
-    glVertex2f(flipper1.vertex2[0],flipper1.vertex2[1]);
-    glVertex2f(flipper1.vertex3[0],flipper1.vertex3[1]);
-
-    glEnd();
-
-        /* create left flipper*/
-    glPushMatrix();
-    glPushMatrix();
-    glBegin(GL_TRIANGLES);
-    glColor3f(0.5,0,0);
-    glVertex2f(flipper2.vertex1[0],flipper2.vertex1[1]);
-    glVertex2f(flipper2.vertex2[0],flipper2.vertex2[1]);
-    glVertex2f(flipper2.vertex3[0],flipper2.vertex3[1]);
-
-    glEnd();
-
+    extern void draw_triangle(Triangle triangle);
+    /* create triangle*/
+    draw_triangle(t1);
+    /* create right flipper*/
+    draw_triangle(flipper1);
+    /* create left flipper*/
+    draw_triangle(flipper2);
 
     //Draw Circle
     int n = 20; 
@@ -619,13 +564,13 @@ void render()
     glColor3ub(255,255, 100);
     glBegin(GL_TRIANGLE_FAN);
     for (int i = 0; i < n; i++) {
-        circle.x = circle.r*cos(angle);
-        circle.y = circle.r*sin(angle);
-        glVertex2f(circle.x+circle.c[0],circle.y + circle.c[1]);
-        angle += inc;
+	circle.x = circle.r*cos(angle);
+	circle.y = circle.r*sin(angle);
+	glVertex2f(circle.x+circle.c[0],circle.y + circle.c[1]);
+	angle += inc;
     }
     glEnd();
-    
+
     n = 40; 
 
     angle = 0.0;
@@ -634,13 +579,13 @@ void render()
     glColor3ub(255,100, 255);
     glBegin(GL_TRIANGLE_FAN);
     for (int i = 0; i < n/2+1; i++) {
-        halfcir.x = halfcir.r*cos(angle);
-        halfcir.y = halfcir.r*sin(angle);
-        glVertex2f(halfcir.x+halfcir.c[0],halfcir.y + halfcir.c[1]);
-        angle += inc;
+	halfcir.x = halfcir.r*cos(angle);
+	halfcir.y = halfcir.r*sin(angle);
+	glVertex2f(halfcir.x+halfcir.c[0],halfcir.y + halfcir.c[1]);
+	angle += inc;
     }
     glEnd();
-    }
+}
 
 
 

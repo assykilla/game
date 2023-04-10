@@ -1,7 +1,13 @@
 //modified by Xander Reyes
 ////date: Spring 2022
 #include <string>
+#include <math.h>
 #include "xreyes.h"
+#include <X11/Xlib.h>
+#include <X11/keysym.h>
+#include <GL/glx.h>
+#include "fonts.h"
+
 using namespace std;
 int alex_feature;
 float velocity[2] = {0.0f, 0.0f};
@@ -45,4 +51,48 @@ void box_collision(int ballx, int bally, int boxx, int boxy,
 	    *vy = -*vy * 0.7;
 
     }
+}
+
+void circle_collision(int ballx, int bally, float cx, float cy, 
+	float r, float *vx, float *vy)
+{
+	 int dist2,xd2,yd2;
+        xd2 = ballx - cx;
+        yd2 = bally - cy;
+        dist2 = sqrt((xd2*xd2)+(yd2*yd2));
+        if (dist2 <= r) {
+            if (ballx < cx) {
+                if (*vy > 0) {
+                *vx = -dist2 * 0.1;
+                }
+                else {
+                *vy =  -*vy * 0.1;
+                *vx = -dist2 * 0.1;
+                }
+            } else {
+
+                if (*vy > 0) {
+                *vx = dist2 * 0.1;
+                }
+                else {
+                *vy =  -*vy * 0.1;
+                *vx = -dist2 * 0.1;
+                }
+            }
+
+        }
+
+}
+
+void draw_triangle(Triangle triangle)
+{
+	glPushMatrix();
+    glBegin(GL_TRIANGLES);
+    glColor3f(0.5,0,0);
+    glVertex2f(triangle.vertex1[0],triangle.vertex1[1]);
+    glVertex2f(triangle.vertex2[0],triangle.vertex2[1]);
+    glVertex2f(triangle.vertex3[0],triangle.vertex3[1]);
+    glEnd();
+
+
 }
