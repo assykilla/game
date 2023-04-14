@@ -21,11 +21,13 @@ using namespace std;
 #include "isamara.h"
 #include "xreyes.h"
 //some structures
+Image img("dinosaurs.jpeg");
 
 class Global {
     public:
 	int xres, yres;
 	int n;
+    GLuint texture;
 	unsigned int pause;
 	unsigned int mainmenu;
 	unsigned int issa_feature;
@@ -70,7 +72,9 @@ class Box {
 	    vel[0] = v0;
 	    vel[1] = v1;
 	}
-}highbox(50.0f,335.0f, 310, 10, 0.0f, 0.0f);
+} highbox1(50.0f,335.0f, 310, 10, 0.0f, 0.0f), 
+    ball(4.0f,4.0f, 380, 100, velocity[0], velocity[1]),
+    highbox2(20.0f,float(g.yres), 0, 10, 0.0f, 0.0f);
 class Circle {
     public:
 	float r, c[2], x, y, vel[2];
@@ -94,7 +98,11 @@ class Circle {
 	    vel[1] = v1;
 	}
 
-} circle, test_ball(10,g.xres/2,g.yres/2,0,0), halfcir(50.0f, 310 ,335, 0.0f, 0.0f);
+} circle, test_ball(10,g.xres/2,g.yres/2,0,0), 
+  halfcir(50.0f, 310 ,335, 0.0f, 0.0f),
+  cir1(12.0f, 135 ,235, 0.0f, 0.0f),
+  cir2(12.0f, 105 ,210, 0.0f, 0.0f),
+  cir3(12.0f, 165 ,210, 0.0f, 0.0f);
 
 
 class X11_wrapper {
@@ -111,7 +119,7 @@ class X11_wrapper {
 	void swapBuffers();
 	void reshape_window(int width, int height);
 	void check_resize(XEvent *e);
-	void check_mouse(XEvent *e);
+    void check_mouse(XEvent *e);
 	int check_keys(XEvent *e);
 } x11;
 
@@ -294,7 +302,6 @@ void X11_wrapper::check_mouse(XEvent *e)
     }
 }
 
-Box ball = Box(5.0f,5.0f, 580, 100, velocity[0], velocity[1]);
 
 int X11_wrapper::check_keys(XEvent *e)
 {
@@ -353,15 +360,24 @@ void init_opengl(void)
     glEnable(GL_TEXTURE_2D);
     initialize_fonts();
 
+    glGenTextures(1, &g.texture);
+    int w = img.width;
+    int h = img.height;
+    glBindTexture(GL_TEXTURE_2D, g.texture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+        GL_RGB, GL_UNSIGNED_BYTE, img.data);
 }
-float Gravity = 0.05;
-Triangle t1 = Triangle(float(g.xres/2+100),350.0f,float(g.xres/2+100),
-	float(g.yres), float(g.yres), 300.0f);
-
-Triangle flipper2 = Triangle(180.0f, 140.0f, 140.0f,
-	10.0f, 10.0f, 25.0f);
-Triangle flipper1 = Triangle(200.0f, 240.0f, 240.0f,
-	10.0f, 25.0f, 10.0f);
+float Gravity = 0.075;
+Triangle t1 = Triangle(400.0f,350.0f,400.0f,
+	450.0f, 450.0f, 300.0f);
+Triangle t2 = Triangle(20.0f,20.0f,80.0f,
+	450.0f, 300.0f, 450.0f);
+Triangle flipper1 = Triangle(80.0f, 80.0f, 130.0f,
+	25.0f, 8.0f, 8.0f);
+Triangle flipper2 = Triangle(200.0f, 150.0f, 200.0f,
+	25.0f, 8.0f, 8.0f);
 
 
 void physics()
@@ -426,8 +442,10 @@ void physics()
     extern void box_collision(int ballx, int bally, int boxx, int boxy,
 	    int w, int h, float *vx, float *vy);
     
-    box_collision(ball.pos[0], ball.pos[1], highbox.pos[0], highbox.pos[1],
-	    highbox.w, highbox.h, &ball.vel[0], &ball.vel[1]);
+    box_collision(ball.pos[0], ball.pos[1], highbox1.pos[0], highbox1.pos[1],
+	    highbox1.w, highbox1.h, &ball.vel[0], &ball.vel[1]);
+    box_collision(ball.pos[0], ball.pos[1], highbox2.pos[0], highbox2.pos[1],
+	    highbox2.w, highbox2.h, &ball.vel[0], &ball.vel[1]);
 
     extern void circle_collision(int ballx, int bally, float cx, float cy,
 	    float r, float *vx, float *vy);
@@ -438,20 +456,27 @@ void physics()
     circle_collision(ball.pos[0], ball.pos[1],halfcir.c[0], halfcir.c[1],
 	    halfcir.r, &ball.vel[0], &ball.vel[1]);
 
+    circle_collision(ball.pos[0], ball.pos[1],cir1.c[0], cir1.c[1],
+	    cir1.r, &ball.vel[0], &ball.vel[1]);
+    circle_collision(ball.pos[0], ball.pos[1],cir2.c[0], cir2.c[1],
+	    cir2.r, &ball.vel[0], &ball.vel[1]);
+    circle_collision(ball.pos[0], ball.pos[1],cir3.c[0], cir3.c[1],
+	    cir3.r, &ball.vel[0], &ball.vel[1]);
 
-    /*int dist3, xd3, yd3, verx,very,tridist;
-      verx = t1.vertex3[0] - t1.vertex2[0];
-      hypotenuse = sqrt((verx*verx)+(very*very))
-      very = t1.vertex2[1] - t1.vertex3[1];
-      xd2 = ball.pos[0] - t1.vertex1[0];
-      yd2 = ball.pos[1] - t1.vertex1[1];
-      dist3 = sqrt((xd3*xd3)+(yd3*yd3));
-      */
-
-    //Triangle(425,450)
-    //	  (350,450)
-    //	  (425,300)
-    int u,w,v;
+    /* For hypotenus facing left downwards and facing upwards */
+    extern void triangle_collision( Triangle triangle, float ballx,
+            float bally, float *vx, float *vy);
+    triangle_collision( t1, ball.pos[0], ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( flipper1, ball.pos[0], ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( flipper2, ball.pos[0], ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
+    /* For hypotenus facing right downwards */
+    extern void xtriangle_collision( Triangle triangle, float ballx,
+            float bally, float *vx, float *vy);
+    xtriangle_collision( t2, ball.pos[0], ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
     // Checking for wall collision
     if (ball.pos[0] - ball.w < 0)
 	ball.vel[0] = -ball.vel[0];
@@ -478,6 +503,16 @@ void render()
     } else if (g.mainmenu == 4) {
 	return;
     }
+    glBindTexture(GL_TEXTURE_2D, g.texture);
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2i(400, 0);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2i(400,  g.yres);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2i( g.xres,  g.yres);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2i( g.xres, 0);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+
     Rect r[2];
     if (g.pause){
 	r[0].bot = g.yres/1.5;
@@ -511,30 +546,27 @@ void render()
     //highbox = Box(10.0f,325.0f, 350, 10, 0.0f, 0.0f);
     glPushMatrix();
     glColor3ub(255,100,255);
-    glTranslatef(highbox.pos[0], highbox.pos[1], 0.0f);
+    glTranslatef(highbox1.pos[0], highbox1.pos[1], 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(-highbox.w, -highbox.h);
-    glVertex2f(-highbox.w,  highbox.h);
-    glVertex2f( highbox.w,  highbox.h);
-    glVertex2f( highbox.w, -highbox.h);
+    glVertex2f(-highbox1.w, -highbox1.h);
+    glVertex2f(-highbox1.w,  highbox1.h);
+    glVertex2f( highbox1.w,  highbox1.h);
+    glVertex2f( highbox1.w, -highbox1.h);
     glEnd();
     glPopMatrix();
 
-    /*flipper = Box(5.0f,25.0f, 200, 10, 0.0f, 0.0f);
-      glPushMatrix();
-      glColor3ub(250,0,100);
-      glTranslatef(flipper.pos[0], flipper.pos[1], 0.0f);
-      glRotatef(10.0f, 100, 20, 1.0f);
-      glBegin(GL_QUADS);
-      glVertex2f(-flipper.w, -flipper.h);
-      glVertex2f(-flipper.w,  flipper.h);
-      glVertex2f( flipper.w,  flipper.h);
-      glVertex2f( flipper.w, -flipper.h);
-      glEnd();
-      glPopMatrix();
-      */
+    glPushMatrix();
+    glColor3ub(255,100,255);
+    glTranslatef(highbox2.pos[0], highbox2.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-highbox2.w, -highbox2.h);
+    glVertex2f(-highbox2.w,  highbox2.h);
+    glVertex2f( highbox2.w,  highbox2.h);
+    glVertex2f( highbox2.w, -highbox2.h);
+    glEnd();
+    glPopMatrix();
 
-    // Summon Ball	
+       // Summon Ball	
     //if (summonball) {
     glPushMatrix();
     glColor3ub(0,0,0);
@@ -551,12 +583,13 @@ void render()
     extern void draw_triangle(Triangle triangle);
     /* create triangle*/
     draw_triangle(t1);
+    draw_triangle(t2);
     /* create right flipper*/
     draw_triangle(flipper1);
     /* create left flipper*/
     draw_triangle(flipper2);
 
-    //Draw Circle
+    /*//Draw Circle
     int n = 20; 
     double angle = 0.0;
     double inc = (2.0*3.14)/n;
@@ -568,13 +601,14 @@ void render()
 	circle.y = circle.r*sin(angle);
 	glVertex2f(circle.x+circle.c[0],circle.y + circle.c[1]);
 	angle += inc;
-    }
+    }*/
+
     glEnd();
+    //Draw Half Circle
+    int n = 40; 
 
-    n = 40; 
-
-    angle = 0.0;
-    inc = (2.0*3.14)/n;
+    double angle = 0.0;
+    double inc = (2.0*3.14)/n;
     //glVertex2f(x, y);
     glColor3ub(255,100, 255);
     glBegin(GL_TRIANGLE_FAN);
@@ -585,6 +619,11 @@ void render()
 	angle += inc;
     }
     glEnd();
+
+    extern void draw_circle(float r, float cx, float cy);
+    draw_circle(cir1.r,cir1.c[0],cir1.c[1]);
+    draw_circle(cir2.r,cir2.c[0],cir2.c[1]);
+    draw_circle(cir3.r,cir3.c[0],cir3.c[1]);
 }
 
 

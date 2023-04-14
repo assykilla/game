@@ -1,6 +1,5 @@
 // Xander Reyes
 
-
 #ifndef _XANDER_H_
 #define _XANDER_H_
 class Triangle 
@@ -12,6 +11,12 @@ class Triangle
                 float verty1, float verty2, float verty3);
 };
 
-
+class Image { 
+    public: 
+	int width, height; 
+	unsigned char *data; 
+	~Image();
+	Image(const char *fname);
+};
 #endif
 
