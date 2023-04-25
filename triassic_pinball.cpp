@@ -24,6 +24,8 @@ using namespace std;
 //some structures
 Image img("dinosaurs.jpeg");
 
+extern void draw_triangle(Triangle triangle);
+
 class Global {
     public:
 	int xres, yres;
@@ -551,65 +553,6 @@ void physics()
         if (ball.pos[1] + ball.w > g.yres)
             ball.vel[1] = -ball.vel[1];
 
-        if (TriangleCol(Gt1, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionRU();
-           points += 5;
-        }
-
-        if (TriangleCol(Gt2, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionLU();
-           points += 5;
-           }
-
-        if (TriangleCol(Gt3, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionLD();
-           points += 5;
-           }
-
-        if (TriangleCol(Gt4, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionRD();
-           points += 5;
-           }
-        
-        if (TriangleCol(Gt5, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionLD();
-           points += 5;
-           }
-
-        if (TriangleCol(Gt6, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionRD();
-           points += 5;
-           }
-
-        if (TriangleCol(Gt7, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionRU();
-           points += 5;
-           }
-
-        if (TriangleCol(Gt8, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionRD();
-           points += 5;
-           }
-
-        if (TriangleCol(Gt9, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionLU();
-           points += 5;
-           }
-
-        if (TriangleCol(Gt10, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionRU();
-           points += 5;
-           }
-
-        if (TriangleCol(Gt11, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionRU();
-           points += 5;
-           }
-
-        if (TriangleCol(Gt12, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollisionLU();
-           points += 5;
-           }
      }
     }
 }
@@ -691,8 +634,8 @@ void render()
                 posy = posy - 50;
         }
      
-    extern void draw_triangle(Triangle triangle);
     /* create triangle*/
+    glColor3ub(125, 0, 0);
     draw_triangle(t1);
     draw_triangle(t2);
     draw_triangle(t3);
@@ -848,105 +791,19 @@ void render()
     glEnd();
     glPopMatrix();
 
-    glPushMatrix();
-    glBegin(GL_TRIANGLES);
     glColor3ub(115, 80, 50);
-    glVertex2f(Gt1[0], Gt1[1]);
-    glVertex2f(Gt1[2], Gt1[3]);
-    glVertex2f(Gt1[4], Gt1[5]);
-
-    glEnd();
-
-    glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt2[0], Gt2[1]);
-    glVertex2f(Gt2[2], Gt2[3]);
-    glVertex2f(Gt2[4], Gt2[5]);
-
-    glEnd();
-
-    glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt3[0], Gt3[1]);
-    glVertex2f(Gt3[2], Gt3[3]);
-    glVertex2f(Gt3[4], Gt3[5]);
-
-    glEnd();
-
-    glFlush();
-
-    glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt4[0], Gt4[1]);
-    glVertex2f(Gt4[2], Gt4[3]);
-    glVertex2f(Gt4[4], Gt4[5]);
-
-    glEnd();
-
-    glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt5[0], Gt5[1]);
-    glVertex2f(Gt5[2], Gt5[3]);
-    glVertex2f(Gt5[4], Gt5[5]);
-
-    glEnd();
-
-    glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt6[0], Gt6[1]);
-    glVertex2f(Gt6[2], Gt6[3]);
-    glVertex2f(Gt6[4], Gt6[5]);
-
-    glEnd();
-
-    glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt7[0], Gt7[1]);
-    glVertex2f(Gt7[2], Gt7[3]);
-    glVertex2f(Gt7[4], Gt7[5]);
-
-    glEnd();
-
-    glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt8[0], Gt8[1]);
-    glVertex2f(Gt8[2], Gt8[3]);
-    glVertex2f(Gt8[4], Gt8[5]);
-
-    glEnd();
-
-    glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt9[0], Gt9[1]);
-    glVertex2f(Gt9[2], Gt9[3]);
-    glVertex2f(Gt9[4], Gt9[5]);
-
-    glEnd();
-
-        glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt10[0], Gt10[1]);
-    glVertex2f(Gt10[2], Gt10[3]);
-    glVertex2f(Gt10[4], Gt10[5]);
-
-    glEnd();
-
-    glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt11[0], Gt11[1]);
-    glVertex2f(Gt11[2], Gt11[3]);
-    glVertex2f(Gt11[4], Gt11[5]);
-
-    glEnd();
-
-    glBegin(GL_TRIANGLES);
-    glColor3ub(115, 80, 50);
-    glVertex2f(Gt12[0], Gt12[1]);
-    glVertex2f(Gt12[2], Gt12[3]);
-    glVertex2f(Gt12[4], Gt12[5]);
-
-    glEnd();
-
+    draw_triangle(Gt1);
+    draw_triangle(Gt2);
+    draw_triangle(Gt3);
+    draw_triangle(Gt4);
+    draw_triangle(Gt5);
+    draw_triangle(Gt6);
+    draw_triangle(Gt7);
+    draw_triangle(Gt8);
+    draw_triangle(Gt9);
+    draw_triangle(Gt10);
+    draw_triangle(Gt11);
+    draw_triangle(Gt12);
     int n = 15; 
     double angle = 0.0;
     double inc = (2.0*3.14)/n;

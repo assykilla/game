@@ -166,7 +166,6 @@ void draw_triangle(Triangle triangle)
     glPushMatrix();
     glRotatef(triangle.angle, 0.0f, 0.0f, 1.0f);
     glBegin(GL_TRIANGLES);
-    glColor3f(0.5,0,0);
     glVertex2f(triangle.vertex1[0],triangle.vertex1[1]);
     glVertex2f(triangle.vertex2[0],triangle.vertex2[1]);
     glVertex2f(triangle.vertex3[0],triangle.vertex3[1]);

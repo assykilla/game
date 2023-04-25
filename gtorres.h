@@ -14,17 +14,18 @@ extern int level2;
 extern void addScore(int amount);
 
 extern void renderStats(Rect r, int x, int y, int pts);
-extern float Gt1[];
-extern float Gt2[];
-extern float Gt3[];
-extern float Gt4[];
-extern float Gt5[];
-extern float Gt6[];
-extern float Gt7[];
-extern float Gt8[];
-extern float Gt9[];
-extern float Gt10[];
-extern float Gt11[];
-extern float Gt12[];
+extern Triangle Gt1;
+extern Triangle Gt2;
+extern Triangle Gt3;
+extern Triangle Gt4;
+extern Triangle Gt5;
+extern Triangle Gt6;
+extern Triangle Gt7;
+extern Triangle Gt8;
+extern Triangle Gt9;
+extern Triangle Gt10;
+extern Triangle Gt11;
+extern Triangle Gt12;
+
 
 #endif
