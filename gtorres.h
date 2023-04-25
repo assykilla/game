@@ -11,6 +11,7 @@ extern int credit;
 extern int currentBalls;
 extern int level1;
 extern int level2;
+extern void addScore(int amount);
 
 extern void renderStats(Rect r, int x, int y, int pts);
 extern float Gt1[];
