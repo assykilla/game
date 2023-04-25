@@ -6,6 +6,7 @@ class Triangle
 {
     public:
         float vertex1[2],vertex2[2],vertex3[2];
+	float angle;
         Triangle();
         Triangle(float vertx1, float vertx2, float vertx3,
                 float verty1, float verty2, float verty3);
@@ -18,5 +19,6 @@ class Image {
 	~Image();
 	Image(const char *fname);
 };
+
 #endif
 
