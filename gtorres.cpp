@@ -13,6 +13,8 @@
 using namespace std;
 
 int points = 0;
+int credit = 0;
+int currentBalls = 1;
 bool leftFlipper, rightFlipper = 0;
 Rect stats[1];
 bool level1 = 1;

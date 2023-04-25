@@ -7,6 +7,8 @@ extern bool leftFlipper;
 extern bool rightFlipper;
 extern Rect stats[1];
 extern int points;
+extern int credit;
+extern int currentBalls;
 extern int level1;
 extern int level2;
 

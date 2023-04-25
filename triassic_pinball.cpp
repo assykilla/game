@@ -33,7 +33,7 @@ class Global {
 	unsigned int mainmenu;
 	unsigned int issa_feature;
 	Global(){
-	    xres = 600;
+	    xres = 800;
 	    yres = 800;
 	    n = 0;
 	    pause = 0;
@@ -303,13 +303,30 @@ void X11_wrapper::check_mouse(XEvent *e)
     }
 }
 
-void triangleCollision()
+void triangleCollisionLU()
 {
     float temp = ball.vel[0];
     ball.vel[0] = ball.vel[1]-1;
     ball.vel[1] = temp-1;
 }
-
+void triangleCollisionLD()
+{
+    float temp = ball.vel[1];
+    ball.vel[1] = ball.vel[0]-1;
+    ball.vel[0] = temp-1;
+}
+void triangleCollisionRU()
+{
+    float temp = ball.vel[0];
+    ball.vel[0] = ball.vel[1]-1;
+    ball.vel[1] = temp-1;
+}
+void triangleCollisionRD()
+{
+    float temp = ball.vel[0];
+    ball.vel[0] = ball.vel[1]-1;
+    ball.vel[1] = temp-1;
+}
 int X11_wrapper::check_keys(XEvent *e)
 {
     leftFlipper = 0;
@@ -343,8 +360,14 @@ int X11_wrapper::check_keys(XEvent *e)
 		break;
 	    case XK_e:
         case XK_2:
-        level2 = 1;
-        level1 = 0;
+        if (level1 == 1) {
+            level2 = 1;
+            level1 = 0;
+        }
+        else {
+            level1 = 1;
+            level2 = 0;
+        }
         break;
 		if (XK_Shift_L && g.mainmenu != 0) {
 		    g.mainmenu = 0;
@@ -521,62 +544,62 @@ void physics()
             ball.vel[1] = -ball.vel[1];
 
         if (TriangleCol(Gt1, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionRU();
            points += 5;
         }
 
         if (TriangleCol(Gt2, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionLU();
            points += 5;
            }
 
         if (TriangleCol(Gt3, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionLD();
            points += 5;
            }
 
         if (TriangleCol(Gt4, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionRD();
            points += 5;
            }
         
         if (TriangleCol(Gt5, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionLD();
            points += 5;
            }
 
         if (TriangleCol(Gt6, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionRD();
            points += 5;
            }
 
         if (TriangleCol(Gt7, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionRU();
            points += 5;
            }
 
         if (TriangleCol(Gt8, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionRD();
            points += 5;
            }
 
         if (TriangleCol(Gt9, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionLU();
            points += 5;
            }
 
         if (TriangleCol(Gt10, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionRU();
            points += 5;
            }
 
         if (TriangleCol(Gt11, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionRU();
            points += 5;
            }
 
         if (TriangleCol(Gt12, ball.pos[0], ball.pos[1]) == 1) {
-           triangleCollision();
+           triangleCollisionLU();
            points += 5;
            }
      }
@@ -597,16 +620,6 @@ void render()
     } else if (g.mainmenu == 4) {
 	return;
     }
-    glBindTexture(GL_TEXTURE_2D, g.texture);
-    glColor3f(1.0, 1.0, 1.0);
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0.0f, 1.0f); glVertex2i(400, 0);
-    glTexCoord2f( 0.0f, 0.0f); glVertex2i(400,  g.yres);
-    glTexCoord2f( 1.0f, 0.0f); glVertex2i( g.xres,  g.yres);
-    glTexCoord2f( 1.0f, 1.0f); glVertex2i( g.xres, 0);
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, 0);
-
 
 
     if (g.issa_feature) {
@@ -696,6 +709,17 @@ void render()
     draw_circle(cir2.r,cir2.c[0],cir2.c[1]);
     draw_circle(cir3.r,cir3.c[0],cir3.c[1]);
 
+    glBindTexture(GL_TEXTURE_2D, g.texture);
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2i(400, 0);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2i(400,  g.yres);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2i( g.xres,  g.yres);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2i( g.xres, 0);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+
     }
 
     if (level2 == 1) {
@@ -738,7 +762,7 @@ void render()
     glEnd();
     glPopMatrix();
 
-    Box out1 = Box(600.0f, 5.0f, 600.0f, 795.0f, 0.0f, 0.0f);
+    Box out1 = Box(300.0f, 5.0f, 300.0f, 795.0f, 0.0f, 0.0f);
     glPushMatrix();
     glColor3ub(115, 80, 50);
     glTranslatef(out1.pos[0], out1.pos[1], 0.0f);
@@ -774,7 +798,7 @@ void render()
     glEnd();
     glPopMatrix();
 
-    Box bot2 = Box(150.0f, 50.0f, 550.0f, 0.0f, 0.0f, 0.0f);
+    Box bot2 = Box(75.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f);
     glPushMatrix();
     glColor3ub(115, 80, 50);
     glTranslatef(bot2.pos[0], bot2.pos[1], 0.0f);
@@ -967,6 +991,17 @@ void render()
         glFlush();
         glEnd();
     }
+
+    glBindTexture(GL_TEXTURE_2D, g.texture);
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2i(600, 0);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2i(600,  g.yres);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2i( g.xres,  g.yres);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2i( g.xres, 0);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+
 
     }
 
