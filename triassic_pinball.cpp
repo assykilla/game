@@ -20,6 +20,7 @@ using namespace std;
 #include "abotello.h"
 #include "isamara.h"
 #include "xreyes.h"
+#include "gtorres.h"
 //some structures
 Image img("dinosaurs.jpeg");
 
@@ -32,8 +33,8 @@ class Global {
 	unsigned int mainmenu;
 	unsigned int issa_feature;
 	Global(){
-	    xres = 650;
-	    yres = 450;
+	    xres = 600;
+	    yres = 800;
 	    n = 0;
 	    pause = 0;
 	    mainmenu = 0;
@@ -302,9 +303,17 @@ void X11_wrapper::check_mouse(XEvent *e)
     }
 }
 
+void triangleCollision()
+{
+    float temp = ball.vel[0];
+    ball.vel[0] = ball.vel[1]-1;
+    ball.vel[1] = temp-1;
+}
 
 int X11_wrapper::check_keys(XEvent *e)
 {
+    leftFlipper = 0;
+    rightFlipper = 0;
     if (e->type != KeyPress && e->type != KeyRelease)
 	return 0;
     int key = XLookupKeysym(&e->xkey, 0);
@@ -313,7 +322,6 @@ int X11_wrapper::check_keys(XEvent *e)
 	    case XK_p:
 		g.pause = manage_pstate(g.pause);
 		break;
-	    case XK_2:
 		if (XK_Shift_L)
 		    // Key 2 and shift are both pressed down
 		{
@@ -334,10 +342,20 @@ int X11_wrapper::check_keys(XEvent *e)
 		ball.vel[1] = velocity[1];
 		break;
 	    case XK_e:
+        case XK_2:
+        level2 = 1;
+        level1 = 0;
+        break;
 		if (XK_Shift_L && g.mainmenu != 0) {
 		    g.mainmenu = 0;
 		}
 		break;
+            case XK_Left:
+                leftFlipper = 1;
+                break;
+            case XK_Right:
+                rightFlipper = 1;
+                break;
 	    case XK_Escape:
 		//Escape key was pressed
 		return 1;
@@ -400,7 +418,6 @@ void physics()
 	}
     }
 
-
     /*for (int i = 0; i < g.n; i++) {
       particle[i].pos[0] += particle[i].vel[0];
       particle[i].pos[1] += particle[i].vel[1];
@@ -439,6 +456,8 @@ void physics()
       ball.vel[0] += 0.03; 
       }
       */
+
+     if (level1 == 1) {
     extern void box_collision(int ballx, int bally, int boxx, int boxy,
 	    int w, int h, float *vx, float *vy);
     
@@ -487,6 +506,81 @@ void physics()
     if (ball.pos[1] + ball.h > g.yres)
 	ball.vel[1] = -ball.vel[1];
 
+     }
+
+     if (level2 == 1) {
+                if (ball.pos[0] - ball.w < 0) {
+            ball.vel[0] = -ball.vel[0];
+            points += 5;
+        }
+
+        else if (ball.pos[0] + ball.w > g.xres)
+            ball.vel[0] = -ball.vel[0];
+
+        if (ball.pos[1] + ball.w > g.yres)
+            ball.vel[1] = -ball.vel[1];
+
+        if (TriangleCol(Gt1, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+        }
+
+        if (TriangleCol(Gt2, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+
+        if (TriangleCol(Gt3, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+
+        if (TriangleCol(Gt4, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+        
+        if (TriangleCol(Gt5, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+
+        if (TriangleCol(Gt6, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+
+        if (TriangleCol(Gt7, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+
+        if (TriangleCol(Gt8, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+
+        if (TriangleCol(Gt9, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+
+        if (TriangleCol(Gt10, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+
+        if (TriangleCol(Gt11, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+
+        if (TriangleCol(Gt12, ball.pos[0], ball.pos[1]) == 1) {
+           triangleCollision();
+           points += 5;
+           }
+     }
+
 
 }
 void render()
@@ -513,17 +607,6 @@ void render()
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    Rect r[2];
-    if (g.pause){
-	r[0].bot = g.yres/1.5;
-	r[0].left = g.xres/2;
-	r[0].center = 0;
-	ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
-    }
-    r[1].bot = g.yres-35;
-    r[1].left = g.xres/2;
-    r[1].center = -5;
-    ggprint8b(&r[7], 20, 0x00ffff00, "Alex's Feature -  Shift + 2");
 
 
     if (g.issa_feature) {
@@ -544,6 +627,8 @@ void render()
     //glClear(GL_COLOR_BUFFER_BIT);
     // Draw Box	
     //highbox = Box(10.0f,325.0f, 350, 10, 0.0f, 0.0f);
+
+    if (level1 == 1) {
     glPushMatrix();
     glColor3ub(255,100,255);
     glTranslatef(highbox1.pos[0], highbox1.pos[1], 0.0f);
@@ -565,20 +650,6 @@ void render()
     glVertex2f( highbox2.w, -highbox2.h);
     glEnd();
     glPopMatrix();
-
-       // Summon Ball	
-    //if (summonball) {
-    glPushMatrix();
-    glColor3ub(0,0,0);
-    glTranslatef(ball.pos[0], ball.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glVertex2f(-ball.w, -ball.h);
-    glVertex2f(-ball.w,  ball.h);
-    glVertex2f( ball.w,  ball.h);
-    glVertex2f( ball.w, -ball.h);
-    glEnd();
-    glPopMatrix();
-    //	}
 
     extern void draw_triangle(Triangle triangle);
     /* create triangle*/
@@ -624,6 +695,307 @@ void render()
     draw_circle(cir1.r,cir1.c[0],cir1.c[1]);
     draw_circle(cir2.r,cir2.c[0],cir2.c[1]);
     draw_circle(cir3.r,cir3.c[0],cir3.c[1]);
+
+    }
+
+    if (level2 == 1) {
+    
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    Box start = Box(5.0f, 350.0f, 550.0f, 300.0f, 0.0f, 0.0f);
+    glPushMatrix();
+    glColor3ub(115, 80, 50);
+    glTranslatef(start.pos[0], start.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-start.w, -start.h);
+    glVertex2f(-start.w,  start.h);
+    glVertex2f( start.w,  start.h);
+    glVertex2f( start.w, -start.h);
+    glEnd();
+    glPopMatrix();
+
+    Box start2 = Box(5.0f, 800.0f, 595.0f, 800.0f, 0.0f, 0.0f);
+    glPushMatrix();
+    glColor3ub(115, 80, 50);
+    glTranslatef(start2.pos[0], start2.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-start2.w, -start2.h);
+    glVertex2f(-start2.w,  start2.h);
+    glVertex2f( start2.w,  start2.h);
+    glVertex2f( start2.w, -start2.h);
+    glEnd();
+    glPopMatrix();
+
+    Box start3 = Box(5.0f, 150.0f, 550.0f, 800.0f, 0.0f, 0.0f);
+    glPushMatrix();
+    glColor3ub(135, 145, 145);
+    glTranslatef(start3.pos[0], start3.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-start3.w, -start3.h);
+    glVertex2f(-start3.w,  start3.h);
+    glVertex2f( start3.w,  start3.h);
+    glVertex2f( start3.w, -start3.h);
+    glEnd();
+    glPopMatrix();
+
+    Box out1 = Box(600.0f, 5.0f, 600.0f, 795.0f, 0.0f, 0.0f);
+    glPushMatrix();
+    glColor3ub(115, 80, 50);
+    glTranslatef(out1.pos[0], out1.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-out1.w, -out1.h);
+    glVertex2f(-out1.w,  out1.h);
+    glVertex2f( out1.w,  out1.h);
+    glVertex2f( out1.w, -out1.h);
+    glEnd();
+    glPopMatrix();
+
+    Box out2 = Box(5.0f, 800.0f, 5.0f, 800.0f, 0.0f, 0.0f);
+    glPushMatrix();
+    glColor3ub(115, 80, 50);
+    glTranslatef(out2.pos[0], out2.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-out2.w, -out2.h);
+    glVertex2f(-out2.w,  out2.h);
+    glVertex2f( out2.w,  out2.h);
+    glVertex2f( out2.w, -out2.h);
+    glEnd();
+    glPopMatrix();
+
+    Box bot1 = Box(75.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f);
+    glPushMatrix();
+    glColor3ub(115, 80, 50);
+    glTranslatef(bot1.pos[0], bot1.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-bot1.w, -bot1.h);
+    glVertex2f(-bot1.w,  bot1.h);
+    glVertex2f( bot1.w,  bot1.h);
+    glVertex2f( bot1.w, -bot1.h);
+    glEnd();
+    glPopMatrix();
+
+    Box bot2 = Box(150.0f, 50.0f, 550.0f, 0.0f, 0.0f, 0.0f);
+    glPushMatrix();
+    glColor3ub(115, 80, 50);
+    glTranslatef(bot2.pos[0], bot2.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-bot2.w, -bot2.h);
+    glVertex2f(-bot2.w,  bot2.h);
+    glVertex2f( bot2.w,  bot2.h);
+    glVertex2f( bot2.w, -bot2.h);
+    glEnd();
+    glPopMatrix();
+
+    glPushMatrix();
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt1[0], Gt1[1]);
+    glVertex2f(Gt1[2], Gt1[3]);
+    glVertex2f(Gt1[4], Gt1[5]);
+
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt2[0], Gt2[1]);
+    glVertex2f(Gt2[2], Gt2[3]);
+    glVertex2f(Gt2[4], Gt2[5]);
+
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt3[0], Gt3[1]);
+    glVertex2f(Gt3[2], Gt3[3]);
+    glVertex2f(Gt3[4], Gt3[5]);
+
+    glEnd();
+
+    glFlush();
+
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt4[0], Gt4[1]);
+    glVertex2f(Gt4[2], Gt4[3]);
+    glVertex2f(Gt4[4], Gt4[5]);
+
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt5[0], Gt5[1]);
+    glVertex2f(Gt5[2], Gt5[3]);
+    glVertex2f(Gt5[4], Gt5[5]);
+
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt6[0], Gt6[1]);
+    glVertex2f(Gt6[2], Gt6[3]);
+    glVertex2f(Gt6[4], Gt6[5]);
+
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt7[0], Gt7[1]);
+    glVertex2f(Gt7[2], Gt7[3]);
+    glVertex2f(Gt7[4], Gt7[5]);
+
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt8[0], Gt8[1]);
+    glVertex2f(Gt8[2], Gt8[3]);
+    glVertex2f(Gt8[4], Gt8[5]);
+
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt9[0], Gt9[1]);
+    glVertex2f(Gt9[2], Gt9[3]);
+    glVertex2f(Gt9[4], Gt9[5]);
+
+    glEnd();
+
+        glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt10[0], Gt10[1]);
+    glVertex2f(Gt10[2], Gt10[3]);
+    glVertex2f(Gt10[4], Gt10[5]);
+
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt11[0], Gt11[1]);
+    glVertex2f(Gt11[2], Gt11[3]);
+    glVertex2f(Gt11[4], Gt11[5]);
+
+    glEnd();
+
+    glBegin(GL_TRIANGLES);
+    glColor3ub(115, 80, 50);
+    glVertex2f(Gt12[0], Gt12[1]);
+    glVertex2f(Gt12[2], Gt12[3]);
+    glVertex2f(Gt12[4], Gt12[5]);
+
+    glEnd();
+
+    int n = 15; 
+    double angle = 0.0;
+    double inc = (2.0*3.14)/n;
+    Circle circle1 = Circle(40.0f, 125, 650, 0.0f, 0.0f);
+    //glVertex2f(x, y);
+    glColor3ub(150, 150, 150);
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < n; i++) {
+        circle1.x = circle1.r*cos(angle);
+        circle1.y = circle1.r*sin(angle);
+        glVertex2f(circle1.x+circle1.c[0],circle1.y + circle1.c[1]);
+        angle += inc;
+    }
+    glEnd();
+
+    Circle circle2 = Circle(25.0f, 225, 550, 0.0f, 0.0f);
+    glColor3ub(150, 150, 150);
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < n; i++) {
+        circle2.x = circle2.r*cos(angle);
+        circle2.y = circle2.r*sin(angle);
+        glVertex2f(circle2.x+circle2.c[0],circle2.y + circle2.c[1]);
+        angle += inc;
+    }
+    glEnd();
+
+    Circle circle3 = Circle(25.0f, 350, 575, 0.0f, 0.0f);
+    glColor3ub(150, 150, 150);
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < n; i++) {
+        circle3.x = circle3.r*cos(angle);
+        circle3.y = circle3.r*sin(angle);
+        glVertex2f(circle3.x+circle3.c[0],circle3.y + circle3.c[1]);
+        angle += inc;
+    }
+    glEnd();
+
+    Circle circle4 = Circle(25.0f, 300, 450, 0.0f, 0.0f);
+    glColor3ub(150, 150, 150);
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < n; i++) {
+        circle4.x = circle4.r*cos(angle);
+        circle4.y = circle4.r*sin(angle);
+        glVertex2f(circle4.x+circle4.c[0],circle4.y + circle4.c[1]);
+        angle += inc;
+    }
+    glEnd();
+
+    if (leftFlipper) {
+        glColor3ub(150, 150, 150);
+        glBegin(GL_LINES);
+        glVertex2f(150.0f, 50.0f);
+        glVertex2f(225.0f, 100.0f);
+        glFlush();
+        glEnd();
+    }
+    else {
+        glColor3ub(150, 150, 150);
+        glBegin(GL_LINES);
+        glVertex2f(150.0f, 50.0f);
+        glVertex2f(225.0f, 25.0f);
+        glFlush();
+        glEnd();
+    }
+
+
+    if (rightFlipper) {
+        glColor3ub(150, 150, 150);
+        glBegin(GL_LINES);
+        glVertex2f(400.0f, 50.0f);
+        glVertex2f(325.0f, 100.0f);
+        glFlush();
+        glEnd();
+    }
+    else {
+        glColor3ub(150, 150, 150);
+        glBegin(GL_LINES);
+        glVertex2f(400.0f, 50.0f);
+        glVertex2f(325.0f, 25.0f);
+        glFlush();
+        glEnd();
+    }
+
+    }
+
+    // Summon Ball	
+    //if (summonball) {
+    glPushMatrix();
+    glColor3ub(0,0,0);
+    glTranslatef(ball.pos[0], ball.pos[1], 0.0f);
+    glBegin(GL_QUADS);
+    glVertex2f(-ball.w, -ball.h);
+    glVertex2f(-ball.w,  ball.h);
+    glVertex2f( ball.w,  ball.h);
+    glVertex2f( ball.w, -ball.h);
+    glEnd();
+    glPopMatrix();
+
+    Rect r[2];
+    if (g.pause){
+        r[0].bot = g.yres/1.5;
+        r[0].left = g.xres/2;
+        r[0].center = 0;
+        ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
+    }
+    r[1].bot = g.yres-35;
+    r[1].left = g.xres/2;
+    r[1].center = -5;
+    ggprint8b(&r[7], 20, 0x00ffff00, "Alex's Feature -  Shift + 2");
+
+    renderStats(stats[1], g.xres, g.yres, points);
 }
 
 
