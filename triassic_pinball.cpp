@@ -23,6 +23,9 @@ using namespace std;
 #include "gtorres.h"
 //some structures
 Image img("dinosaurs.jpeg");
+Image lvl2grass("grass1.jpg");
+Image lvl2rock("rock1.jpg");
+Image lvl2rock2("stone2.jpg");
 
 extern void draw_triangle(Triangle triangle);
 
@@ -31,6 +34,9 @@ class Global {
 	int xres, yres;
 	int n;
     GLuint texture;
+    GLuint rocktxt;
+    GLuint grassbkg;
+    GLuint rock2txt;
 	unsigned int pause;
 	unsigned int mainmenu;
 	unsigned int issa_feature;
@@ -430,6 +436,36 @@ void init_opengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
         GL_RGB, GL_UNSIGNED_BYTE, img.data);
+
+    glGenTextures(1, &g.rocktxt);
+
+	w = lvl2rock.width;
+   	h = lvl2rock.height;
+   	glBindTexture(GL_TEXTURE_2D, g.rocktxt);
+   	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+   	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+        GL_RGB, GL_UNSIGNED_BYTE, lvl2rock.data);
+
+    glGenTextures(1, &g.grassbkg);
+
+    w = lvl2grass.width;
+   	h = lvl2grass.height;
+   	glBindTexture(GL_TEXTURE_2D, g.grassbkg);
+   	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+   	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+        GL_RGB, GL_UNSIGNED_BYTE, lvl2grass.data);
+
+    glGenTextures(1, &g.rock2txt);
+    
+    w = lvl2rock2.width;
+   	h = lvl2rock2.height;
+   	glBindTexture(GL_TEXTURE_2D, g.rock2txt);
+   	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+   	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+  	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+        GL_RGB, GL_UNSIGNED_BYTE, lvl2rock2.data);
 }
 float Gravity = 0.075;
 
@@ -707,15 +743,27 @@ void render()
     
     glClear(GL_COLOR_BUFFER_BIT);
 
+    glBindTexture(GL_TEXTURE_2D, g.grassbkg);
+    glColor3f(1.0, 1.0, 1.0);
+    glBegin(GL_QUADS);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2i(0, 0);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2i(0,  g.yres);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2i( g.xres,  g.yres);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2i( g.xres, 0);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    
+
+    glBindTexture(GL_TEXTURE_2D, g.rocktxt);
     Box start = Box(5.0f, 350.0f, 550.0f, 300.0f, 0.0f, 0.0f);
     glPushMatrix();
     glColor3ub(115, 80, 50);
     glTranslatef(start.pos[0], start.pos[1], 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(-start.w, -start.h);
-    glVertex2f(-start.w,  start.h);
-    glVertex2f( start.w,  start.h);
-    glVertex2f( start.w, -start.h);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-start.w, -start.h);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-start.w,  start.h);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2f( start.w,  start.h);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2f( start.w, -start.h);
     glEnd();
     glPopMatrix();
 
@@ -724,11 +772,15 @@ void render()
     glColor3ub(115, 80, 50);
     glTranslatef(start2.pos[0], start2.pos[1], 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(-start2.w, -start2.h);
-    glVertex2f(-start2.w,  start2.h);
-    glVertex2f( start2.w,  start2.h);
-    glVertex2f( start2.w, -start2.h);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-start2.w, -start2.h);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-start2.w,  start2.h);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2f( start2.w,  start2.h);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2f( start2.w, -start2.h);
     glEnd();
+    glPopMatrix();
+
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
     glPopMatrix();
 
     Box start3 = Box(5.0f, 150.0f, 550.0f, 800.0f, 0.0f, 0.0f);
@@ -736,22 +788,23 @@ void render()
     glColor3ub(135, 145, 145);
     glTranslatef(start3.pos[0], start3.pos[1], 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(-start3.w, -start3.h);
-    glVertex2f(-start3.w,  start3.h);
-    glVertex2f( start3.w,  start3.h);
-    glVertex2f( start3.w, -start3.h);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-start3.w, -start3.h);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-start3.w,  start3.h);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2f( start3.w,  start3.h);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2f( start3.w, -start3.h);
     glEnd();
     glPopMatrix();
 
+    glBindTexture(GL_TEXTURE_2D, g.rocktxt);
     Box out1 = Box(300.0f, 5.0f, 300.0f, 795.0f, 0.0f, 0.0f);
     glPushMatrix();
     glColor3ub(115, 80, 50);
     glTranslatef(out1.pos[0], out1.pos[1], 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(-out1.w, -out1.h);
-    glVertex2f(-out1.w,  out1.h);
-    glVertex2f( out1.w,  out1.h);
-    glVertex2f( out1.w, -out1.h);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-out1.w, -out1.h);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-out1.w,  out1.h);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2f( out1.w,  out1.h);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2f( out1.w, -out1.h);
     glEnd();
     glPopMatrix();
 
@@ -760,10 +813,10 @@ void render()
     glColor3ub(115, 80, 50);
     glTranslatef(out2.pos[0], out2.pos[1], 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(-out2.w, -out2.h);
-    glVertex2f(-out2.w,  out2.h);
-    glVertex2f( out2.w,  out2.h);
-    glVertex2f( out2.w, -out2.h);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-out2.w, -out2.h);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-out2.w,  out2.h);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2f( out2.w,  out2.h);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2f( out2.w, -out2.h);
     glEnd();
     glPopMatrix();
 
@@ -772,10 +825,10 @@ void render()
     glColor3ub(115, 80, 50);
     glTranslatef(bot1.pos[0], bot1.pos[1], 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(-bot1.w, -bot1.h);
-    glVertex2f(-bot1.w,  bot1.h);
-    glVertex2f( bot1.w,  bot1.h);
-    glVertex2f( bot1.w, -bot1.h);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-bot1.w, -bot1.h);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-bot1.w,  bot1.h);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2f( bot1.w,  bot1.h);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2f( bot1.w, -bot1.h);
     glEnd();
     glPopMatrix();
 
@@ -784,14 +837,19 @@ void render()
     glColor3ub(115, 80, 50);
     glTranslatef(bot2.pos[0], bot2.pos[1], 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(-bot2.w, -bot2.h);
-    glVertex2f(-bot2.w,  bot2.h);
-    glVertex2f( bot2.w,  bot2.h);
-    glVertex2f( bot2.w, -bot2.h);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-bot2.w, -bot2.h);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-bot2.w,  bot2.h);
+    glTexCoord2f( 1.0f, 0.0f); glVertex2f( bot2.w,  bot2.h);
+    glTexCoord2f( 1.0f, 1.0f); glVertex2f( bot2.w, -bot2.h);
     glEnd();
     glPopMatrix();
 
-    glColor3ub(115, 80, 50);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glPopMatrix();
+
+    glColor3ub(115, 80, 50);\
+    glBindTexture(GL_TEXTURE_2D, g.rocktxt);
     draw_triangle(Gt1);
     draw_triangle(Gt2);
     draw_triangle(Gt3);
@@ -804,20 +862,28 @@ void render()
     draw_triangle(Gt10);
     draw_triangle(Gt11);
     draw_triangle(Gt12);
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glPopMatrix();
     int n = 15; 
     double angle = 0.0;
     double inc = (2.0*3.14)/n;
     Circle circle1 = Circle(40.0f, 125, 650, 0.0f, 0.0f);
     //glVertex2f(x, y);
     glColor3ub(150, 150, 150);
+
+    glBindTexture(GL_TEXTURE_2D, g.rock2txt);
+
     glBegin(GL_TRIANGLE_FAN);
     for (int i = 0; i < n; i++) {
         circle1.x = circle1.r*cos(angle);
         circle1.y = circle1.r*sin(angle);
+        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
         glVertex2f(circle1.x+circle1.c[0],circle1.y + circle1.c[1]);
         angle += inc;
     }
     glEnd();
+    glPopMatrix();
 
     Circle circle2 = Circle(25.0f, 225, 550, 0.0f, 0.0f);
     glColor3ub(150, 150, 150);
@@ -825,10 +891,12 @@ void render()
     for (int i = 0; i < n; i++) {
         circle2.x = circle2.r*cos(angle);
         circle2.y = circle2.r*sin(angle);
+        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
         glVertex2f(circle2.x+circle2.c[0],circle2.y + circle2.c[1]);
         angle += inc;
     }
     glEnd();
+    glPopMatrix();
 
     Circle circle3 = Circle(25.0f, 350, 575, 0.0f, 0.0f);
     glColor3ub(150, 150, 150);
@@ -836,10 +904,12 @@ void render()
     for (int i = 0; i < n; i++) {
         circle3.x = circle3.r*cos(angle);
         circle3.y = circle3.r*sin(angle);
+        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
         glVertex2f(circle3.x+circle3.c[0],circle3.y + circle3.c[1]);
         angle += inc;
     }
     glEnd();
+    glPopMatrix();
 
     Circle circle4 = Circle(25.0f, 300, 450, 0.0f, 0.0f);
     glColor3ub(150, 150, 150);
@@ -847,10 +917,13 @@ void render()
     for (int i = 0; i < n; i++) {
         circle4.x = circle4.r*cos(angle);
         circle4.y = circle4.r*sin(angle);
+        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
         glVertex2f(circle4.x+circle4.c[0],circle4.y + circle4.c[1]);
         angle += inc;
     }
     glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glPopMatrix();
 
     if (leftFlipper) {
         glColor3ub(150, 150, 150);
