@@ -99,10 +99,10 @@ class Box {
     box2(47.0f ,20.0f ,60, 10, 0.0f, 0.0f),
     greenbox(8.0f, 10.0f, 170, 12, 0.0f, 0.0f),
     boxes[2],
-    start(5.0f, 350.0f, 550.0f, 300.0f, 0.0f, 0.0f),
-    start2(5.0f, 800.0f, 595.0f, 800.0f, 0.0f, 0.0f),
-    out1(300.0f, 5.0f, 300.0f, 795.0f, 0.0f, 0.0f),
-    out2(5.0f, 800.0f, 5.0f, 800.0f, 0.0f, 0.0f),
+    start(10.0f, 350.0f, 550.0f, 300.0f, 0.0f, 0.0f),
+    start2(10.0f, 800.0f, 595.0f, 800.0f, 0.0f, 0.0f),
+    out1(300.0f, 10.0f, 300.0f, 795.0f, 0.0f, 0.0f),
+    out2(10.0f, 800.0f, 5.0f, 800.0f, 0.0f, 0.0f),
     bot1(75.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f),
     bot2(75.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f);
 
@@ -495,6 +495,12 @@ void physics()
     /* Circle Collision */
     extern void circle_collision(float *ballx, float *bally, 
             float cx, float cy, float r, float *vx, float *vy);
+    /* For hypotenus facing left downwards and facing upwards */
+    extern void triangle_collision( Triangle triangle, float *ballx,
+            float *bally, float *vx, float *vy); 
+    /* For hypotenus facing right downwards */
+    extern void xtriangle_collision( Triangle triangle, float ballx,
+            float bally, float *vx, float *vy);
     // FIRST  
     if (level1 == 1) {
 	
@@ -526,8 +532,6 @@ void physics()
             cir3.r, &ball.vel[0], &ball.vel[1]);
         
     /* For hypotenus facing left downwards and facing upwards */
-    extern void triangle_collision( Triangle triangle, float *ballx,
-            float *bally, float *vx, float *vy);
     triangle_collision( t1, &ball.pos[0], &ball.pos[1],
             &ball.vel[0], &ball.vel[1]);
     triangle_collision( t3, &ball.pos[0], &ball.pos[1],
@@ -545,8 +549,6 @@ void physics()
     triangle_collision( flipper2, &ball.pos[0], &ball.pos[1],
             &ball.vel[0], &ball.vel[1]);
     /* For hypotenus facing right downwards */
-    extern void xtriangle_collision( Triangle triangle, float ballx,
-            float bally, float *vx, float *vy);
     xtriangle_collision( t2, ball.pos[0], ball.pos[1],
             &ball.vel[0], &ball.vel[1]);
     // Checking for wall collision
@@ -605,6 +607,30 @@ void physics()
             circle3.r, &ball.vel[0], &ball.vel[1]);
     circle_collision(&ball.pos[0], &ball.pos[1],circle4.c[0], circle4.c[1],
             circle4.r, &ball.vel[0], &ball.vel[1]);
+
+    triangle_collision( Gt1, &ball.pos[0], &ball.pos[1], // flipper1
+            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( Gt2, &ball.pos[0], &ball.pos[1], // flipper2
+            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( Gt3, &ball.pos[0], &ball.pos[1], // t1
+            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( Gt5, &ball.pos[0], &ball.pos[1], // t1
+            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( Gt7, &ball.pos[0], &ball.pos[1], // flipper1
+            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( Gt9, &ball.pos[0], &ball.pos[1], // flipper2
+            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( Gt10, &ball.pos[0], &ball.pos[1], // t1
+            &ball.vel[0], &ball.vel[1]);
+    
+    
+    
+    xtriangle_collision( Gt4, ball.pos[0], ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
+    xtriangle_collision( Gt6, ball.pos[0], ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
+    xtriangle_collision( Gt8, ball.pos[0], ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
 
                 if (ball.pos[0] - ball.w < 0) {
             ball.vel[0] = -ball.vel[0];
@@ -732,18 +758,8 @@ void render()
     r[1].center = -5;
     ggprint8b(&r[1], 20, 0x00ffff00, "Alex's Feature -  Shift + 2");
 
-    Rect scoreboard;
-    scoreboard.bot = 345;
-    scoreboard.left = 500;
-    scoreboard.center = 0;
-    ggprint8b(&scoreboard, 20, 0x00ffff00, "Score: %i", score);
-
-    Rect life;
-    life.bot = 295;
-    life.left = 500;
-    life.center = 0;
-    ggprint8b(&life, 20, 0x00ffff00, "Lives: %i", lives);
-
+    extern void show_stats(int score, int lives);
+    show_stats(score, lives);
 
     glColor4f(0.2, 0.5, 0.2, 0.3);
     glPushMatrix();
@@ -805,8 +821,8 @@ void render()
     draw_triangle(Gt8, tridef);
     draw_triangle(Gt9, tridef);
     draw_triangle(Gt10, tridef);
-    draw_triangle(Gt11, tridef);
-    draw_triangle(Gt12, tridef);
+    /*draw_triangle(Gt11, tridef);
+    draw_triangle(Gt12, tridef);*/
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     glPopMatrix();
