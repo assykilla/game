@@ -27,7 +27,16 @@ Image lvl2grass("grass1.jpg");
 Image lvl2rock("rock1.jpg");
 Image lvl2rock2("stone2.jpg");
 
-extern void draw_triangle(Triangle triangle);
+extern Triangle t1;
+extern Triangle t2;
+extern Triangle t3;
+extern Triangle t4;
+extern Triangle t5;
+extern Triangle t6;
+extern Triangle flipper1;
+extern Triangle flipper2;
+extern void draw_triangle(Triangle triangle, unsigned char color[]);
+extern void draw_circle(float r, float cx, float cy, unsigned char color[]);
 
 class Global {
     public:
@@ -65,11 +74,10 @@ class Box {
 	    memcpy(color, col, sizeof(unsigned char) *3);
 
 	}
-	//float boxr=150.0f/255.0f, boxg=160.0f/255.0f, boxb=220.0f/255.0f;
 	Box(){
 	    w = 75.0f;
 	    h = 15.0f;
-	    pos[0] = 520;
+	    pos[0] = 570;
 	    pos[1] = 350;
 	    vel[0] = 0.0f;
 	    vel[1] = 0.0f;
@@ -82,15 +90,21 @@ class Box {
 	    vel[0] = v0;
 	    vel[1] = v1;
 	}
-} highbox1(50.0f,335.0f, 310, 10, 0.0f, 0.0f), 
-    ball(4.0f,4.0f, 380, 100, velocity[0], velocity[1]),
+} highbox1(50.0f,375.0f, 350, 10, 0.0f, 0.0f), 
+    ball(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
     highbox2(20.0f,float(g.yres), 0, 10, 0.0f, 0.0f),
-    highbox3(10.0f,float(g.yres), 390, 10, 0.0f, 0.0f),
-    widebox1(200.0f,25.0f, 180, g.yres+5, 0.0f, 0.0f),
-    box1(37.0f ,15.0f ,230,10, 0.0f, 0.0f),
-    box2(37.0f ,15.0f ,50,10, 0.0f, 0.0f),
-    greenbox(8.0f, 10.0f, 140, 12, 0.0f, 0.0f),
-    boxes[2];
+    highbox3(10.0f,float(g.yres), 440, 10, 0.0f, 0.0f),
+    widebox1(230.0f,25.0f, 200, g.yres, 0.0f, 0.0f),
+    box1(47.0f ,20.0f ,280, 10, 0.0f, 0.0f),
+    box2(47.0f ,20.0f ,60, 10, 0.0f, 0.0f),
+    greenbox(8.0f, 10.0f, 170, 12, 0.0f, 0.0f),
+    boxes[2],
+    start(5.0f, 350.0f, 550.0f, 300.0f, 0.0f, 0.0f),
+    start2(5.0f, 800.0f, 595.0f, 800.0f, 0.0f, 0.0f),
+    out1(300.0f, 5.0f, 300.0f, 795.0f, 0.0f, 0.0f),
+    out2(5.0f, 800.0f, 5.0f, 800.0f, 0.0f, 0.0f),
+    bot1(75.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f),
+    bot2(75.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f);
 
 
 
@@ -118,11 +132,14 @@ class Circle {
 	}
 
 } circle, test_ball(10,g.xres/2,g.yres/2,0,0), 
-  halfcir(50.0f, 310 ,335, 0.0f, 0.0f),
-  cir1(12.0f, 135 ,235, 0.0f, 0.0f),
-  cir2(12.0f, 105 ,210, 0.0f, 0.0f),
-  cir3(12.0f, 165 ,210, 0.0f, 0.0f);
-
+  halfcir(50.0f, 350 ,375, 0.0f, 0.0f),
+  cir1(18.0f, 165 ,245, 0.0f, 0.0f),
+  cir2(18.0f, 115 ,210, 0.0f, 0.0f),
+  cir3(18.0f, 215 ,210, 0.0f, 0.0f),
+  circle1(40.0f, 125, 650, 0.0f, 0.0f),
+  circle2(25.0f, 225, 550, 0.0f, 0.0f),
+  circle3(25.0f, 350, 575, 0.0f, 0.0f),
+  circle4(25.0f, 300, 450, 0.0f, 0.0f);
 
 class X11_wrapper {
     private:
@@ -142,7 +159,6 @@ class X11_wrapper {
 	int check_keys(XEvent *e);
 } x11;
 
-//FunctiCircle(float wid, float hgt, int x, int y, float v0, float v1){
 void init_opengl(void);
 void physics(void);
 void render(void);
@@ -217,7 +233,7 @@ void X11_wrapper::set_title()
 {
     //Set the window title bar.
     XMapWindow(dpy, win);
-    XStoreName(dpy, win, "3350 Lab2");
+    XStoreName(dpy, win, "Triassic Pinball");
 }
 
 bool X11_wrapper::getXPending()
@@ -264,21 +280,6 @@ void X11_wrapper::check_resize(XEvent *e)
     }
 }
 //-----------------------------------------------------------------------------
-
-Triangle t1 = Triangle(400.0f,325.0f,400.0f,
-        450.0f, 450.0f, 300.0f);
-Triangle t2 = Triangle(20.0f,20.0f,120.0f,
-        450.0f, 300.0f, 450.0f);
-Triangle flipper1 = Triangle(85.0f, 85.0f, 137.0f,
-        25.0f, 8.0f, 8.0f);
-Triangle flipper2 = Triangle(195.0f, 143.0f, 195.0f,
-        25.0f, 8.0f, 8.0f);
-Triangle t3 = Triangle(20.0f, 20.0f, 87.0f,
-        75.0f, 25.0f, 25.0f);
-Triangle t4 = Triangle(260.0f, 193.0f, 260.0f,
-        75.0f, 25.0f, 25.0f);
-Triangle t5 = Triangle(20.0f, 20.0f, 120.0f,
-        540.0f, 450.0f, 450.0f);
 
 void X11_wrapper::check_mouse(XEvent *e)
 {
@@ -488,10 +489,14 @@ void physics()
 	}
     }
 
+    /* Box collision */
+    extern void box_collision(float *ballx, float *bally, int ballw, 
+            int boxx, int boxy, int w, int h, float *vx, float *vy);
+    /* Circle Collision */
+    extern void circle_collision(float *ballx, float *bally, 
+            float cx, float cy, float r, float *vx, float *vy);
     // FIRST  
     if (level1 == 1) {
-    extern void box_collision(float *ballx, float *bally, int ballw,
-            int boxx, int boxy, int w, int h, float *vx, float *vy);
 	
     box_collision(&ball.pos[0], &ball.pos[1], ball.w, highbox1.pos[0],
         highbox1.pos[1], highbox1.w, highbox1.h, &ball.vel[0], &ball.vel[1]);
@@ -506,9 +511,7 @@ void physics()
     box_collision(&ball.pos[0], &ball.pos[1], ball.w, box2.pos[0],
         box2.pos[1], box2.w, box2.h, &ball.vel[0], &ball.vel[1]);
 
-   
-    extern void circle_collision(float *ballx, float *bally, float cx, float cy,
-            float r, float *vx, float *vy);
+   /* CIRCLES */
     circle_collision(&ball.pos[0], &ball.pos[1],circle.c[0], circle.c[1],
             circle.r, &ball.vel[0], &ball.vel[1]);
 
@@ -532,6 +535,8 @@ void physics()
     triangle_collision( t4, &ball.pos[0], &ball.pos[1],
             &ball.vel[0], &ball.vel[1]);
     triangle_collision( t5, &ball.pos[0], &ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( t6, &ball.pos[0], &ball.pos[1],
             &ball.vel[0], &ball.vel[1]);
 
     /* Flipper collision */
@@ -562,7 +567,7 @@ void physics()
             score = 0;
         }
 
-        ball.pos[0] = 370;
+        ball.pos[0] = 415;
         ball.pos[1] = 100;
         ball.vel[0] = 0;
         ball.vel[1] = 0;
@@ -578,6 +583,29 @@ void physics()
     }
      // SECOND
      if (level2 == 1) {
+    
+        box_collision(&ball.pos[0], &ball.pos[1], ball.w, start.pos[0],
+            start.pos[1], start.w, start.h, &ball.vel[0], &ball.vel[1]);
+        box_collision(&ball.pos[0], &ball.pos[1], ball.w, start2.pos[0],
+            start2.pos[1], start2.w, start2.h, &ball.vel[0], &ball.vel[1]);
+        box_collision(&ball.pos[0], &ball.pos[1], ball.w, out1.pos[0],
+            out1.pos[1], out1.w, out1.h, &ball.vel[0], &ball.vel[1]);
+        box_collision(&ball.pos[0], &ball.pos[1], ball.w, out2.pos[0],
+            out2.pos[1], out2.w, out2.h, &ball.vel[0], &ball.vel[1]);
+        box_collision(&ball.pos[0], &ball.pos[1], ball.w, bot1.pos[0],
+            bot1.pos[1], bot1.w, bot1.h, &ball.vel[0], &ball.vel[1]);
+        box_collision(&ball.pos[0], &ball.pos[1], ball.w, bot2.pos[0],
+            bot2.pos[1], bot2.w, bot2.h, &ball.vel[0], &ball.vel[1]);
+
+    circle_collision(&ball.pos[0], &ball.pos[1],circle1.c[0], circle1.c[1],
+            circle1.r, &ball.vel[0], &ball.vel[1]);
+    circle_collision(&ball.pos[0], &ball.pos[1],circle2.c[0], circle2.c[1],
+            circle2.r, &ball.vel[0], &ball.vel[1]);
+    circle_collision(&ball.pos[0], &ball.pos[1],circle3.c[0], circle3.c[1],
+            circle3.r, &ball.vel[0], &ball.vel[1]);
+    circle_collision(&ball.pos[0], &ball.pos[1],circle4.c[0], circle4.c[1],
+            circle4.r, &ball.vel[0], &ball.vel[1]);
+
                 if (ball.pos[0] - ball.w < 0) {
             ball.vel[0] = -ball.vel[0];
             points += 5;
@@ -601,10 +629,10 @@ void draw_box(Box box, unsigned char color [])
     glColor3ubv(box.color);
     glTranslatef(box.pos[0], box.pos[1], 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(-box.w, -box.h);
-    glVertex2f(-box.w,  box.h);
-    glVertex2f( box.w,  box.h);
-    glVertex2f( box.w, -box.h);
+    glTexCoord2f( 0.0f, 1.0f);  glVertex2f(-box.w, -box.h);
+    glTexCoord2f( 0.0f, 0.0f);  glVertex2f(-box.w,  box.h);
+    glTexCoord2f( 1.0f, 0.0f);  glVertex2f( box.w,  box.h);
+    glTexCoord2f( 1.0f, 1.0f);  glVertex2f( box.w, -box.h);
     glEnd();
     glPopMatrix();
 }
@@ -641,20 +669,21 @@ void render()
 	draw_button(g.xres,g.yres);
     }
     Rect r[2];
-
+    unsigned char tridef[3] { 115, 80, 50};
+    unsigned char cirdef[3] { 150, 150, 150};
+    unsigned char def[3] { 115, 80, 50};
     if (level1 == 1) {    
     glBindTexture(GL_TEXTURE_2D, g.texture);
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_QUADS);
-    glTexCoord2f( 0.0f, 1.0f); glVertex2i(400, 0);
-    glTexCoord2f( 0.0f, 0.0f); glVertex2i(400,  g.yres);
+    glTexCoord2f( 0.0f, 1.0f); glVertex2i(450, 0);
+    glTexCoord2f( 0.0f, 0.0f); glVertex2i(450,  g.yres);
     glTexCoord2f( 1.0f, 0.0f); glVertex2i( g.xres,  g.yres);
     glTexCoord2f( 1.0f, 1.0f); glVertex2i( g.xres, 0);
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
 
      // Draw Box
-    unsigned char def[3] { 126, 0, 0};
     unsigned char balldef[3] { 0, 0, 0};
     unsigned char col[3] { 126, 100, 255};
         draw_box(highbox1, def);
@@ -671,16 +700,16 @@ void render()
         }
      
     /* create triangle*/
-    glColor3ub(125, 0, 0);
-    draw_triangle(t1);
-    draw_triangle(t2);
-    draw_triangle(t3);
-    draw_triangle(t4);
-    draw_triangle(t5);
+    draw_triangle(t1, tridef);
+    draw_triangle(t2, tridef);
+    draw_triangle(t3, tridef);
+    draw_triangle(t4, tridef);
+    draw_triangle(t5, tridef);
+    draw_triangle(t6, tridef);
     /* create right flipper*/
-    draw_triangle(flipper1);
+    draw_triangle(flipper1, tridef);
     /* create left flipper*/
-    draw_triangle(flipper2);
+    draw_triangle(flipper2, tridef);
 
     //Draw Half Circle
     int n = 40; 
@@ -688,7 +717,7 @@ void render()
     double angle = 0.0;
     double inc = (2.0*3.14)/n;
     //glVertex2f(x, y);
-    glColor3ub(126,0, 0);
+    glColor3ub(115, 80, 50);
     glBegin(GL_TRIANGLE_FAN);
     for (int i = 0; i < n/2+1; i++) {
 	halfcir.x = halfcir.r*cos(angle);
@@ -730,10 +759,9 @@ void render()
     draw_box(  ball  , balldef);
 
 
-    extern void draw_circle(float r, float cx, float cy);
-    draw_circle(cir1.r,cir1.c[0],cir1.c[1]);
-    draw_circle(cir2.r,cir2.c[0],cir2.c[1]);
-    draw_circle(cir3.r,cir3.c[0],cir3.c[1]);
+    draw_circle(cir1.r,cir1.c[0],cir1.c[1], cirdef);
+    draw_circle(cir2.r,cir2.c[0],cir2.c[1], cirdef);
+    draw_circle(cir3.r,cir3.c[0],cir3.c[1], cirdef);
 
 
 
@@ -752,175 +780,44 @@ void render()
     glTexCoord2f( 1.0f, 1.0f); glVertex2i( g.xres, 0);
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
+   
+
+    glBindTexture(GL_TEXTURE_2D, g.rocktxt);
+    draw_box(start, def);
+    draw_box(start2, def);
+    draw_box(out1, def);
+    draw_box(out2, def);
+    draw_box(bot1, def);
+    draw_box(bot2, def);
     
-
-    glBindTexture(GL_TEXTURE_2D, g.rocktxt);
-    Box start = Box(5.0f, 350.0f, 550.0f, 300.0f, 0.0f, 0.0f);
-    glPushMatrix();
-    glColor3ub(115, 80, 50);
-    glTranslatef(start.pos[0], start.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-start.w, -start.h);
-    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-start.w,  start.h);
-    glTexCoord2f( 1.0f, 0.0f); glVertex2f( start.w,  start.h);
-    glTexCoord2f( 1.0f, 1.0f); glVertex2f( start.w, -start.h);
-    glEnd();
-    glPopMatrix();
-
-    Box start2 = Box(5.0f, 800.0f, 595.0f, 800.0f, 0.0f, 0.0f);
-    glPushMatrix();
-    glColor3ub(115, 80, 50);
-    glTranslatef(start2.pos[0], start2.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-start2.w, -start2.h);
-    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-start2.w,  start2.h);
-    glTexCoord2f( 1.0f, 0.0f); glVertex2f( start2.w,  start2.h);
-    glTexCoord2f( 1.0f, 1.0f); glVertex2f( start2.w, -start2.h);
-    glEnd();
-    glPopMatrix();
-
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     glPopMatrix();
 
-    Box start3 = Box(5.0f, 150.0f, 550.0f, 800.0f, 0.0f, 0.0f);
-    glPushMatrix();
-    glColor3ub(135, 145, 145);
-    glTranslatef(start3.pos[0], start3.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-start3.w, -start3.h);
-    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-start3.w,  start3.h);
-    glTexCoord2f( 1.0f, 0.0f); glVertex2f( start3.w,  start3.h);
-    glTexCoord2f( 1.0f, 1.0f); glVertex2f( start3.w, -start3.h);
-    glEnd();
-    glPopMatrix();
-
     glBindTexture(GL_TEXTURE_2D, g.rocktxt);
-    Box out1 = Box(300.0f, 5.0f, 300.0f, 795.0f, 0.0f, 0.0f);
-    glPushMatrix();
-    glColor3ub(115, 80, 50);
-    glTranslatef(out1.pos[0], out1.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-out1.w, -out1.h);
-    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-out1.w,  out1.h);
-    glTexCoord2f( 1.0f, 0.0f); glVertex2f( out1.w,  out1.h);
-    glTexCoord2f( 1.0f, 1.0f); glVertex2f( out1.w, -out1.h);
-    glEnd();
-    glPopMatrix();
-
-    Box out2 = Box(5.0f, 800.0f, 5.0f, 800.0f, 0.0f, 0.0f);
-    glPushMatrix();
-    glColor3ub(115, 80, 50);
-    glTranslatef(out2.pos[0], out2.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-out2.w, -out2.h);
-    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-out2.w,  out2.h);
-    glTexCoord2f( 1.0f, 0.0f); glVertex2f( out2.w,  out2.h);
-    glTexCoord2f( 1.0f, 1.0f); glVertex2f( out2.w, -out2.h);
-    glEnd();
-    glPopMatrix();
-
-    Box bot1 = Box(75.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f);
-    glPushMatrix();
-    glColor3ub(115, 80, 50);
-    glTranslatef(bot1.pos[0], bot1.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-bot1.w, -bot1.h);
-    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-bot1.w,  bot1.h);
-    glTexCoord2f( 1.0f, 0.0f); glVertex2f( bot1.w,  bot1.h);
-    glTexCoord2f( 1.0f, 1.0f); glVertex2f( bot1.w, -bot1.h);
-    glEnd();
-    glPopMatrix();
-
-    Box bot2 = Box(75.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f);
-    glPushMatrix();
-    glColor3ub(115, 80, 50);
-    glTranslatef(bot2.pos[0], bot2.pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glTexCoord2f( 0.0f, 1.0f); glVertex2f(-bot2.w, -bot2.h);
-    glTexCoord2f( 0.0f, 0.0f); glVertex2f(-bot2.w,  bot2.h);
-    glTexCoord2f( 1.0f, 0.0f); glVertex2f( bot2.w,  bot2.h);
-    glTexCoord2f( 1.0f, 1.0f); glVertex2f( bot2.w, -bot2.h);
-    glEnd();
-    glPopMatrix();
-
+    draw_triangle(Gt1, tridef);
+    draw_triangle(Gt2, tridef);
+    draw_triangle(Gt3, tridef);
+    draw_triangle(Gt4, tridef);
+    draw_triangle(Gt5, tridef);
+    draw_triangle(Gt6, tridef);
+    draw_triangle(Gt7, tridef);
+    draw_triangle(Gt8, tridef);
+    draw_triangle(Gt9, tridef);
+    draw_triangle(Gt10, tridef);
+    draw_triangle(Gt11, tridef);
+    draw_triangle(Gt12, tridef);
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     glPopMatrix();
-
-    glColor3ub(115, 80, 50);\
-    glBindTexture(GL_TEXTURE_2D, g.rocktxt);
-    draw_triangle(Gt1);
-    draw_triangle(Gt2);
-    draw_triangle(Gt3);
-    draw_triangle(Gt4);
-    draw_triangle(Gt5);
-    draw_triangle(Gt6);
-    draw_triangle(Gt7);
-    draw_triangle(Gt8);
-    draw_triangle(Gt9);
-    draw_triangle(Gt10);
-    draw_triangle(Gt11);
-    draw_triangle(Gt12);
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glPopMatrix();
-    int n = 15; 
-    double angle = 0.0;
-    double inc = (2.0*3.14)/n;
-    Circle circle1 = Circle(40.0f, 125, 650, 0.0f, 0.0f);
-    //glVertex2f(x, y);
+    
+        //glVertex2f(x, y);
     glColor3ub(150, 150, 150);
-
     glBindTexture(GL_TEXTURE_2D, g.rock2txt);
-
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < n; i++) {
-        circle1.x = circle1.r*cos(angle);
-        circle1.y = circle1.r*sin(angle);
-        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
-        glVertex2f(circle1.x+circle1.c[0],circle1.y + circle1.c[1]);
-        angle += inc;
-    }
-    glEnd();
-    glPopMatrix();
-
-    Circle circle2 = Circle(25.0f, 225, 550, 0.0f, 0.0f);
-    glColor3ub(150, 150, 150);
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < n; i++) {
-        circle2.x = circle2.r*cos(angle);
-        circle2.y = circle2.r*sin(angle);
-        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
-        glVertex2f(circle2.x+circle2.c[0],circle2.y + circle2.c[1]);
-        angle += inc;
-    }
-    glEnd();
-    glPopMatrix();
-
-    Circle circle3 = Circle(25.0f, 350, 575, 0.0f, 0.0f);
-    glColor3ub(150, 150, 150);
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < n; i++) {
-        circle3.x = circle3.r*cos(angle);
-        circle3.y = circle3.r*sin(angle);
-        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
-        glVertex2f(circle3.x+circle3.c[0],circle3.y + circle3.c[1]);
-        angle += inc;
-    }
-    glEnd();
-    glPopMatrix();
-
-    Circle circle4 = Circle(25.0f, 300, 450, 0.0f, 0.0f);
-    glColor3ub(150, 150, 150);
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < n; i++) {
-        circle4.x = circle4.r*cos(angle);
-        circle4.y = circle4.r*sin(angle);
-        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
-        glVertex2f(circle4.x+circle4.c[0],circle4.y + circle4.c[1]);
-        angle += inc;
-    }
+    draw_circle(circle1.r,circle1.c[0],circle1.c[1], cirdef);
+    draw_circle(circle2.r,circle2.c[0],circle2.c[1], cirdef);
+    draw_circle(circle3.r,circle3.c[0],circle3.c[1], cirdef);
+    draw_circle(circle4.r,circle4.c[0],circle4.c[1], cirdef);
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     glPopMatrix();
