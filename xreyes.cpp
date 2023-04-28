@@ -15,6 +15,7 @@ using namespace std;
 int alex_feature;
 float velocity[2] = {0.0f, 0.0f};
 bool summonball = false;
+int summonshapes = 0;
 int score = 0;
 int lives = 3;
 double point = 0.00;
@@ -62,7 +63,13 @@ Triangle t4 = Triangle(310.0f, 233.0f, 310.0f,
 Triangle t5 = Triangle(20.0f, 20.0f, 120.0f,
 	540.0f, 450.0f, 450.0f);
 Triangle t6 = Triangle(450.0f, 375.0f, 450.0f,
-	600.0f, 495.0f, 495.0f);
+	575.0f, 495.0f, 495.0f);
+Triangle t7 = Triangle(450.0f,350.0f,450.0f,
+	700.0f, 700.0f, 600.0f);
+Triangle t8 = Triangle(375.0f, 300.0f, 375.0f,
+	495.0f, 385.0f, 385.0f);
+Triangle t9 = Triangle(375.0f, 375.0f, 450.0f,
+	495.0f, 385.0f, 385.0f);
 
 void box_collision(float *ballx, float *bally, int ballw,
 	int boxx, int boxy, int w, int h, float *vx, float *vy)
@@ -106,7 +113,7 @@ void circle_collision(float *ballx, float *bally, float cx, float cy,
 	    if (r < 20)
 		*vx = -dist2 * 0.4;
 	    else
-		*vx = -dist2 * 0.07;
+		*vx = -dist2 * 0.09;
 	}
 	else if ( *ballx >= cx + 1 && *ballx <= cx -1)
 	    *vy = -*vy;
@@ -116,14 +123,14 @@ void circle_collision(float *ballx, float *bally, float cx, float cy,
 		    if (r < 20)
 			*vx = -dist2 * 0.4;
 		    else
-			*vx = -dist2 * 0.07;
+			*vx = -dist2 * 0.09;
 		}
 		else {
 		    *vy =  -*vy * 0.3;
 		    if (r < 20)
 			*vx = -dist2 * 0.4;
 		    else
-			*vx = -dist2 * 0.07;
+			*vx = -dist2 * 0.09;
 		}
 		// *ballx = *ballx - 5;
 	    } else { //ballx > cx && bally > cy
@@ -131,14 +138,14 @@ void circle_collision(float *ballx, float *bally, float cx, float cy,
 		    if (r < 20)
 			*vx = dist2 * 0.4;
 		    else
-			*vx = dist2 * 0.07;
+			*vx = dist2 * 0.09;
 		}
 		else {
 		    *vy =  -*vy * 0.3;
 		    if (r < 20)
 			*vx = dist2 * 0.4;
 		    else
-			*vx = dist2 * 0.07;
+			*vx = dist2 * 0.09;
 		}
 		// *ballx = *ballx + 5;
 	    }
@@ -153,14 +160,14 @@ void circle_collision(float *ballx, float *bally, float cx, float cy,
 		    if (r < 20)
 			*vx = -dist2 * 0.4;
 		    else
-			*vx = -dist2 * 0.07;
+			*vx = -dist2 * 0.09;
 
 		}
 		else {
 		    if (r < 20)
 			*vx = -dist2 * 0.4;
 		    else
-			*vx = -dist2 * 0.07;
+			*vx = -dist2 * 0.09;
 		}
 	    } else {    //ballx > cx && bally < cy
 			// *ballx = *ballx + 5 ;
@@ -170,13 +177,13 @@ void circle_collision(float *ballx, float *bally, float cx, float cy,
 		    if (r < 20)
 			*vx = dist2 * 0.4;
 		    else
-			*vx = dist2 * 0.07;
+			*vx = dist2 * 0.09;
 		}
 		else {
 		    if (r < 20)
 			*vx = dist2 * 0.4;
 		    else
-			*vx = dist2 * 0.07;
+			*vx = dist2 * 0.09;
 		}
 	    }
 	}
@@ -275,16 +282,16 @@ void triangle_collision( Triangle triangle, float *ballx, float *bally,
 		*vx = -*vx * 0.9;
 	    }
 	    else if (hyp == u) {     //flipper2
-		if (*vx > 0 && *vy <= -5.0f) {
+		if (*vx > 3.0f && *vy <= -6.0f) {
 		    *vx = -*vx * 0.9;
 		    *vy = -*vy * 0.8;
 		    *bally = *bally + 2;
 		}
-		else if ( *vx < 0 && *vy <= -5.0f) { 
+		else if ( *vx <-3.0f && *vy <= -6.0f) { 
 		    *vy = -*vy; 
 		    *bally = *bally + 2;
 		}
-		else if ( *vy > -5.0f && *vy < 0){
+		else if ( *vy > -6.0f && *vy < 0){
 		    if (*vx > 0)
 			*vx = -*vx * 0.7;
 		    *vx = *vx - 0.05;
@@ -292,32 +299,52 @@ void triangle_collision( Triangle triangle, float *ballx, float *bally,
 		    *bally = *bally + 2;
 
 		}
+		else if (*vx < 0 && *vx > -3.0f) {
+		    *bally = *bally + 2; 
+		    *vx = *vx * 1.1;
+		    *vy = *vy * 0.8;
+		}
+		else if (*vx > 0 && *vx < 3.0f) {
+		    *bally = *bally + 2; 
+		    *vx = -*vx;
+		}
 		else if (*vx == 0) {
 		    *bally = *bally + 2; 
-		    *vx = *vy;
+		    *vx = -*vy;
 		}
 		else if (*vy == 0)
 		    *vy = -*vx;
 		else 
-		    *vy = -*vy;
+		    *vy = -*vy * 0.8;
 	    }
 	    else if ( hyp == v) {    //flipper1
-		if (*vx > 0 && *vy <= -5.0f) {
+		if (*vx > 3.0f && *vy <= -6.0f) {
 		    *vy = -*vy * 0.8;
 		    *bally = *bally + 2;
 		}
-		else if ( *vx < 0 && *vy <= -5.0f) {
+		else if ( *vx < -3.0f && *vy <= -6.0f) {
 		    *vx = -*vx * 0.9;
 		    *vy = -*vy * 0.8;
 		    *bally = *bally + 2; 
 		}
-		else if ( *vy > -5.0f && *vy < 0) {
+		else if ( *vy > -6.0f && *vy < 0) {
 		    if (*vx < 0)
 			*vx = -*vx * 0.7;
 		    *vx = *vx + 0.05;
 		    *vy = *vy + 0.125;
 		    *bally = *bally + 2; 
 		}
+		else if (*vx < 0 && *vx > -3.0f) {
+		    *vx = -*vx;
+		    *bally = *bally + 2; 
+		}
+		else if (*vx > 0 && *vx < 3.0f) {
+		    *vx = *vx * 1.1;
+		    *vy = *vy * 0.08;
+		    *bally = *bally + 2; 
+		}
+		else if (*vy == 0)
+		    *vy = -*vx;
 		else 
 		    *vy = -*vy * 0.8;
 	    }
@@ -329,8 +356,15 @@ void triangle_collision( Triangle triangle, float *ballx, float *bally,
 		    *vy = -*vx;
 		else if (*vy < 0)
 		    *vx = -*vx;
-		else if (*vx < 0 && *vx > -1.5f)
+		else if (*vx < 0 && *vx > -3.0f) {
+		    *bally = *bally - 2; 
+		    *vx = *vx * 1.1;
+		    *vy = *vy * 0.8;
+		}
+		else if (*vx > 0 && *vx < 3.0f) {
+		    *bally = *bally - 2; 
 		    *vx = -*vx;
+		}
 		else {
 		    *vx = -*vx;
 		    *vy = -*vy;	

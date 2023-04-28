@@ -33,6 +33,9 @@ extern Triangle t3;
 extern Triangle t4;
 extern Triangle t5;
 extern Triangle t6;
+extern Triangle t7;
+extern Triangle t8;
+extern Triangle t9;
 extern Triangle flipper1;
 extern Triangle flipper2;
 extern void draw_triangle(Triangle triangle, unsigned char color[]);
@@ -51,7 +54,7 @@ class Global {
 	unsigned int issa_feature;
 	Global(){
 	    xres = 800;
-	    yres = 800;
+	    yres = 700;
 	    n = 0;
 	    pause = 0;
 	    mainmenu = 0;
@@ -59,7 +62,7 @@ class Global {
 
 	}
 } g;
-extern int alex_feature, score, lives;
+extern int alex_feature, score, lives, summonshapes;
 extern float velocity[2];
 extern bool summonball;
 extern double point;
@@ -99,10 +102,10 @@ class Box {
     box2(47.0f ,20.0f ,60, 10, 0.0f, 0.0f),
     greenbox(8.0f, 10.0f, 170, 12, 0.0f, 0.0f),
     boxes[2],
-    start(10.0f, 350.0f, 550.0f, 300.0f, 0.0f, 0.0f),
-    start2(10.0f, 800.0f, 595.0f, 800.0f, 0.0f, 0.0f),
-    out1(300.0f, 10.0f, 300.0f, 795.0f, 0.0f, 0.0f),
-    out2(10.0f, 800.0f, 5.0f, 800.0f, 0.0f, 0.0f),
+    start(10.0f, 300.0f, 550.0f, 250.0f, 0.0f, 0.0f),
+    start2(10.0f, float(g.yres) , 595.0f, g.yres, 0.0f, 0.0f),
+    out1(300.0f, 10.0f, 300.0f, 695.0f, 0.0f, 0.0f),
+    out2(10.0f, float(g.yres), 5.0f, g.yres, 0.0f, 0.0f),
     bot1(75.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f),
     bot2(75.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f);
 
@@ -131,15 +134,16 @@ class Circle {
 	    vel[1] = v1;
 	}
 
-} circle, test_ball(10,g.xres/2,g.yres/2,0,0), 
+} test_ball(10,g.xres/2,g.yres/2,0,0), 
   halfcir(50.0f, 350 ,375, 0.0f, 0.0f),
   cir1(18.0f, 165 ,245, 0.0f, 0.0f),
   cir2(18.0f, 115 ,210, 0.0f, 0.0f),
   cir3(18.0f, 215 ,210, 0.0f, 0.0f),
-  circle1(40.0f, 125, 650, 0.0f, 0.0f),
-  circle2(25.0f, 225, 550, 0.0f, 0.0f),
+  cir4(25.0f, 210 ,400, 0.0f, 0.0f),
+  circle1(30.0f, 125, 550, 0.0f, 0.0f),
+  circle2(25.0f, 225, 450, 0.0f, 0.0f),
   circle3(25.0f, 350, 575, 0.0f, 0.0f),
-  circle4(25.0f, 300, 450, 0.0f, 0.0f);
+  circle4(25.0f, 300, 350, 0.0f, 0.0f);
 
 class X11_wrapper {
     private:
@@ -518,9 +522,6 @@ void physics()
         box2.pos[1], box2.w, box2.h, &ball.vel[0], &ball.vel[1]);
 
    /* CIRCLES */
-    circle_collision(&ball.pos[0], &ball.pos[1],circle.c[0], circle.c[1],
-            circle.r, &ball.vel[0], &ball.vel[1]);
-
     circle_collision(&ball.pos[0], &ball.pos[1],halfcir.c[0], halfcir.c[1],
             halfcir.r, &ball.vel[0], &ball.vel[1]);
 
@@ -530,6 +531,8 @@ void physics()
             cir2.r, &ball.vel[0], &ball.vel[1]);
     circle_collision(&ball.pos[0], &ball.pos[1],cir3.c[0], cir3.c[1],
             cir3.r, &ball.vel[0], &ball.vel[1]);
+    circle_collision(&ball.pos[0], &ball.pos[1],cir4.c[0], cir4.c[1],
+            cir4.r, &ball.vel[0], &ball.vel[1]);
         
     /* For hypotenus facing left downwards and facing upwards */
     triangle_collision( t1, &ball.pos[0], &ball.pos[1],
@@ -542,7 +545,17 @@ void physics()
             &ball.vel[0], &ball.vel[1]);
     triangle_collision( t6, &ball.pos[0], &ball.pos[1],
             &ball.vel[0], &ball.vel[1]);
+    triangle_collision( t7, &ball.pos[0], &ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
+    if (ball.pos[0] <= 300.0f && ball.pos[1] >= 395.0f)
+	    summonshapes = 1;
 
+    if (summonshapes) {
+    	triangle_collision( t7, &ball.pos[0], &ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
+    	triangle_collision( t8, &ball.pos[0], &ball.pos[1],
+            &ball.vel[0], &ball.vel[1]);
+    }
     /* Flipper collision */
     triangle_collision( flipper1, &ball.pos[0], &ball.pos[1],
             &ball.vel[0], &ball.vel[1]);
@@ -574,6 +587,7 @@ void physics()
         ball.vel[0] = 0;
         ball.vel[1] = 0;
         summonball = false;
+        summonshapes = 0;
     }
         if (ball.vel[0] != 0.0f || ball.vel[1] != 0.0f) {
                 point += 0.01;
@@ -732,6 +746,11 @@ void render()
     draw_triangle(t4, tridef);
     draw_triangle(t5, tridef);
     draw_triangle(t6, tridef);
+    draw_triangle(t7, tridef);
+    if (summonshapes) {
+    	draw_triangle(t8, tridef);
+    	draw_triangle(t9, tridef);
+    }
     /* create right flipper*/
     draw_triangle(flipper1, tridef);
     /* create left flipper*/
@@ -778,6 +797,7 @@ void render()
     draw_circle(cir1.r,cir1.c[0],cir1.c[1], cirdef);
     draw_circle(cir2.r,cir2.c[0],cir2.c[1], cirdef);
     draw_circle(cir3.r,cir3.c[0],cir3.c[1], cirdef);
+    draw_circle(cir4.r,cir4.c[0],cir4.c[1], cirdef);
 
 
 

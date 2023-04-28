@@ -34,21 +34,21 @@ Triangle Gt1 = Triangle (5.0f, 5.0f, 150.0f,
 Triangle Gt2 = Triangle (545.0f,400.0f, 545.0f, 
                         100.0f ,50.0f ,50.0f);
 Triangle Gt3 = Triangle (600.0f,500.0f, 600.0f, 
-                        800.0f ,800.0f ,700.0f);
+                        700.0f ,700.0f ,600.0f);
 Triangle Gt4 = Triangle (5.0f,5.0f, 105.0f, 
-                        795.0f ,695.0f ,795.0f);
+                        695.0f ,595.0f ,695.0f);
 Triangle Gt5 = Triangle (225.0f,200.0f, 225.0f, 
-                        795.0f ,795.0f ,695.0f);
+                        695.0f ,695.0f ,595.0f);
 Triangle Gt6 = Triangle (225.0f,225.0f, 250.0f,
-                        795.0f ,695.0f ,795.0f);
+                        695.0f ,595.0f ,695.0f);
 Triangle Gt7 = Triangle (5.0f,5.0f, 80.0f, 
-                        600.0f ,550.0f ,550.0f);
-Triangle Gt8 = Triangle (7.0f,7.0f, 80.0f, 
-                        550.0f ,300.0f ,550.0f);
+                        500.0f ,450.0f ,450.0f);
+Triangle Gt8 = Triangle (5.0f, 5.0f, 80.0f, 
+                        450.0f ,200.0f ,450.0f);
 Triangle Gt9 = Triangle (545.0f,420.0f, 545.0f, 
-                        650.0f ,500.0f ,500.0f);
+                        550.0f ,400.0f ,400.0f);
 Triangle Gt10 = Triangle (545.0f,420.0f, 545.0f, 
-                        500.0f ,500.0f ,250.0f);
+                        400.0f ,400.0f ,150.0f);
 Triangle Gt11 = Triangle (150.0f,60.0f, 60.0f, 
                         100.0f ,135.0f ,275.0f);
 Triangle Gt12 = Triangle (490.0f,490.0f, 400.0f, 
