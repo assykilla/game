@@ -51,6 +51,7 @@ class Global {
     GLuint rock2txt;
 	unsigned int pause;
 	unsigned int mainmenu;
+    unsigned int map;
 	unsigned int issa_feature;
 	Global(){
 	    xres = 800;
@@ -58,6 +59,7 @@ class Global {
 	    n = 0;
 	    pause = 0;
 	    mainmenu = 0;
+        map = 0;
 	    issa_feature = 0;
 
 	}
@@ -306,9 +308,12 @@ void X11_wrapper::check_mouse(XEvent *e)
 	    if (g.mainmenu == 0) {
 		g.mainmenu = select_option(e->xbutton.x, g.yres - e->xbutton.y);
 	    } else if (g.mainmenu == 1) {
-		if (g.issa_feature) {
-		    push_button(&test_ball.vel[0], g.xres, g.yres);
-		}
+            if (g.map == 0) {
+                g.map = select_map(g.xres, g.yres, e->xbutton.x, g.yres - e->xbutton.y);
+            }
+            if (g.issa_feature) {
+                push_button(&test_ball.vel[0], g.xres, g.yres);
+            }
 	    }
 
 
@@ -391,6 +396,11 @@ int X11_wrapper::check_keys(XEvent *e)
 		ball.vel[1] = velocity[1];
 		break;
 	    case XK_e:
+        if (XK_Shift_L && g.mainmenu != 0) {
+		    g.mainmenu = 0;
+            g.map = 0;
+		}
+		break;
         case XK_2:
         if (level1 == 1) {
             level2 = 1;
@@ -401,10 +411,6 @@ int X11_wrapper::check_keys(XEvent *e)
             level2 = 0;
         }
         break;
-		if (XK_Shift_L && g.mainmenu != 0) {
-		    g.mainmenu = 0;
-		}
-		break;
             case XK_Left:
                 leftFlipper = 1;
                 break;
@@ -506,7 +512,7 @@ void physics()
     extern void xtriangle_collision( Triangle triangle, float ballx,
             float bally, float *vx, float *vy);
     // FIRST  
-    if (level1 == 1) {
+    if (g.map == 1) {
 	
     box_collision(&ball.pos[0], &ball.pos[1], ball.w, highbox1.pos[0],
         highbox1.pos[1], highbox1.w, highbox1.h, &ball.vel[0], &ball.vel[1]);
@@ -581,7 +587,6 @@ void physics()
             lives = 3;
             score = 0;
         }
-
         ball.pos[0] = 415;
         ball.pos[1] = 100;
         ball.vel[0] = 0;
@@ -598,7 +603,7 @@ void physics()
          }
     }
      // SECOND
-     if (level2 == 1) {
+     if (g.map == 2) {
     
         box_collision(&ball.pos[0], &ball.pos[1], ball.w, start.pos[0],
             start.pos[1], start.w, start.h, &ball.vel[0], &ball.vel[1]);
@@ -626,7 +631,7 @@ void physics()
             &ball.vel[0], &ball.vel[1]);
     triangle_collision( Gt2, &ball.pos[0], &ball.pos[1], // flipper2
             &ball.vel[0], &ball.vel[1]);
-    triangle_collision( Gt3, &ball.pos[0], &ball.pos[1], // t1
+    triangle_collision( Gt3, &ball.pos[0], &ball.pos[1], // t1select_map(g.xres, g.yres, e->xbutton.x, g.yres - e->xbutton.y);
             &ball.vel[0], &ball.vel[1]);
     triangle_collision( Gt5, &ball.pos[0], &ball.pos[1], // t1
             &ball.vel[0], &ball.vel[1]);
@@ -689,8 +694,8 @@ void render()
 	render_title(titleprompt[5],g.xres,g.yres);
 	return;
     } else if (g.mainmenu == 4) {
-	return;
-    }
+        return;
+    } else if (g.mainmenu == 1) {
 
 
     if (g.issa_feature) {
@@ -708,11 +713,14 @@ void render()
 	glEnd();
 	draw_button(g.xres,g.yres);
     }
+    if (g.map == 0) {
+        render_map_select(g.xres, g.yres);
+    }
     Rect r[2];
     unsigned char tridef[3] { 115, 80, 50};
     unsigned char cirdef[3] { 150, 150, 150};
     unsigned char def[3] { 115, 80, 50};
-    if (level1 == 1) {    
+    if (g.map == 1) {    
     glBindTexture(GL_TEXTURE_2D, g.texture);
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_QUADS);
@@ -803,7 +811,7 @@ void render()
 
     }
 
-    if (level2 == 1) {
+    if (g.map == 2) {
     
     glClear(GL_COLOR_BUFFER_BIT);
 
@@ -931,6 +939,7 @@ void render()
     ggprint8b(&r[7], 20, 0x00ffff00, "Alex's Feature -  Shift + 2");
 */
     renderStats(stats[1], g.xres, g.yres, points);
+}
 }
 
 
