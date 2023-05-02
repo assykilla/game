@@ -13,6 +13,11 @@
 #include "xreyes.h"
 using namespace std;
 
+extern Triangle flipper1;
+extern Triangle flipper2;
+extern void triangle_collision( Triangle triangle, float *ballx,
+            float *bally, float *vx, float *vy); 
+
 int points = 0;
 int credit = 0;
 int currentBalls = 1;
@@ -20,6 +25,200 @@ bool leftFlipper, rightFlipper = 0;
 Rect stats[1];
 bool level1 = 1;
 bool level2 = 0;
+int leftFlipperFrame = 0;
+int rightFlipperFrame = 0;
+float leftAngle = 0.0f;
+float rightAngle = 0.0f;
+int flipperFrames = 4;
+int * x_og;
+int * y_og;
+int x_rotated;
+int y_rotated;
+
+Triangle GflipL = Triangle (150.0f, 150.0f, 265.0f,
+                            50.0f, 10.0f, 10.0f);
+Triangle GflipR = Triangle (400.0f, 285.0f, 400.0f,
+                            50.0f, 10.0f, 10.0f);
+
+bool TriangleCol(Triangle, float, float);
+
+void rotate_point(float angle, float *x, float *y, float cx, float cy)
+{
+  float s = sin(angle);
+  float c = cos(angle);
+
+  // translate point back to origin:
+  *x -= cx;
+  *y -= cy;
+
+  // rotate point
+  float xnew = *x * c - *y * s;
+  float ynew = *x * s + *y * c;
+
+  // translate point back:
+  *x = xnew + cx;
+  *y = ynew + cy;
+}
+
+void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float *ballvy) {
+
+    //LEVEL 1 LOGIC
+    if (map == 1) {
+        if (leftFlipper == 1) {
+            if (leftFlipperFrame <= flipperFrames) {
+                leftFlipperFrame += 1;
+                leftAngle = 0.2f;
+                if (TriangleCol(flipper1, *ballx, *bally)) {
+                    *ballvy  = 8.0f;
+                    cout << "Collision!" << endl;
+                }
+            } else if (leftFlipperFrame == flipperFrames + 1) {
+                leftAngle = 0;
+                if (TriangleCol(flipper1, *ballx, *bally)) {
+                    *ballvy = *ballvx * 0.8;
+                }
+            }
+        }
+        if (leftFlipper == 0) {
+            if (leftFlipperFrame > 0) {
+                leftFlipperFrame -= 1;
+                leftAngle = -0.2f;
+                if (TriangleCol(flipper1, *ballx, *bally)) {
+                    *ballvx = *ballvx * 0.8;
+                    *ballvy = *ballvy * 0.8;
+                }
+            } else if (leftFlipperFrame == 0) {
+                leftAngle = 0;
+                triangle_collision(flipper1, ballx, bally,
+                ballvx, ballvy);
+            }
+        }
+
+
+        if (rightFlipper == 1) {
+            if (rightFlipperFrame <= flipperFrames) {
+                rightFlipperFrame += 1;
+                rightAngle = -0.2f;
+                if (TriangleCol(flipper2, *ballx, *bally)) {
+                    *ballvy  = 8.0f;
+                }
+            } else if (rightFlipperFrame == flipperFrames + 1) {
+                rightAngle = 0;
+                if (TriangleCol(flipper2, *ballx, *bally)) {
+                    *ballvy = *ballvx * -0.8;
+                }
+            }
+        }
+        if (rightFlipper == 0) {
+            if (rightFlipperFrame > 0) {
+                rightFlipperFrame -= 1;
+                rightAngle = 0.2f;
+                if (TriangleCol(flipper2, *ballx, *bally)) {
+                    *ballvx = *ballvx * 0.8;
+                    *ballvy = *ballvy * 0.8;
+                }
+            } else if (rightFlipperFrame == 0) {
+                rightAngle = 0;
+                triangle_collision(flipper1, ballx, bally,
+                ballvx, ballvy);
+            }
+        }
+    }
+    //LEVEL 2 LOGIC
+    if (map == 2) {
+        if (leftFlipper == 1) {
+            if (leftFlipperFrame <= flipperFrames) {
+                leftFlipperFrame += 1;
+                leftAngle = 0.2f;
+                if (TriangleCol(GflipL, *ballx, *bally)) {
+                    *ballvy  = 8.0f;
+                }
+            } else if (leftFlipperFrame == flipperFrames + 1) {
+                leftAngle = 0;
+                if (TriangleCol(GflipL, *ballx, *bally)) {
+                    *ballvy = *ballvx * 0.8;
+                }
+            }
+        }
+        if (leftFlipper == 0) {
+            if (leftFlipperFrame > 0) {
+                leftFlipperFrame -= 1;
+                leftAngle = -0.2f;
+                if (TriangleCol(GflipL, *ballx, *bally)) {
+                    *ballvx = *ballvx * 0.8;
+                    *ballvy = *ballvy * 0.8;
+                }
+            } else if (leftFlipperFrame == 0) {
+                leftAngle = 0;
+                triangle_collision(GflipL, ballx, bally,
+                                    ballvx, ballvy);
+            }
+        }
+
+
+        if (rightFlipper == 1) {
+            if (rightFlipperFrame <= flipperFrames) {
+                rightFlipperFrame += 1;
+                rightAngle = -0.2f;
+                if (TriangleCol(GflipR, *ballx, *bally)) {
+                    *ballvy  = 8.0f;
+            }
+            } else if (rightFlipperFrame == flipperFrames + 1) {
+                rightAngle = 0;
+                if (TriangleCol(GflipR, *ballx, *bally)) {
+                    *ballvy = *ballvx * -0.8;
+                }
+            }
+        }
+        if (rightFlipper == 0) {
+            if (rightFlipperFrame > 0) {
+                rightFlipperFrame -= 1;
+                rightAngle = 0.2f;
+                if (TriangleCol(GflipR, *ballx, *bally)) {
+                    *ballvx = *ballvx * 0.8;
+                    *ballvy = *ballvy * 0.8;
+                    cout << "Collision!" << endl;
+                }
+            } else if (rightFlipperFrame == 0) {
+                rightAngle = 0;
+                triangle_collision(GflipL, ballx, bally,
+                ballvx, ballvy);
+            }
+        }
+    }
+
+    if (map == 1) {
+        rotate_point(leftAngle, &flipper1.vertex1[0], &flipper1.vertex1[1], 
+                            flipper1.vertex1[0], flipper1.vertex1[1]);
+        rotate_point(leftAngle, &flipper1.vertex3[0], &flipper1.vertex3[1], 
+                            flipper1.vertex1[0], flipper1.vertex1[1]);
+        rotate_point(leftAngle, &flipper1.vertex2[0], &flipper1.vertex2[1], 
+                            flipper1.vertex1[0], flipper1.vertex1[1]);
+
+        rotate_point(rightAngle, &flipper2.vertex1[0], &flipper2.vertex1[1], 
+                            flipper2.vertex1[0], flipper2.vertex1[1]);
+        rotate_point(rightAngle, &flipper2.vertex2[0], &flipper2.vertex2[1], 
+                            flipper2.vertex1[0], flipper2.vertex1[1]);
+        rotate_point(rightAngle, &flipper2.vertex3[0], &flipper2.vertex3[1], 
+                            flipper2.vertex1[0], flipper2.vertex1[1]);
+    }
+    if (map == 2) {
+        rotate_point(leftAngle, &GflipL.vertex1[0], &GflipL.vertex1[1], 
+                    GflipL.vertex1[0], GflipL.vertex1[1]);
+        rotate_point(leftAngle, &GflipL.vertex3[0], &GflipL.vertex3[1], 
+                    GflipL.vertex1[0], GflipL.vertex1[1]);
+        rotate_point(leftAngle, &GflipL.vertex2[0], &GflipL.vertex2[1], 
+                    GflipL.vertex1[0], GflipL.vertex1[1]);
+
+        rotate_point(rightAngle, &GflipR.vertex1[0], &GflipR.vertex1[1], 
+                    GflipR.vertex1[0], GflipR.vertex1[1]);
+        rotate_point(rightAngle, &GflipR.vertex2[0], &GflipR.vertex2[1], 
+                    GflipR.vertex1[0], GflipR.vertex1[1]);
+        rotate_point(rightAngle, &GflipR.vertex3[0], &GflipR.vertex3[1], 
+                    GflipR.vertex1[0], GflipR.vertex1[1]);
+    }
+    }
+
 
 void renderStats(Rect r, int x, int y, int pts) {
     r.bot = y-35;
@@ -61,14 +260,14 @@ void addScore(int amount)
     credit += amount;
 }
 
-bool TriangleCol(float t[5], float ballx, float bally)
+bool TriangleCol(Triangle t, float ballx, float bally)
 {
-    float s1 = t[5] - t[1];
-	float s2 = t[4] - t[0];
-	float s3 = t[3] - t[1];
-	float s4 = bally - t[1];
+    float s1 = t.vertex3[1] - t.vertex1[1];
+	float s2 = t.vertex3[0] - t.vertex1[0];
+	float s3 = t.vertex2[1] - t.vertex1[1];
+	float s4 = bally - t.vertex1[1];
 
-	float w1 = (t[0] * s1 + s4 * s2 - ballx * s1) / (s3 * s2 - (t[2]-t[0]) * s1);
+	float w1 = (t.vertex1[0] * s1 + s4 * s2 - ballx * s1) / (s3 * s2 - (t.vertex2[0]-t.vertex1[0]) * s1);
 	float w2 = (s4- w1 * s3) / s1;
 	return w1 >= 0 && w2 >= 0 && (w1 + w2) <= 1;
 }

@@ -2,7 +2,7 @@
 #define _GEORGE_T_
 
 
-extern bool TriangleCol(float*, float, float);
+extern bool TriangleCol(Triangle, float, float);
 extern bool leftFlipper;
 extern bool rightFlipper;
 extern Rect stats[1];
@@ -12,8 +12,21 @@ extern int currentBalls;
 extern int level1;
 extern int level2;
 extern void addScore(int amount);
+extern int leftFlipperFrame;
+extern int rightFlipperFrame;
+extern float leftAngle;
+extern float rightAngle;
+extern int flipperFrames;
+extern int x_rotated;
+extern int y_rotated;
+//extern void rotateFlippersL(bool leftFlipper, int leftFlipperAngle);
+//extern void rotateFlippersR(bool rightFlipper, int rightFlipperAngle);
 
 extern void renderStats(Rect r, int x, int y, int pts);
+extern void rotate_point(float angle, float *x, float *y, float cx, float cy);
+extern void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float *ballvy);
+extern Triangle GflipL;
+extern Triangle GflipR;
 extern Triangle Gt1;
 extern Triangle Gt2;
 extern Triangle Gt3;

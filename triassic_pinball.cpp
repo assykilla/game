@@ -80,8 +80,8 @@ class Box {
 
 	}
 	Box(){
-	    w = 75.0f;
-	    h = 15.0f;
+	    w = 5.0f;
+	    h = 5.0f;
 	    pos[0] = 570;
 	    pos[1] = 350;
 	    vel[0] = 0.0f;
@@ -96,7 +96,6 @@ class Box {
 	    vel[1] = v1;
 	}
 } highbox1(50.0f,375.0f, 350, 10, 0.0f, 0.0f), 
-    ball(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
     highbox2(20.0f,float(g.yres), 0, 10, 0.0f, 0.0f),
     highbox3(10.0f,float(g.yres), 440, 10, 0.0f, 0.0f),
     widebox1(230.0f,25.0f, 200, g.yres, 0.0f, 0.0f),
@@ -109,7 +108,8 @@ class Box {
     out1(300.0f, 10.0f, 300.0f, 695.0f, 0.0f, 0.0f),
     out2(10.0f, float(g.yres), 5.0f, g.yres, 0.0f, 0.0f),
     bot1(75.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f),
-    bot2(75.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f);
+    bot2(75.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f),
+    ball(5.0f,5.0f, 415, 100, velocity[0], velocity[1]);
 
 
 
@@ -142,10 +142,10 @@ class Circle {
   cir2(18.0f, 115 ,210, 0.0f, 0.0f),
   cir3(18.0f, 215 ,210, 0.0f, 0.0f),
   cir4(25.0f, 210 ,400, 0.0f, 0.0f),
-  circle1(30.0f, 125, 550, 0.0f, 0.0f),
-  circle2(25.0f, 225, 450, 0.0f, 0.0f),
-  circle3(25.0f, 350, 575, 0.0f, 0.0f),
-  circle4(25.0f, 300, 350, 0.0f, 0.0f);
+  circle1(50.0f, 125, 575, 0.0f, 0.0f),
+  circle2(30.0f, 200, 425, 0.0f, 0.0f),
+  circle3(30.0f, 350, 550, 0.0f, 0.0f),
+  circle4(30.0f, 300, 350, 0.0f, 0.0f);
 
 class X11_wrapper {
     private:
@@ -340,34 +340,8 @@ void X11_wrapper::check_mouse(XEvent *e)
     }
 }
 
-void triangleCollisionLU()
-{
-    float temp = ball.vel[0];
-    ball.vel[0] = ball.vel[1]-1;
-    ball.vel[1] = temp-1;
-}
-void triangleCollisionLD()
-{
-    float temp = ball.vel[1];
-    ball.vel[1] = ball.vel[0]-1;
-    ball.vel[0] = temp-1;
-}
-void triangleCollisionRU()
-{
-    float temp = ball.vel[0];
-    ball.vel[0] = ball.vel[1]-1;
-    ball.vel[1] = temp-1;
-}
-void triangleCollisionRD()
-{
-    float temp = ball.vel[0];
-    ball.vel[0] = ball.vel[1]-1;
-    ball.vel[1] = temp-1;
-}
 int X11_wrapper::check_keys(XEvent *e)
 {
-    leftFlipper = 0;
-    rightFlipper = 0;
     if (e->type != KeyPress && e->type != KeyRelease)
 	return 0;
     int key = XLookupKeysym(&e->xkey, 0);
@@ -411,6 +385,10 @@ int X11_wrapper::check_keys(XEvent *e)
             level2 = 0;
         }
         break;
+		if (XK_Shift_L && g.mainmenu != 0) {
+		    g.mainmenu = 0;
+		}
+		break;
             case XK_Left:
                 leftFlipper = 1;
                 break;
@@ -419,9 +397,25 @@ int X11_wrapper::check_keys(XEvent *e)
                 break;
 	    case XK_Escape:
 		//Escape key was pressed
+
 		return 1;
 	}
     }
+
+    if (e->type == KeyRelease) {
+    switch (key) {
+    	break;
+        case XK_Left:
+            leftFlipper = 0;
+            break;
+        case XK_Right:
+            rightFlipper = 0;
+            break;
+
+        return 1;
+    }
+    }
+
     return 0;
 }
 
@@ -477,6 +471,7 @@ void init_opengl(void)
    	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
   	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
         GL_RGB, GL_UNSIGNED_BYTE, lvl2rock2.data);
+
 }
 float Gravity = 0.075;
 
@@ -563,10 +558,13 @@ void physics()
             &ball.vel[0], &ball.vel[1]);
     }
     /* Flipper collision */
+    /*
     triangle_collision( flipper1, &ball.pos[0], &ball.pos[1],
             &ball.vel[0], &ball.vel[1]);
     triangle_collision( flipper2, &ball.pos[0], &ball.pos[1],
             &ball.vel[0], &ball.vel[1]);
+    */
+    
     /* For hypotenus facing right downwards */
     xtriangle_collision( t2, ball.pos[0], ball.pos[1],
             &ball.vel[0], &ball.vel[1]);
@@ -587,12 +585,21 @@ void physics()
             lives = 3;
             score = 0;
         }
-        ball.pos[0] = 415;
-        ball.pos[1] = 100;
-        ball.vel[0] = 0;
-        ball.vel[1] = 0;
-        summonball = false;
-        summonshapes = 0;
+        if (g.map == 1) {
+            ball.pos[0] = 415;
+            ball.pos[1] = 100;
+            ball.vel[0] = 0;
+            ball.vel[1] = 0;
+            summonball = false;
+            summonshapes = 0;
+        } else {
+            ball.pos[0] = 575;
+            ball.pos[1] = 100;
+            ball.vel[0] = 0;
+            ball.vel[1] = 0;
+            summonball = false;
+            summonshapes = 0;
+        }
     }
         if (ball.vel[0] != 0.0f || ball.vel[1] != 0.0f) {
                 point += 0.01;
@@ -720,7 +727,10 @@ void render()
     unsigned char tridef[3] { 115, 80, 50};
     unsigned char cirdef[3] { 150, 150, 150};
     unsigned char def[3] { 115, 80, 50};
+    
+
     if (g.map == 1) {    
+
     glBindTexture(GL_TEXTURE_2D, g.texture);
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_QUADS);
@@ -759,6 +769,9 @@ void render()
     	draw_triangle(t8, tridef);
     	draw_triangle(t9, tridef);
     }
+
+    flipping(g.map, &ball.pos[0], &ball.pos[1], &ball.vel[0], &ball.vel[1]);
+    
     /* create right flipper*/
     draw_triangle(flipper1, tridef);
     /* create left flipper*/
@@ -806,9 +819,6 @@ void render()
     draw_circle(cir2.r,cir2.c[0],cir2.c[1], cirdef);
     draw_circle(cir3.r,cir3.c[0],cir3.c[1], cirdef);
     draw_circle(cir4.r,cir4.c[0],cir4.c[1], cirdef);
-
-
-
     }
 
     if (g.map == 2) {
@@ -849,6 +859,12 @@ void render()
     draw_triangle(Gt8, tridef);
     draw_triangle(Gt9, tridef);
     draw_triangle(Gt10, tridef);
+
+    flipping(g.map, &ball.pos[0], &ball.pos[1], &ball.vel[0], &ball.vel[1]);
+
+    draw_triangle(GflipL, tridef);
+    draw_triangle(GflipR, tridef);
+
     /*draw_triangle(Gt11, tridef);
     draw_triangle(Gt12, tridef);*/
     glEnd();
@@ -857,49 +873,64 @@ void render()
     
         //glVertex2f(x, y);
     glColor3ub(150, 150, 150);
+
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glPopMatrix();
+    int n = 15; 
+    double angle = 0.0;
+    double inc = (2.0*3.14)/n;
+    //glVertex2f(x, y);
+    glColor3ub(150, 150, 150);
+
     glBindTexture(GL_TEXTURE_2D, g.rock2txt);
-    draw_circle(circle1.r,circle1.c[0],circle1.c[1], cirdef);
-    draw_circle(circle2.r,circle2.c[0],circle2.c[1], cirdef);
-    draw_circle(circle3.r,circle3.c[0],circle3.c[1], cirdef);
-    draw_circle(circle4.r,circle4.c[0],circle4.c[1], cirdef);
+
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < n; i++) {
+        circle1.x = circle1.r*cos(angle);
+        circle1.y = circle1.r*sin(angle);
+        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
+        glVertex2f(circle1.x+circle1.c[0],circle1.y + circle1.c[1]);
+        angle += inc;
+    }
+    glEnd();
+    glPopMatrix();
+
+    glColor3ub(150, 150, 150);
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < n; i++) {
+        circle2.x = circle2.r*cos(angle);
+        circle2.y = circle2.r*sin(angle);
+        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
+        glVertex2f(circle2.x+circle2.c[0],circle2.y + circle2.c[1]);
+        angle += inc;
+    }
+    glEnd();
+    glPopMatrix();
+
+    glColor3ub(150, 150, 150);
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < n; i++) {
+        circle3.x = circle3.r*cos(angle);
+        circle3.y = circle3.r*sin(angle);
+        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
+        glVertex2f(circle3.x+circle3.c[0],circle3.y + circle3.c[1]);
+        angle += inc;
+    }
+    glEnd();
+    glPopMatrix();
+
+    glColor3ub(150, 150, 150);
+    glBegin(GL_TRIANGLE_FAN);
+    for (int i = 0; i < n; i++) {
+        circle4.x = circle4.r*cos(angle);
+        circle4.y = circle4.r*sin(angle);
+        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
+        glVertex2f(circle4.x+circle4.c[0],circle4.y + circle4.c[1]);
+        angle += inc;
+    }
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     glPopMatrix();
-
-    if (leftFlipper) {
-        glColor3ub(150, 150, 150);
-        glBegin(GL_LINES);
-        glVertex2f(150.0f, 50.0f);
-        glVertex2f(225.0f, 100.0f);
-        glFlush();
-        glEnd();
-    }
-    else {
-        glColor3ub(150, 150, 150);
-        glBegin(GL_LINES);
-        glVertex2f(150.0f, 50.0f);
-        glVertex2f(225.0f, 25.0f);
-        glFlush();
-        glEnd();
-    }
-
-
-    if (rightFlipper) {
-        glColor3ub(150, 150, 150);
-        glBegin(GL_LINES);
-        glVertex2f(400.0f, 50.0f);
-        glVertex2f(325.0f, 100.0f);
-        glFlush();
-        glEnd();
-    }
-    else {
-        glColor3ub(150, 150, 150);
-        glBegin(GL_LINES);
-        glVertex2f(400.0f, 50.0f);
-        glVertex2f(325.0f, 25.0f);
-        glFlush();
-        glEnd();
-    }
 
     glBindTexture(GL_TEXTURE_2D, g.texture);
     glColor3f(1.0, 1.0, 1.0);
