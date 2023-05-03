@@ -36,6 +36,7 @@ extern Triangle t6;
 extern Triangle t7;
 extern Triangle t8;
 extern Triangle t9;
+extern Triangle t10;
 extern Triangle flipper1;
 extern Triangle flipper2;
 extern void draw_triangle(Triangle triangle, unsigned char color[]);
@@ -404,6 +405,8 @@ int X11_wrapper::check_keys(XEvent *e)
         if (XK_Shift_L && g.mainmenu != 0) {
 		    g.mainmenu = 0;
             g.map = 0;
+			score = 0;
+			lives = 3;
 		}
 		break;
         case XK_m:
@@ -600,21 +603,26 @@ void physics()
 	    summonshapes = 1;
 
     if (summonshapes) {
-    	triangle_collision( t7, &ball1[i].pos[0], &ball1[i].pos[1],
-            &ball1[i].vel[0], &ball1[i].vel[1]);
     	triangle_collision( t8, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
+    	triangle_collision( t9, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
     }
     /* Flipper collision */
-    /*
-    triangle_collision( flipper1, &ball1[i].pos[0], &ball1[i].pos[1],
+    if (leftFlipper) {
+    	triangle_collision( flipper1, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
-    triangle_collision( flipper2, &ball1[i].pos[0], &ball1[i].pos[1],
+	}
+	if (rightFlipper) {	
+    	triangle_collision( flipper2, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
-    */
+	}
+   
     
     /* For hypotenus facing right downwards */
     xtriangle_collision( t2, ball1[i].pos[0], ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
+    xtriangle_collision( t10, ball1[i].pos[0], ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
     // Checking for wall collision
     if (ball1[i].pos[0] - ball1[i].w < 0)
@@ -711,14 +719,39 @@ void physics()
 
         if (ball2[0].pos[1] + ball2[0].w > g.yres)
             ball2[0].vel[1] = -ball2[0].vel[1];
-        
+
+     	/*if (ball1[0].pos[1] < - 30) {
+        	if (lives > 1) {
+            	lives--;
+            	ball2[0].ballSpawned = 0;
+        	}
+        	else {
+            	lives = 3;
+            	score = 0;
+        	}
+
+            	ball2[0].pos[0] = 575;
+            	ball2[0].pos[1] = 100;
+            	ball2[0].vel[0] = 0;
+            	ball2[0].vel[1] = 0;
+            	ball2[0].init = 0;
+            	summonshapes = 0;
+    	}
+        if (ball2[0].vel[0] != 0.0f || ball2[0].vel[1] != 0.0f) {
+        	point += 0.01;
+          	if (point >= 0.10f){
+            	score += 1;
+            	point = 0.00f;
+         	}
+         }
+      
         ball2[0].pos[0] = 575;
         ball2[0].pos[1] = 100;
         ball2[0].vel[0] = 0;
         ball2[0].vel[1] = 0;
         ball2[0].init = 0;
         summonshapes = 0;
-
+*/
      }
     }
 }
@@ -820,6 +853,7 @@ void render()
     draw_triangle(t5, tridef);
     draw_triangle(t6, tridef);
     draw_triangle(t7, tridef);
+    draw_triangle(t10, tridef);
     if (summonshapes) {
     	draw_triangle(t8, tridef);
     	draw_triangle(t9, tridef);

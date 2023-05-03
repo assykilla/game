@@ -93,12 +93,19 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
                 leftAngle = 0.2f;
                 if (TriangleCol(flipper1, *ballx, *bally)) {
                     *ballvy  = 8.0f;
+					*ballx = *ballx - 3;
+					*bally = *bally + 3;
                     cout << "Collision!" << endl;
                 }
-            } else if (leftFlipperFrame == flipperFrames + 1) {
+            } else if (leftFlipperFrame >= flipperFrames + 1) {
                 leftAngle = 0;
                 if (TriangleCol(flipper1, *ballx, *bally)) {
-                    *ballvy = *ballvx * 0.8;
+					if (*ballvx < 0 )
+                    	*ballvy = *ballvx * -0.8;
+					else
+                    	*ballvy = *ballvx * 0.8;
+					*ballx = *ballx - 3;
+					*bally = *bally + 3;
                 }
             }
         }
@@ -109,8 +116,10 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
                 if (TriangleCol(flipper1, *ballx, *bally)) {
                     *ballvx = *ballvx * 0.8;
                     *ballvy = *ballvy * 0.8;
+					*ballx = *ballx - 3;
+					*bally = *bally + 3;
                 }
-            } else if (leftFlipperFrame == 0) {
+            } else if (leftFlipperFrame <= 0) {
                 leftAngle = 0;
                 triangle_collision(flipper1, ballx, bally,
                 ballvx, ballvy);
@@ -124,11 +133,18 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
                 rightAngle = -0.2f;
                 if (TriangleCol(flipper2, *ballx, *bally)) {
                     *ballvy  = 8.0f;
+					*ballx = *ballx + 3;
+					*bally = *bally + 3;
                 }
-            } else if (rightFlipperFrame == flipperFrames + 1) {
+            } else if (rightFlipperFrame >= flipperFrames + 1) {
                 rightAngle = 0;
                 if (TriangleCol(flipper2, *ballx, *bally)) {
-                    *ballvy = *ballvx * -0.8;
+					if (*ballvx < 0)
+                    	*ballvy = *ballvx * -0.8;
+					else
+                    	*ballvy = *ballvx * 0.8;
+					*ballx = *ballx + 3;
+					*bally = *bally + 3;
                 }
             }
         }
@@ -139,10 +155,12 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
                 if (TriangleCol(flipper2, *ballx, *bally)) {
                     *ballvx = *ballvx * 0.8;
                     *ballvy = *ballvy * 0.8;
+					*ballx = *ballx + 3;
+					*bally = *bally + 3;
                 }
-            } else if (rightFlipperFrame == 0) {
+            } else if (rightFlipperFrame <= 0) {
                 rightAngle = 0;
-                triangle_collision(flipper1, ballx, bally,
+                triangle_collision(flipper2, ballx, bally,
                 ballvx, ballvy);
             }
         }
