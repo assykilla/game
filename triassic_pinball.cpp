@@ -79,6 +79,8 @@ class Box {
 	    memcpy(color, col, sizeof(unsigned char) *3);
 
 	}
+    bool ballSpawned;
+    bool init;
 	Box(){
 	    w = 5.0f;
 	    h = 5.0f;
@@ -86,6 +88,8 @@ class Box {
 	    pos[1] = 350;
 	    vel[0] = 0.0f;
 	    vel[1] = 0.0f;
+        ballSpawned = 0;
+        init = 0;
 	}
 	Box(float wid, float hgt, int x, int y, float v0, float v1){
 	    w = wid;
@@ -109,7 +113,20 @@ class Box {
     out2(10.0f, float(g.yres), 5.0f, g.yres, 0.0f, 0.0f),
     bot1(75.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f),
     bot2(75.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f),
-    ball(5.0f,5.0f, 415, 100, velocity[0], velocity[1]);
+    ball1[MAX_BALLS] {
+        Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
+        Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
+        Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
+        Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
+        Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
+    },
+    ball2[MAX_BALLS] {
+        Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
+        Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
+        Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
+        Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
+        Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
+    };
 
 
 
@@ -365,9 +382,23 @@ int X11_wrapper::check_keys(XEvent *e)
 		}
 		break;
 	    case XK_space:
-		summonball = true;
-		velocity[1] = 8.0f;
-		ball.vel[1] = velocity[1];
+        for (int i = 0; i < MAX_BALLS; i++) {
+            if (g.map == 1) {
+                velocity[1] = 8.0f;
+                if (ball1[i].ballSpawned == 1) {
+		            ball1[i].vel[1] = velocity[1];
+                    ball1[i].init = 1;
+                }
+
+            }
+            else {
+                velocity[1] = 9.0f;
+                if (ball2[i].ballSpawned) {
+                    ball2[i].vel[1] = velocity[1];
+                    ball2[i].init = 1;
+                }
+            }
+        }
 		break;
 	    case XK_e:
         if (XK_Shift_L && g.mainmenu != 0) {
@@ -375,6 +406,18 @@ int X11_wrapper::check_keys(XEvent *e)
             g.map = 0;
 		}
 		break;
+        case XK_m:
+        if (credit <= 0) {
+            for (int i = 0; i < MAX_BALLS; i++) {
+                if (ball1[i].ballSpawned == 0) {
+                    cout << "Purchased ball " << i + 1<< endl;
+                    ball1[i].ballSpawned = 1;
+                    makeBall(i, &ball1[i].ballSpawned, &ball1[i].pos[0], &ball1[i].pos[1], &ball1[i].vel[1]); 
+                    break;
+                }
+            }
+        }
+        break;
         case XK_2:
         if (level1 == 1) {
             level2 = 1;
@@ -478,13 +521,15 @@ float Gravity = 0.075;
 void physics()
 {
     if(!g.pause){
-	if (summonball) {
-	    if (ball.vel[0] <= 9.0f || ball.vel[1] <= 9.0f) {
-		ball.pos[0] += ball.vel[0];
-		ball.pos[1] += ball.vel[1];
-		ball.vel[1] -= Gravity;
+        for (int i = 0; i < MAX_BALLS; i++) {
+	if (ball1[i].init == 1) {
+	    if (ball1[i].vel[0] <= 9.0f || ball1[i].vel[1] <= 9.0f) {
+		ball1[i].pos[0] += ball1[i].vel[0];
+		ball1[i].pos[1] += ball1[i].vel[1];
+		ball1[i].vel[1] -= Gravity;
 	    }
 	}
+        }
     if(g.issa_feature) {
 	if (test_ball.vel[0] < 0) {
 	    test_ball.vel[0] = 0;
@@ -508,100 +553,97 @@ void physics()
             float bally, float *vx, float *vy);
     // FIRST  
     if (g.map == 1) {
+
+    for (int i = 0; i < MAX_BALLS; i++) {
+    
 	
-    box_collision(&ball.pos[0], &ball.pos[1], ball.w, highbox1.pos[0],
-        highbox1.pos[1], highbox1.w, highbox1.h, &ball.vel[0], &ball.vel[1]);
-    box_collision(&ball.pos[0], &ball.pos[1], ball.w, highbox2.pos[0],
-        highbox2.pos[1], highbox2.w, highbox2.h, &ball.vel[0], &ball.vel[1]);
-    box_collision(&ball.pos[0], &ball.pos[1], ball.w, widebox1.pos[0],
-        widebox1.pos[1], widebox1.w, widebox1.h, &ball.vel[0], &ball.vel[1]);
-    box_collision(&ball.pos[0], &ball.pos[1], ball.w, highbox3.pos[0],
-        highbox3.pos[1], highbox3.w, highbox3.h, &ball.vel[0], &ball.vel[1]);
-    box_collision(&ball.pos[0], &ball.pos[1], ball.w, box1.pos[0],
-        box1.pos[1], box1.w, box1.h, &ball.vel[0], &ball.vel[1]);
-    box_collision(&ball.pos[0], &ball.pos[1], ball.w, box2.pos[0],
-        box2.pos[1], box2.w, box2.h, &ball.vel[0], &ball.vel[1]);
+    box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, highbox1.pos[0],
+        highbox1.pos[1], highbox1.w, highbox1.h, &ball1[i].vel[0], &ball1[i].vel[1]);
+    box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, highbox2.pos[0],
+        highbox2.pos[1], highbox2.w, highbox2.h, &ball1[i].vel[0], &ball1[i].vel[1]);
+    box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, widebox1.pos[0],
+        widebox1.pos[1], widebox1.w, widebox1.h, &ball1[i].vel[0], &ball1[i].vel[1]);
+    box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, highbox3.pos[0],
+        highbox3.pos[1], highbox3.w, highbox3.h, &ball1[i].vel[0], &ball1[i].vel[1]);
+    box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, box1.pos[0],
+        box1.pos[1], box1.w, box1.h, &ball1[i].vel[0], &ball1[i].vel[1]);
+    box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, box2.pos[0],
+        box2.pos[1], box2.w, box2.h, &ball1[i].vel[0], &ball1[i].vel[1]);
 
    /* CIRCLES */
-    circle_collision(&ball.pos[0], &ball.pos[1],halfcir.c[0], halfcir.c[1],
-            halfcir.r, &ball.vel[0], &ball.vel[1]);
+    circle_collision(&ball1[i].pos[0], &ball1[i].pos[1],halfcir.c[0], halfcir.c[1],
+            halfcir.r, &ball1[i].vel[0], &ball1[i].vel[1]);
 
-    circle_collision(&ball.pos[0], &ball.pos[1],cir1.c[0], cir1.c[1],
-            cir1.r, &ball.vel[0], &ball.vel[1]);
-    circle_collision(&ball.pos[0], &ball.pos[1],cir2.c[0], cir2.c[1],
-            cir2.r, &ball.vel[0], &ball.vel[1]);
-    circle_collision(&ball.pos[0], &ball.pos[1],cir3.c[0], cir3.c[1],
-            cir3.r, &ball.vel[0], &ball.vel[1]);
-    circle_collision(&ball.pos[0], &ball.pos[1],cir4.c[0], cir4.c[1],
-            cir4.r, &ball.vel[0], &ball.vel[1]);
+    circle_collision(&ball1[i].pos[0], &ball1[i].pos[1],cir1.c[0], cir1.c[1],
+            cir1.r, &ball1[i].vel[0], &ball1[i].vel[1]);
+    circle_collision(&ball1[i].pos[0], &ball1[i].pos[1],cir2.c[0], cir2.c[1],
+            cir2.r, &ball1[i].vel[0], &ball1[i].vel[1]);
+    circle_collision(&ball1[i].pos[0], &ball1[i].pos[1],cir3.c[0], cir3.c[1],
+            cir3.r, &ball1[i].vel[0], &ball1[i].vel[1]);
+    circle_collision(&ball1[i].pos[0], &ball1[i].pos[1],cir4.c[0], cir4.c[1],
+            cir4.r, &ball1[i].vel[0], &ball1[i].vel[1]);
         
     /* For hypotenus facing left downwards and facing upwards */
-    triangle_collision( t1, &ball.pos[0], &ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( t3, &ball.pos[0], &ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( t4, &ball.pos[0], &ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( t5, &ball.pos[0], &ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( t6, &ball.pos[0], &ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( t7, &ball.pos[0], &ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
-    if (ball.pos[0] <= 300.0f && ball.pos[1] >= 395.0f)
+    triangle_collision( t1, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
+    triangle_collision( t3, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
+    triangle_collision( t4, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
+    triangle_collision( t5, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
+    triangle_collision( t6, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
+    triangle_collision( t7, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
+    if (ball1[i].pos[0] <= 300.0f && ball1[i].pos[1] >= 395.0f)
 	    summonshapes = 1;
 
     if (summonshapes) {
-    	triangle_collision( t7, &ball.pos[0], &ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
-    	triangle_collision( t8, &ball.pos[0], &ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
+    	triangle_collision( t7, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
+    	triangle_collision( t8, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
     }
     /* Flipper collision */
     /*
-    triangle_collision( flipper1, &ball.pos[0], &ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( flipper2, &ball.pos[0], &ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( flipper1, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
+    triangle_collision( flipper2, &ball1[i].pos[0], &ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
     */
     
     /* For hypotenus facing right downwards */
-    xtriangle_collision( t2, ball.pos[0], ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
+    xtriangle_collision( t2, ball1[i].pos[0], ball1[i].pos[1],
+            &ball1[i].vel[0], &ball1[i].vel[1]);
     // Checking for wall collision
-    if (ball.pos[0] - ball.w < 0)
-	ball.vel[0] = -ball.vel[0];
+    if (ball1[i].pos[0] - ball1[i].w < 0)
+	ball1[i].vel[0] = -ball1[i].vel[0];
 
-    else if (ball.pos[0] + ball.w > g.xres)
-	ball.vel[0] = -ball.vel[0];
+    else if (ball1[i].pos[0] + ball1[i].w > g.xres)
+	ball1[i].vel[0] = -ball1[i].vel[0];
 
-    if (ball.pos[1] + ball.h > g.yres)
-	ball.vel[1] = -ball.vel[1];
+    if (ball1[i].pos[1] + ball1[i].h > g.yres)
+	ball1[i].vel[1] = -ball1[i].vel[1];
      
-    if (ball.pos[1] < - 30) {
-        if (lives > 1)
+    if (ball1[i].pos[1] < - 30) {
+        if (lives > 1) {
             lives--;
+            ball1[i].ballSpawned = 0;
+        }
         else {
             lives = 3;
             score = 0;
         }
-        if (g.map == 1) {
-            ball.pos[0] = 415;
-            ball.pos[1] = 100;
-            ball.vel[0] = 0;
-            ball.vel[1] = 0;
-            summonball = false;
+
+            ball1[i].pos[0] = 415;
+            ball1[i].pos[1] = 100;
+            ball1[i].vel[0] = 0;
+            ball1[i].vel[1] = 0;
+            ball1[i].init = 0;
             summonshapes = 0;
-        } else {
-            ball.pos[0] = 575;
-            ball.pos[1] = 100;
-            ball.vel[0] = 0;
-            ball.vel[1] = 0;
-            summonball = false;
-            summonshapes = 0;
-        }
     }
-        if (ball.vel[0] != 0.0f || ball.vel[1] != 0.0f) {
+        if (ball1[i].vel[0] != 0.0f || ball1[i].vel[1] != 0.0f) {
                 point += 0.01;
                         if (point >= 0.10f){
                                 score += 1;
@@ -609,65 +651,73 @@ void physics()
                         }
          }
     }
+    }
      // SECOND
      if (g.map == 2) {
     
-        box_collision(&ball.pos[0], &ball.pos[1], ball.w, start.pos[0],
-            start.pos[1], start.w, start.h, &ball.vel[0], &ball.vel[1]);
-        box_collision(&ball.pos[0], &ball.pos[1], ball.w, start2.pos[0],
-            start2.pos[1], start2.w, start2.h, &ball.vel[0], &ball.vel[1]);
-        box_collision(&ball.pos[0], &ball.pos[1], ball.w, out1.pos[0],
-            out1.pos[1], out1.w, out1.h, &ball.vel[0], &ball.vel[1]);
-        box_collision(&ball.pos[0], &ball.pos[1], ball.w, out2.pos[0],
-            out2.pos[1], out2.w, out2.h, &ball.vel[0], &ball.vel[1]);
-        box_collision(&ball.pos[0], &ball.pos[1], ball.w, bot1.pos[0],
-            bot1.pos[1], bot1.w, bot1.h, &ball.vel[0], &ball.vel[1]);
-        box_collision(&ball.pos[0], &ball.pos[1], ball.w, bot2.pos[0],
-            bot2.pos[1], bot2.w, bot2.h, &ball.vel[0], &ball.vel[1]);
+        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, start.pos[0],
+            start.pos[1], start.w, start.h, &ball2[0].vel[0], &ball2[0].vel[1]);
+        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, start2.pos[0],
+            start2.pos[1], start2.w, start2.h, &ball2[0].vel[0], &ball2[0].vel[1]);
+        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, out1.pos[0],
+            out1.pos[1], out1.w, out1.h, &ball2[0].vel[0], &ball2[0].vel[1]);
+        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, out2.pos[0],
+            out2.pos[1], out2.w, out2.h, &ball2[0].vel[0], &ball2[0].vel[1]);
+        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, bot1.pos[0],
+            bot1.pos[1], bot1.w, bot1.h, &ball2[0].vel[0], &ball2[0].vel[1]);
+        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, bot2.pos[0],
+            bot2.pos[1], bot2.w, bot2.h, &ball2[0].vel[0], &ball2[0].vel[1]);
 
-    circle_collision(&ball.pos[0], &ball.pos[1],circle1.c[0], circle1.c[1],
-            circle1.r, &ball.vel[0], &ball.vel[1]);
-    circle_collision(&ball.pos[0], &ball.pos[1],circle2.c[0], circle2.c[1],
-            circle2.r, &ball.vel[0], &ball.vel[1]);
-    circle_collision(&ball.pos[0], &ball.pos[1],circle3.c[0], circle3.c[1],
-            circle3.r, &ball.vel[0], &ball.vel[1]);
-    circle_collision(&ball.pos[0], &ball.pos[1],circle4.c[0], circle4.c[1],
-            circle4.r, &ball.vel[0], &ball.vel[1]);
+    circle_collision(&ball2[0].pos[0], &ball2[0].pos[1],circle1.c[0], circle1.c[1],
+            circle1.r, &ball2[0].vel[0], &ball2[0].vel[1]);
+    circle_collision(&ball2[0].pos[0], &ball2[0].pos[1],circle2.c[0], circle2.c[1],
+            circle2.r, &ball2[0].vel[0], &ball2[0].vel[1]);
+    circle_collision(&ball2[0].pos[0], &ball2[0].pos[1],circle3.c[0], circle3.c[1],
+            circle3.r, &ball2[0].vel[0], &ball2[0].vel[1]);
+    circle_collision(&ball2[0].pos[0], &ball2[0].pos[1],circle4.c[0], circle4.c[1],
+            circle4.r, &ball2[0].vel[0], &ball2[0].vel[1]);
 
-    triangle_collision( Gt1, &ball.pos[0], &ball.pos[1], // flipper1
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( Gt2, &ball.pos[0], &ball.pos[1], // flipper2
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( Gt3, &ball.pos[0], &ball.pos[1], // t1select_map(g.xres, g.yres, e->xbutton.x, g.yres - e->xbutton.y);
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( Gt5, &ball.pos[0], &ball.pos[1], // t1
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( Gt7, &ball.pos[0], &ball.pos[1], // flipper1
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( Gt9, &ball.pos[0], &ball.pos[1], // flipper2
-            &ball.vel[0], &ball.vel[1]);
-    triangle_collision( Gt10, &ball.pos[0], &ball.pos[1], // t1
-            &ball.vel[0], &ball.vel[1]);
+    triangle_collision( Gt1, &ball2[0].pos[0], &ball2[0].pos[1], // flipper1
+            &ball2[0].vel[0], &ball2[0].vel[1]);
+    triangle_collision( Gt2, &ball2[0].pos[0], &ball2[0].pos[1], // flipper2
+            &ball2[0].vel[0], &ball2[0].vel[1]);
+    triangle_collision( Gt3, &ball2[0].pos[0], &ball2[0].pos[1], // t1select_map(g.xres, g.yres, e->xbutton.x, g.yres - e->xbutton.y);
+            &ball2[0].vel[0], &ball2[0].vel[1]);
+    triangle_collision( Gt5, &ball2[0].pos[0], &ball2[0].pos[1], // t1
+            &ball2[0].vel[0], &ball2[0].vel[1]);
+    triangle_collision( Gt7, &ball2[0].pos[0], &ball2[0].pos[1], // flipper1
+            &ball2[0].vel[0], &ball2[0].vel[1]);
+    triangle_collision( Gt9, &ball2[0].pos[0], &ball2[0].pos[1], // flipper2
+            &ball2[0].vel[0], &ball2[0].vel[1]);
+    triangle_collision( Gt10, &ball2[0].pos[0], &ball2[0].pos[1], // t1
+            &ball2[0].vel[0], &ball2[0].vel[1]);
     
     
     
-    xtriangle_collision( Gt4, ball.pos[0], ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
-    xtriangle_collision( Gt6, ball.pos[0], ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
-    xtriangle_collision( Gt8, ball.pos[0], ball.pos[1],
-            &ball.vel[0], &ball.vel[1]);
+    xtriangle_collision( Gt4, ball2[0].pos[0], ball2[0].pos[1],
+            &ball2[0].vel[0], &ball2[0].vel[1]);
+    xtriangle_collision( Gt6, ball2[0].pos[0], ball2[0].pos[1],
+            &ball2[0].vel[0], &ball2[0].vel[1]);
+    xtriangle_collision( Gt8, ball2[0].pos[0], ball2[0].pos[1],
+            &ball2[0].vel[0], &ball2[0].vel[1]);
 
-                if (ball.pos[0] - ball.w < 0) {
-            ball.vel[0] = -ball.vel[0];
+                if (ball2[0].pos[0] - ball2[0].w < 0) {
+            ball2[0].vel[0] = -ball2[0].vel[0];
             points += 5;
         }
 
-        else if (ball.pos[0] + ball.w > g.xres)
-            ball.vel[0] = -ball.vel[0];
+        else if (ball2[0].pos[0] + ball2[0].w > g.xres)
+            ball2[0].vel[0] = -ball2[0].vel[0];
 
-        if (ball.pos[1] + ball.w > g.yres)
-            ball.vel[1] = -ball.vel[1];
+        if (ball2[0].pos[1] + ball2[0].w > g.yres)
+            ball2[0].vel[1] = -ball2[0].vel[1];
+        
+        ball2[0].pos[0] = 575;
+        ball2[0].pos[1] = 100;
+        ball2[0].vel[0] = 0;
+        ball2[0].vel[1] = 0;
+        ball2[0].init = 0;
+        summonshapes = 0;
 
      }
     }
@@ -729,7 +779,9 @@ void render()
     unsigned char def[3] { 115, 80, 50};
     
 
-    if (g.map == 1) {    
+    if (g.map == 1) {   
+
+    ball1[0].ballSpawned = 1; 
 
     glBindTexture(GL_TEXTURE_2D, g.texture);
     glColor3f(1.0, 1.0, 1.0);
@@ -750,11 +802,14 @@ void render()
         draw_box(widebox1, def);
         draw_box(box1, def);
         draw_box(box2, def);
-        int posy = boxes[0].pos[1];
+        int posy = 350;
         for (int i = 0; i < 2; i++) {
                 boxes[i].pos[1] = posy;
+                boxes[i].pos[0] = 525;
                 draw_box(boxes[i], col);
                 posy = posy - 50;
+                boxes[i].w = 50;
+                boxes[i].h = 15;
         }
      
     /* create triangle*/
@@ -770,7 +825,7 @@ void render()
     	draw_triangle(t9, tridef);
     }
 
-    flipping(g.map, &ball.pos[0], &ball.pos[1], &ball.vel[0], &ball.vel[1]);
+    flipping(g.map, &ball1[0].pos[0], &ball1[0].pos[1], &ball1[0].vel[0], &ball1[0].vel[1]);
     
     /* create right flipper*/
     draw_triangle(flipper1, tridef);
@@ -812,13 +867,29 @@ void render()
     glEnd();
     glPopMatrix();
 
-    draw_box(  ball  , balldef);
+    draw_box(ball1[0], balldef);
 
 
     draw_circle(cir1.r,cir1.c[0],cir1.c[1], cirdef);
     draw_circle(cir2.r,cir2.c[0],cir2.c[1], cirdef);
     draw_circle(cir3.r,cir3.c[0],cir3.c[1], cirdef);
     draw_circle(cir4.r,cir4.c[0],cir4.c[1], cirdef);
+
+    for (int i = 0; i < MAX_BALLS; i++) {
+        if (ball1[i].ballSpawned == 1) {
+            glPushMatrix();
+            glColor3ub(0,0,0);
+            glTranslatef(ball1[i].pos[0], ball1[i].pos[1], 0.0f);
+            glBegin(GL_QUADS);
+            glVertex2f(-ball1[i].w, -ball1[0].h);
+            glVertex2f(-ball1[i].w,  ball1[0].h);
+            glVertex2f( ball1[i].w,  ball1[0].h);
+            glVertex2f( ball1[i].w, -ball1[0].h);
+            glEnd();
+            glPopMatrix();
+        }
+    }
+
     }
 
     if (g.map == 2) {
@@ -860,7 +931,7 @@ void render()
     draw_triangle(Gt9, tridef);
     draw_triangle(Gt10, tridef);
 
-    flipping(g.map, &ball.pos[0], &ball.pos[1], &ball.vel[0], &ball.vel[1]);
+    flipping(g.map, &ball1[0].pos[0], &ball1[0].pos[1], &ball1[0].vel[0], &ball1[0].vel[1]);
 
     draw_triangle(GflipL, tridef);
     draw_triangle(GflipR, tridef);
@@ -941,35 +1012,21 @@ void render()
     glTexCoord2f( 1.0f, 1.0f); glVertex2i( g.xres, 0);
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
-
-
-    }
-
-    // Summon Ball	
-    //if (summonball) {
+    
     glPushMatrix();
     glColor3ub(0,0,0);
-    glTranslatef(ball.pos[0], ball.pos[1], 0.0f);
+    glTranslatef(ball2[0].pos[0], ball2[0].pos[1], 0.0f);
     glBegin(GL_QUADS);
-    glVertex2f(-ball.w, -ball.h);
-    glVertex2f(-ball.w,  ball.h);
-    glVertex2f( ball.w,  ball.h);
-    glVertex2f( ball.w, -ball.h);
+    glVertex2f(-ball2[0].w, -ball2[0].h);
+    glVertex2f(-ball2[0].w,  ball2[0].h);
+    glVertex2f( ball2[0].w,  ball2[0].h);
+    glVertex2f( ball2[0].w, -ball2[0].h);
     glEnd();
     glPopMatrix();
 
-    /*if (g.pause){
-        r[0].bot = g.yres/1.5;
-        r[0].left = g.xres/2;
-        r[0].center = 0;
-        ggprint8b(&r[6], 20, 0x00ff0000, "Pause Feature");
-    }
-    r[1].bot = g.yres-35;
-    r[1].left = g.xres/2;
-    r[1].center = -5;
-    ggprint8b(&r[7], 20, 0x00ffff00, "Alex's Feature -  Shift + 2");
-*/
     renderStats(stats[1], g.xres, g.yres, points);
+
+    }
 }
 }
 

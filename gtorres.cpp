@@ -34,6 +34,7 @@ int * x_og;
 int * y_og;
 int x_rotated;
 int y_rotated;
+extern const int MAX_BALLS;
 
 Triangle GflipL = Triangle (150.0f, 150.0f, 265.0f,
                             50.0f, 10.0f, 10.0f);
@@ -41,6 +42,28 @@ Triangle GflipR = Triangle (400.0f, 285.0f, 400.0f,
                             50.0f, 10.0f, 10.0f);
 
 bool TriangleCol(Triangle, float, float);
+
+extern bool makeBall(unsigned int map, bool *summoned, float *px, float *py, float *vy) {
+    if (!*summoned) {
+        if (map == 1) {
+            //Spawn a ball
+            *px = 415;
+            *py = 100;
+            *summoned = 1;
+            *vy = 8.0f;
+            return 1;
+        }
+        if (map == 2) {
+            //Spawn a ball
+            *px = 575;
+            *py = 100;
+            *summoned = 1;
+            *vy = 9.5f;
+            return 1;
+        }
+    }
+    return 0;
+}
 
 void rotate_point(float angle, float *x, float *y, float cx, float cy)
 {
