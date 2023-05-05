@@ -41,6 +41,8 @@ extern Triangle flipper1;
 extern Triangle flipper2;
 extern void draw_triangle(Triangle triangle, unsigned char color[]);
 extern void draw_circle(float r, float cx, float cy, unsigned char color[]);
+extern void moving_circle(float *r, float *cy, float *vy);
+extern void show_stats(int score, int lives, int a);
 
 class Global {
     public:
@@ -368,14 +370,12 @@ int X11_wrapper::check_keys(XEvent *e)
 	    case XK_p:
 		g.pause = manage_pstate(g.pause);
 		break;
-		if (XK_Shift_L)
+	    case XK_a:
 		    // Key 2 and shift are both pressed down
-		{
-		    if (alex_feature == 0)
-			alex_feature = 1;
-		    else 
-			alex_feature = 0;
-		}
+			alex_feature ^= 1;
+			if (alex_feature) {
+			cout << "alex feature mode\n";
+			}
 		break;
 	    case XK_3:
 		if (XK_Shift_L && g.mainmenu == 1) {
@@ -556,7 +556,8 @@ void physics()
             float bally, float *vx, float *vy);
     // FIRST  
     if (g.map == 1) {
-
+	if (alex_feature)
+		moving_circle(&cir4.r, &cir4.c[1], &cir4.vel[1]);
     for (int i = 0; i < MAX_BALLS; i++) {
     
 	
@@ -609,11 +610,11 @@ void physics()
             &ball1[i].vel[0], &ball1[i].vel[1]);
     }
     /* Flipper collision */
-    if (leftFlipper) {
+    if (!leftFlipper) {
     	triangle_collision( flipper1, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
 	}
-	if (rightFlipper) {	
+    if (!rightFlipper) {	
     	triangle_collision( flipper2, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
 	}
@@ -810,6 +811,7 @@ void render()
     unsigned char tridef[3] { 115, 80, 50};
     unsigned char cirdef[3] { 150, 150, 150};
     unsigned char def[3] { 115, 80, 50};
+    unsigned char col[3] { 126, 100, 255};
     
 
     if (g.map == 1) {   
@@ -828,7 +830,7 @@ void render()
 
      // Draw Box
     unsigned char balldef[3] { 0, 0, 0};
-    unsigned char col[3] { 126, 100, 255};
+    glBindTexture(GL_TEXTURE_2D, g.rocktxt);
         draw_box(highbox1, def);
         draw_box(highbox2, def);
         draw_box(highbox3, def);
@@ -861,6 +863,7 @@ void render()
 
     flipping(g.map, &ball1[0].pos[0], &ball1[0].pos[1], &ball1[0].vel[0], &ball1[0].vel[1]);
     
+	glBindTexture(GL_TEXTURE_2D, 0);
     /* create right flipper*/
     draw_triangle(flipper1, tridef);
     /* create left flipper*/
@@ -868,27 +871,28 @@ void render()
 
     //Draw Half Circle
     int n = 40; 
-
     double angle = 0.0;
     double inc = (2.0*3.14)/n;
     //glVertex2f(x, y);
+    glBindTexture(GL_TEXTURE_2D, g.rocktxt);
     glColor3ub(115, 80, 50);
     glBegin(GL_TRIANGLE_FAN);
     for (int i = 0; i < n/2+1; i++) {
 	halfcir.x = halfcir.r*cos(angle);
 	halfcir.y = halfcir.r*sin(angle);
+	glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
 	glVertex2f(halfcir.x+halfcir.c[0],halfcir.y + halfcir.c[1]);
 	angle += inc;
     }
     glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
 	
     r[1].bot = g.yres-35;
     r[1].left = g.xres/2;
     r[1].center = -5;
-    ggprint8b(&r[1], 20, 0x00ffff00, "Alex's Feature -  Shift + 2");
+    ggprint8b(&r[1], 20, 0x00ffff00, "Alex's Feature -  a");
 
-    extern void show_stats(int score, int lives);
-    show_stats(score, lives);
+    show_stats(score, lives, 1);
 
     glColor4f(0.2, 0.5, 0.2, 0.3);
     glPushMatrix();
@@ -904,10 +908,12 @@ void render()
     draw_box(ball1[0], balldef);
 
 
+    glBindTexture(GL_TEXTURE_2D, g.rock2txt);
     draw_circle(cir1.r,cir1.c[0],cir1.c[1], cirdef);
     draw_circle(cir2.r,cir2.c[0],cir2.c[1], cirdef);
     draw_circle(cir3.r,cir3.c[0],cir3.c[1], cirdef);
     draw_circle(cir4.r,cir4.c[0],cir4.c[1], cirdef);
+	glBindTexture(GL_TEXTURE_2D, 0);
 
     for (int i = 0; i < MAX_BALLS; i++) {
         if (ball1[i].ballSpawned == 1) {
@@ -948,9 +954,8 @@ void render()
     draw_box(out2, def);
     draw_box(bot1, def);
     draw_box(bot2, def);
-    
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, 0);
+
+	    glBindTexture(GL_TEXTURE_2D, 0);
     glPopMatrix();
 
     glBindTexture(GL_TEXTURE_2D, g.rocktxt);
@@ -981,62 +986,21 @@ void render()
 
     glBindTexture(GL_TEXTURE_2D, 0);
     glPopMatrix();
-    int n = 15; 
-    double angle = 0.0;
-    double inc = (2.0*3.14)/n;
+    //int n = 15; 
+    //double angle = 0.0;
+    //double inc = (2.0*3.14)/n;
     //glVertex2f(x, y);
     glColor3ub(150, 150, 150);
 
     glBindTexture(GL_TEXTURE_2D, g.rock2txt);
-
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < n; i++) {
-        circle1.x = circle1.r*cos(angle);
-        circle1.y = circle1.r*sin(angle);
-        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
-        glVertex2f(circle1.x+circle1.c[0],circle1.y + circle1.c[1]);
-        angle += inc;
-    }
-    glEnd();
-    glPopMatrix();
-
-    glColor3ub(150, 150, 150);
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < n; i++) {
-        circle2.x = circle2.r*cos(angle);
-        circle2.y = circle2.r*sin(angle);
-        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
-        glVertex2f(circle2.x+circle2.c[0],circle2.y + circle2.c[1]);
-        angle += inc;
-    }
-    glEnd();
-    glPopMatrix();
-
-    glColor3ub(150, 150, 150);
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < n; i++) {
-        circle3.x = circle3.r*cos(angle);
-        circle3.y = circle3.r*sin(angle);
-        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
-        glVertex2f(circle3.x+circle3.c[0],circle3.y + circle3.c[1]);
-        angle += inc;
-    }
-    glEnd();
-    glPopMatrix();
-
-    glColor3ub(150, 150, 150);
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < n; i++) {
-        circle4.x = circle4.r*cos(angle);
-        circle4.y = circle4.r*sin(angle);
-        glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
-        glVertex2f(circle4.x+circle4.c[0],circle4.y + circle4.c[1]);
-        angle += inc;
-    }
-    glEnd();
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glPopMatrix();
-
+	draw_circle(circle1.r,circle1.c[0],circle1.c[1], cirdef);
+    draw_circle(circle2.r,circle2.c[0],circle2.c[1], cirdef);
+    draw_circle(circle3.r,circle3.c[0],circle3.c[1], cirdef);
+    draw_circle(circle4.r,circle4.c[0],circle4.c[1], cirdef);
+	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
+    
+	
     glBindTexture(GL_TEXTURE_2D, g.texture);
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_QUADS);
@@ -1047,6 +1011,21 @@ void render()
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     
+	glBindTexture(GL_TEXTURE_2D, g.rocktxt);
+	int posy = 350;
+	int posx = 700;
+        for (int i = 0; i < 2; i++) {
+                boxes[i].pos[1] = posy;
+                boxes[i].pos[0] = posx;
+                draw_box(boxes[i], col);
+                posy = posy - 50;
+                boxes[i].w = 50;
+                boxes[i].h = 15;
+        }    
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    show_stats( score, lives, 0); 
+
     glPushMatrix();
     glColor3ub(0,0,0);
     glTranslatef(ball2[0].pos[0], ball2[0].pos[1], 0.0f);

@@ -53,7 +53,7 @@ void Triangle::set_color(unsigned char col[3])
 
 Triangle t1 = Triangle(450.0f,375.0f,450.0f,
 		495.0f, 495.0f, 350.0f);
-Triangle t2 = Triangle(20.0f,20.0f,110.0f,
+Triangle t2 = Triangle(20.0f,20.0f,100.0f,
 		450.0f, 300.0f, 450.0f);
 Triangle flipper1 = Triangle(100.0f, 100.0f, 167.0f,
 		35.0f, 8.0f, 8.0f);
@@ -63,14 +63,14 @@ Triangle t3 = Triangle(20.0f, 20.0f, 110.0f,
 		95.0f, 28.0f, 28.0f);
 Triangle t4 = Triangle(310.0f, 230.0f, 310.0f,
 		95.0f, 28.0f, 28.0f);
-Triangle t5 = Triangle(20.0f, 20.0f, 110.0f,
+Triangle t5 = Triangle(20.0f, 20.0f, 100.0f,
 		525.0f, 450.0f, 450.0f);
 Triangle t6 = Triangle(450.0f, 375.0f, 450.0f,
 		575.0f, 495.0f, 495.0f);
 Triangle t7 = Triangle(450.0f,350.0f,450.0f,
 		700.0f, 700.0f, 600.0f);
-Triangle t8 = Triangle(375.0f, 300.0f, 375.0f,
-		495.0f, 385.0f, 385.0f);
+Triangle t8 = Triangle(380.0f, 300.0f, 380.0f,
+		500.0f, 385.0f, 385.0f);
 Triangle t9 = Triangle(375.0f, 375.0f, 450.0f,
 		495.0f, 385.0f, 385.0f);
 Triangle t10 = Triangle(20.0f,20.0f,100.0f,
@@ -85,7 +85,7 @@ void box_collision(float *ballx, float *bally, int ballw,
 			*ballx  >= boxx - w &&  	// left
 			*ballx <= boxx + w &&   	// right
 			*bally + ballw >= boxy - h) {     	// bottom
-		if (*bally <= boxy + h - 5 &&
+		if (*bally <= boxy + h - 5 &&		// right and left sides
 				*bally >= boxy - h + 5) {
 			if (*ballx > boxx)
 				*ballx = *ballx + 5;
@@ -93,32 +93,27 @@ void box_collision(float *ballx, float *bally, int ballw,
 				*ballx = *ballx - 5;
 			*vx = -*vx;
 		}
-		if (*bally - ballw <= boxy + h &&    // top 
-				*ballx >= boxx - w &&
-				*ballx <= boxx + w  &&
+		if (*bally - ballw <= boxy + h &&    // top and bottom sides
+				*ballx >= boxx - w + 7 &&
+				*ballx <= boxx + w  - 7 &&
 				*bally + ballw >= boxy - h) {
-			if (*bally > boxy)
+			if (*bally > boxy) {
 				*bally = *bally + 5;
-			else
+				if (*vy < -4.0f)
+				    *vy = 0.0f;
+				else 
+				    *vy = -*vy * 0.85;
+			}
+			else {
 				*bally = *bally - 5;
-			if ( *vy > 4.0f || *vy < -4.0f) {
-				if (*bally > boxy) {
-					*vy = 0.0f;
-				}
-				else {
-					if (*vy > 0) {
-						*vy = -*vy * 1.25;
-					}
-					if (*vy < 0) {
-						*vy = *vy * 1.25;
-					}
-					if (*vy == 0)
-						*vy = -5.0f;
+				
+				*vy = -*vy * 1.10;
+				
+				if (*vy == 0)
+					*vy = -5.0f;
 				}
 			}
 		}
-
-	}
 }
 
 void circle_collision(float *ballx, float *bally, float cx, float cy, 
@@ -239,7 +234,7 @@ void draw_circle(float r, float cx, float cy, unsigned char color[])
 	for (int i = 0; i < n; i++) {
 		x = r*cos(angle);    
 		y = r*sin(angle);    
-		glTexCoord2f(1, 0);
+		glTexCoord2f(sin(angle) / 2.0 + 0.5, cos(angle) / 2.0 + 0.5);
 		glVertex2f(x+cx, y+cy);
 		angle += inc;
 	}
@@ -283,10 +278,14 @@ void flipper1_collision(float *vx, float *vy, float *ballx, float *bally)
 			*vy = *vy * 0.08;
 			*bally = *bally + 3; 
 		}
-		else if (*vy == 0)
+		else if (*vy == 0){
 			*vy = -*vx;
-		else if (*vy > 0)
+			*bally = *bally + 3; 
+		}
+		else if (*vy > 0) {
+			*bally = *bally + 3; 
 			*vy = *vy * 0.9;
+		}
 		else 
 			*vy = -*vy * 0.8;
 }
@@ -321,10 +320,14 @@ void flipper2_collision(float *vx, float *vy, float *ballx, float *bally)
 		*bally = *bally + 3; 
 		*vx = -*vy;
 	}
-	else if (*vy == 0)
+	else if (*vy == 0) {
 		*vy = -*vx;
-	else if (*vy > 0)
+		*bally = *bally + 3; 
+	}
+	else if (*vy > 0) {
+		*bally = *bally + 3; 
 		*vy = *vy * 0.9;
+	}
 	else 
 		*vy = -*vy * 0.8;
 }
@@ -487,17 +490,23 @@ Image::Image(const char *fname) {
 	if (!ppmFlag)
 		unlink(ppmname);
 }
-void show_stats(int score, int lives) 
+void show_stats(int score, int lives, int a) 
 {
-	Rect scoreboard;
+	Rect scoreboard; 
 	scoreboard.bot = 345;
-	scoreboard.left = 500;
+ 	if (a)
+		scoreboard.left = 500;
+	else 
+		scoreboard.left = 700;
 	scoreboard.center = 0;
 	ggprint8b(&scoreboard, 20, 0x00ffff00, "Score: %i", score);
 
 	Rect life;
 	life.bot = 295;
-	life.left = 500;
+	if (a)
+		life.left = 500;
+	else 
+		life.left = 700;
 	life.center = 0;
 	ggprint8b(&life, 20, 0x00ffff00, "Lives: %i", lives);
 }
@@ -517,4 +526,24 @@ void lost_ball(float *ballx, float *bally, float *vy, float *vx,
 	*vy = 0;
 	summonball = false;
 	summonshapes = 0;
+}
+
+int a = 1;
+void moving_circle(float *r, float *cy, float *vy) 
+{	
+	if (a && *cy <= 550){
+		*vy = 0.75f;
+		if (*cy == 550)
+		    a = 0;
+	}
+	else if (!a && *cy >= 400) {
+		*vy = -0.75f;
+		if (*cy == 400)
+		    a = 1;
+	}/*
+	if (*cy < 400) {
+		*vy = 0.0f;
+		*cy = 400;
+	}*/
+		*cy += *vy;	
 }
