@@ -399,7 +399,7 @@ int X11_wrapper::check_keys(XEvent *e)
 
             }
             else if (g.map == 2) {
-                velocity[1] = 9.0f;
+                velocity[1] = 9.5f;
                 if (ball2[i].ballSpawned == 1 && ball2[i].init == 0) {
                     ball2[i].vel[1] = velocity[1];
                     ball2[i].init = 1;
@@ -756,16 +756,6 @@ void physics()
 
             if (ball2[i].pos[1] + ball2[i].w > g.yres)
                 ball2[i].vel[1] = -ball2[i].vel[1];
-
-            ball2[i].pos[0] = 575;
-            ball2[i].pos[1] = 100;
-            ball2[i].vel[0] = 0;
-            ball2[i].vel[1] = 0;
-            ball2[i].init = 0;
-            summonshapes = 0;
-
-            if (noBalls == 1)
-                lives--;
 
         if (ball2[i].pos[1] < - 30) {
         ball2[i].ballSpawned = 0;

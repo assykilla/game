@@ -90,50 +90,50 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
 {
     //LEVEL 1 LOGIC
     if (map == 1) {
-        if (leftFlipper == 1) {
-            if (leftFlipperFrame <= flipperFrames) {
+        if (leftFlipper == 1) { //LEFT IS PRESSED
+            if (leftFlipperFrame <= flipperFrames) { //MOVING UP
                 if (TriangleCol(flipper1, *ballx, *bally)) {
                     *ballvy  = 8.0f;
                     cout << "Collision!" << endl;
                 }
-            } else if (leftFlipperFrame == flipperFrames + 1) {
+            } else if (leftFlipperFrame == flipperFrames + 1) { //FLIPPER PEAK
                 if (TriangleCol(flipper1, *ballx, *bally)) {
                     *ballvy = *ballvx * 0.8;
                 }
             }
         }
-        if (leftFlipper == 0) {
-            if (leftFlipperFrame > 0) {
+        if (leftFlipper == 0) { //LEFT IS RELEASED
+            if (leftFlipperFrame > 0) { //MOVING DOWN
                 if (TriangleCol(flipper1, *ballx, *bally)) {
-                    *ballvx = *ballvx * 0.8;
-                    *ballvy = *ballvy * 0.8;
+                    *ballvx = *ballvx * 1;
+                    *ballvy = *ballvy * 1;
                 }
-            } else if (leftFlipperFrame == 0) {
+            } else if (leftFlipperFrame == 0) { //FLIPPER DOWN
                 triangle_collision(flipper1, ballx, bally,
                 ballvx, ballvy);
             }
         }
 
 
-        if (rightFlipper == 1) {
-            if (rightFlipperFrame <= flipperFrames) {
+        if (rightFlipper == 1) { //RIGHT IS PRESSED
+            if (rightFlipperFrame <= flipperFrames) { //MOVING UP
                 if (TriangleCol(flipper2, *ballx, *bally)) {
                     *ballvy  = 8.0f;
                 }
-            } else if (rightFlipperFrame == flipperFrames + 1) {
+            } else if (rightFlipperFrame == flipperFrames + 1) { //FLIPPER PEAK
                 rightAngle = 0;
                 if (TriangleCol(flipper2, *ballx, *bally)) {
                     *ballvy = *ballvx * -0.8;
                 }
             }
         }
-        if (rightFlipper == 0) {
-            if (rightFlipperFrame > 0) {
+        if (rightFlipper == 0) { //RIGHT IS RELEASED
+            if (rightFlipperFrame > 0) { //MOVING DOWN
                 if (TriangleCol(flipper2, *ballx, *bally)) {
-                    *ballvx = *ballvx * 0.8;
-                    *ballvy = *ballvy * 0.8;
+                    *ballvx = *ballvx * 1;
+                    *ballvy = *ballvy * 1;
                 }
-            } else if (rightFlipperFrame == 0) {
+            } else if (rightFlipperFrame == 0) { //FLIPPER DOWN
                 triangle_collision(flipper1, ballx, bally,
                 ballvx, ballvy);
             }
@@ -141,7 +141,7 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
     }
     //LEVEL 2 LOGIC
     if (map == 2) {
-        if (leftFlipper == 1) {
+        if (leftFlipper == 1) { //LEFT IS PRESSED
             if (leftFlipperFrame <= flipperFrames) {
                 if (TriangleCol(GflipL, *ballx, *bally)) {
                     *ballvy  = 8.0f;
@@ -155,8 +155,8 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
         if (leftFlipper == 0) {
             if (leftFlipperFrame > 0) {
                 if (TriangleCol(GflipL, *ballx, *bally)) {
-                    *ballvx = *ballvx * 0.8;
-                    *ballvy = *ballvy * 0.8;
+                    *ballvx = *ballvx * 1;
+                    *ballvy = *ballvy * 1;
                 }
             } else if (leftFlipperFrame == 0) {
                 triangle_collision(GflipL, ballx, bally,
@@ -165,27 +165,27 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
         }
 
 
-        if (rightFlipper == 1) {
-            if (rightFlipperFrame <= flipperFrames) {
+        if (rightFlipper == 1) { //RIGHT IS PRESSED
+            if (rightFlipperFrame <= flipperFrames) { //MOVING UP
                 if (TriangleCol(GflipR, *ballx, *bally)) {
                     *ballvy  = 8.0f;
             }
-            } else if (rightFlipperFrame == flipperFrames + 1) {
+            } else if (rightFlipperFrame == flipperFrames + 1) { //FLIPPER PEAK
                 rightAngle = 0;
                 if (TriangleCol(GflipR, *ballx, *bally)) {
                     *ballvy = *ballvx * -0.8;
                 }
             }
         }
-        if (rightFlipper == 0) {
-            if (rightFlipperFrame > 0) {
+        if (rightFlipper == 0) { //RIGHT IS RELEASED
+            if (rightFlipperFrame > 0) { //MOVING DOWN
                 if (TriangleCol(GflipR, *ballx, *bally)) {
-                    *ballvx = *ballvx * 0.8;
-                    *ballvy = *ballvy * 0.8;
+                    *ballvx = *ballvx * 1;
+                    *ballvy = *ballvy * 1;
                     cout << "Collision!" << endl;
                 }
-            } else if (rightFlipperFrame == 0) {
-                triangle_collision(GflipL, ballx, bally,
+            } else if (rightFlipperFrame == 0) { //FLIPPER DOWN
+                triangle_collision(GflipR, ballx, bally,
                 ballvx, ballvy);
             }
         }
