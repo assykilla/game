@@ -45,19 +45,6 @@ Triangle GflipR = Triangle (400.0f, 285.0f, 400.0f,
 
 bool TriangleCol(Triangle, float, float);
 
-void debugMode()
-{
-    Rect debug;
-    debug.bot = 700 - 20;
-    debug.left = 10;
-    debug.center = 0;
-    //ggprint8b(&debug, 16, 0x00ff00ff, "Ball - SPAWNED: %i", *summoned);
-    //ggprint8b(&debug, 16, 0x00ff00ff, "     VELOCITY X %i / Y %i :", *vx, *vy);
-    //ggprint8b(&debug, 16, 0x00ff00ff, "     POS X %i / Y %i :", *px, *py);
-    
-
-}
-
 extern bool makeBall(unsigned int map, bool *summoned, float *px, float *py, float *vy)
 {
     if (!*summoned) {
