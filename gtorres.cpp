@@ -34,6 +34,8 @@ int * x_og;
 int * y_og;
 int x_rotated;
 int y_rotated;
+bool noBalls = 0;
+bool debugGeorge = 0;
 extern const int MAX_BALLS;
 
 Triangle GflipL = Triangle (150.0f, 150.0f, 265.0f,
@@ -43,7 +45,21 @@ Triangle GflipR = Triangle (400.0f, 285.0f, 400.0f,
 
 bool TriangleCol(Triangle, float, float);
 
-extern bool makeBall(unsigned int map, bool *summoned, float *px, float *py, float *vy) {
+void debugMode()
+{
+    Rect debug;
+    debug.bot = 700 - 20;
+    debug.left = 10;
+    debug.center = 0;
+    //ggprint8b(&debug, 16, 0x00ff00ff, "Ball - SPAWNED: %i", *summoned);
+    //ggprint8b(&debug, 16, 0x00ff00ff, "     VELOCITY X %i / Y %i :", *vx, *vy);
+    //ggprint8b(&debug, 16, 0x00ff00ff, "     POS X %i / Y %i :", *px, *py);
+    
+
+}
+
+extern bool makeBall(unsigned int map, bool *summoned, float *px, float *py, float *vy)
+{
     if (!*summoned) {
         if (map == 1) {
             //Spawn a ball
@@ -83,44 +99,29 @@ void rotate_point(float angle, float *x, float *y, float cx, float cy)
   *y = ynew + cy;
 }
 
-void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float *ballvy) {
-
+void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float *ballvy)
+{
     //LEVEL 1 LOGIC
     if (map == 1) {
         if (leftFlipper == 1) {
             if (leftFlipperFrame <= flipperFrames) {
-                leftFlipperFrame += 1;
-                leftAngle = 0.2f;
                 if (TriangleCol(flipper1, *ballx, *bally)) {
                     *ballvy  = 8.0f;
-					*ballx = *ballx - 3;
-					*bally = *bally + 3;
                     cout << "Collision!" << endl;
                 }
-            } else if (leftFlipperFrame >= flipperFrames + 1) {
-                leftAngle = 0;
+            } else if (leftFlipperFrame == flipperFrames + 1) {
                 if (TriangleCol(flipper1, *ballx, *bally)) {
-					if (*ballvx < 0 )
-                    	*ballvy = *ballvx * -0.8;
-					else
-                    	*ballvy = *ballvx * 0.8;
-					*ballx = *ballx - 3;
-					*bally = *bally + 3;
+                    *ballvy = *ballvx * 0.8;
                 }
             }
         }
         if (leftFlipper == 0) {
             if (leftFlipperFrame > 0) {
-                leftFlipperFrame -= 1;
-                leftAngle = -0.2f;
                 if (TriangleCol(flipper1, *ballx, *bally)) {
                     *ballvx = *ballvx * 0.8;
                     *ballvy = *ballvy * 0.8;
-					*ballx = *ballx - 3;
-					*bally = *bally + 3;
                 }
-            } else if (leftFlipperFrame <= 0) {
-                leftAngle = 0;
+            } else if (leftFlipperFrame == 0) {
                 triangle_collision(flipper1, ballx, bally,
                 ballvx, ballvy);
             }
@@ -129,38 +130,24 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
 
         if (rightFlipper == 1) {
             if (rightFlipperFrame <= flipperFrames) {
-                rightFlipperFrame += 1;
-                rightAngle = -0.2f;
                 if (TriangleCol(flipper2, *ballx, *bally)) {
                     *ballvy  = 8.0f;
-					*ballx = *ballx + 3;
-					*bally = *bally + 3;
                 }
-            } else if (rightFlipperFrame >= flipperFrames + 1) {
+            } else if (rightFlipperFrame == flipperFrames + 1) {
                 rightAngle = 0;
                 if (TriangleCol(flipper2, *ballx, *bally)) {
-					if (*ballvx < 0)
-                    	*ballvy = *ballvx * -0.8;
-					else
-                    	*ballvy = *ballvx * 0.8;
-					*ballx = *ballx + 3;
-					*bally = *bally + 3;
+                    *ballvy = *ballvx * -0.8;
                 }
             }
         }
         if (rightFlipper == 0) {
             if (rightFlipperFrame > 0) {
-                rightFlipperFrame -= 1;
-                rightAngle = 0.2f;
                 if (TriangleCol(flipper2, *ballx, *bally)) {
                     *ballvx = *ballvx * 0.8;
                     *ballvy = *ballvy * 0.8;
-					*ballx = *ballx + 3;
-					*bally = *bally + 3;
                 }
-            } else if (rightFlipperFrame <= 0) {
-                rightAngle = 0;
-                triangle_collision(flipper2, ballx, bally,
+            } else if (rightFlipperFrame == 0) {
+                triangle_collision(flipper1, ballx, bally,
                 ballvx, ballvy);
             }
         }
@@ -169,13 +156,10 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
     if (map == 2) {
         if (leftFlipper == 1) {
             if (leftFlipperFrame <= flipperFrames) {
-                leftFlipperFrame += 1;
-                leftAngle = 0.2f;
                 if (TriangleCol(GflipL, *ballx, *bally)) {
                     *ballvy  = 8.0f;
                 }
             } else if (leftFlipperFrame == flipperFrames + 1) {
-                leftAngle = 0;
                 if (TriangleCol(GflipL, *ballx, *bally)) {
                     *ballvy = *ballvx * 0.8;
                 }
@@ -183,14 +167,11 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
         }
         if (leftFlipper == 0) {
             if (leftFlipperFrame > 0) {
-                leftFlipperFrame -= 1;
-                leftAngle = -0.2f;
                 if (TriangleCol(GflipL, *ballx, *bally)) {
                     *ballvx = *ballvx * 0.8;
                     *ballvy = *ballvy * 0.8;
                 }
             } else if (leftFlipperFrame == 0) {
-                leftAngle = 0;
                 triangle_collision(GflipL, ballx, bally,
                                     ballvx, ballvy);
             }
@@ -199,8 +180,6 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
 
         if (rightFlipper == 1) {
             if (rightFlipperFrame <= flipperFrames) {
-                rightFlipperFrame += 1;
-                rightAngle = -0.2f;
                 if (TriangleCol(GflipR, *ballx, *bally)) {
                     *ballvy  = 8.0f;
             }
@@ -213,21 +192,96 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
         }
         if (rightFlipper == 0) {
             if (rightFlipperFrame > 0) {
-                rightFlipperFrame -= 1;
-                rightAngle = 0.2f;
                 if (TriangleCol(GflipR, *ballx, *bally)) {
                     *ballvx = *ballvx * 0.8;
                     *ballvy = *ballvy * 0.8;
                     cout << "Collision!" << endl;
                 }
             } else if (rightFlipperFrame == 0) {
-                rightAngle = 0;
                 triangle_collision(GflipL, ballx, bally,
                 ballvx, ballvy);
             }
         }
     }
+}
 
+void flipperRotate (unsigned int map)
+{
+    //LEVEL 1 LOGIC
+    if (map == 1) {
+        if (leftFlipper == 1) {
+            if (leftFlipperFrame <= flipperFrames) {
+                leftFlipperFrame += 1;
+                leftAngle = 0.2f;
+            } else if (leftFlipperFrame == flipperFrames + 1) {
+                leftAngle = 0;
+            }
+        }
+        if (leftFlipper == 0) {
+            if (leftFlipperFrame > 0) {
+                leftFlipperFrame -= 1;
+                leftAngle = -0.2f;
+            } else if (leftFlipperFrame == 0) {
+                leftAngle = 0;
+            }
+        }
+
+
+        if (rightFlipper == 1) {
+            if (rightFlipperFrame <= flipperFrames) {
+                rightFlipperFrame += 1;
+                rightAngle = -0.2f;
+            } else if (rightFlipperFrame == flipperFrames + 1) {
+                rightAngle = 0;
+            }
+        }
+        if (rightFlipper == 0) {
+            if (rightFlipperFrame > 0) {
+                rightFlipperFrame -= 1;
+                rightAngle = 0.2f;
+            } else if (rightFlipperFrame == 0) {
+                rightAngle = 0;
+            }
+        }
+    }
+    //LEVEL 2 LOGIC
+    if (map == 2) {
+        if (leftFlipper == 1) {
+            if (leftFlipperFrame <= flipperFrames) {
+                leftFlipperFrame += 1;
+                leftAngle = 0.2f;
+            } else if (leftFlipperFrame == flipperFrames + 1) {
+                leftAngle = 0;
+            }
+        }
+        if (leftFlipper == 0) {
+            if (leftFlipperFrame > 0) {
+                leftFlipperFrame -= 1;
+                leftAngle = -0.2f;
+            } else if (leftFlipperFrame == 0) {
+                leftAngle = 0;
+            }
+        }
+
+
+        if (rightFlipper == 1) {
+            if (rightFlipperFrame <= flipperFrames) {
+                rightFlipperFrame += 1;
+                rightAngle = -0.2f;
+            } else if (rightFlipperFrame == flipperFrames + 1) {
+                rightAngle = 0;
+            }
+        }
+        if (rightFlipper == 0) {
+            if (rightFlipperFrame > 0) {
+                rightFlipperFrame -= 1;
+                rightAngle = 0.2f;
+            } else if (rightFlipperFrame == 0) {
+                rightAngle = 0;
+            }
+        }
+    }
+    
     if (map == 1) {
         rotate_point(leftAngle, &flipper1.vertex1[0], &flipper1.vertex1[1], 
                             flipper1.vertex1[0], flipper1.vertex1[1]);
@@ -258,10 +312,13 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
         rotate_point(rightAngle, &GflipR.vertex3[0], &GflipR.vertex3[1], 
                     GflipR.vertex1[0], GflipR.vertex1[1]);
     }
-    }
+}
 
 
-void renderStats(Rect r, int x, int y, int pts) {
+
+
+void renderStats(Rect r, int x, int y, int pts)
+{
     r.bot = y-35;
     r.left = x/2;
     r.center = -5;

@@ -5,6 +5,8 @@
 //date: Spring 2022
 //purpose: get openGL working on your personal computer
 //
+
+//OUSH THIS
 #include <iostream>
 using namespace std;
 #include <stdio.h>
@@ -120,18 +122,16 @@ class Box {
         Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
         Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
         Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
-        Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
-        Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
+        //Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
+        //Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
     },
     ball2[MAX_BALLS] {
         Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
         Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
         Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
-        Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
-        Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
+        //Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
+        //Box(5.0f,5.0f, 575, 100, velocity[0], velocity[1]),
     };
-
-
 
 class Circle {
     public:
@@ -197,6 +197,8 @@ void render(void);
 int main()
 {
     init_opengl(); 
+    ball1[0].ballSpawned = 1;
+    ball2[0].ballSpawned = 1;
     //Main loop
     int done = 0;
     while (!done) {
@@ -375,8 +377,12 @@ int X11_wrapper::check_keys(XEvent *e)
 			alex_feature ^= 1;
 			if (alex_feature) {
 			cout << "alex feature mode\n";
-			}
+		}
 		break;
+        case XK_d:
+            debugGeorge = !debugGeorge;
+            cout << "Debug mode toggled" << endl;
+        break;
 	    case XK_3:
 		if (XK_Shift_L && g.mainmenu == 1) {
 		    g.issa_feature = !g.issa_feature;
@@ -386,15 +392,15 @@ int X11_wrapper::check_keys(XEvent *e)
         for (int i = 0; i < MAX_BALLS; i++) {
             if (g.map == 1) {
                 velocity[1] = 8.0f;
-                if (ball1[i].ballSpawned == 1) {
+                if (ball1[i].ballSpawned == 1 && ball1[i].init == 0) {
 		            ball1[i].vel[1] = velocity[1];
                     ball1[i].init = 1;
                 }
 
             }
-            else {
+            else if (g.map == 2) {
                 velocity[1] = 9.0f;
-                if (ball2[i].ballSpawned) {
+                if (ball2[i].ballSpawned == 1 && ball2[i].init == 0) {
                     ball2[i].vel[1] = velocity[1];
                     ball2[i].init = 1;
                 }
@@ -411,12 +417,22 @@ int X11_wrapper::check_keys(XEvent *e)
 		break;
         case XK_m:
         if (credit <= 0) {
-            for (int i = 0; i < MAX_BALLS; i++) {
-                if (ball1[i].ballSpawned == 0) {
-                    cout << "Purchased ball " << i + 1<< endl;
-                    ball1[i].ballSpawned = 1;
-                    makeBall(i, &ball1[i].ballSpawned, &ball1[i].pos[0], &ball1[i].pos[1], &ball1[i].vel[1]); 
-                    break;
+            if (g.map == 1) {
+                for (int i = 0; i < MAX_BALLS; i++) {
+                    if (ball1[i].ballSpawned == 0) {
+                        ball1[i].ballSpawned = 1;
+                        makeBall(i, &ball1[i].ballSpawned, &ball1[i].pos[0], &ball1[i].pos[1], &ball1[i].vel[1]); 
+                        break;
+                    }
+                }
+            }
+            if (g.map == 2) {
+                for (int i = 0; i < MAX_BALLS; i++) {
+                    if (ball2[i].ballSpawned == 0) {
+                        ball2[i].ballSpawned = 1;
+                        makeBall(i, &ball2[i].ballSpawned, &ball2[i].pos[0], &ball2[i].pos[1], &ball2[i].vel[1]); 
+                        break;
+                    }
                 }
             }
         }
@@ -525,13 +541,20 @@ void physics()
 {
     if(!g.pause){
         for (int i = 0; i < MAX_BALLS; i++) {
-	if (ball1[i].init == 1) {
-	    if (ball1[i].vel[0] <= 9.0f || ball1[i].vel[1] <= 9.0f) {
-		ball1[i].pos[0] += ball1[i].vel[0];
-		ball1[i].pos[1] += ball1[i].vel[1];
-		ball1[i].vel[1] -= Gravity;
-	    }
-	}
+            if (ball1[i].init == 1) {
+	            if (ball1[i].vel[0] <= 9.0f || ball1[i].vel[1] <= 9.0f) {
+	        	ball1[i].pos[0] += ball1[i].vel[0];
+	        	ball1[i].pos[1] += ball1[i].vel[1];
+	        	ball1[i].vel[1] -= Gravity;
+	            }
+	        }
+            if (ball2[i].init == 1) {
+	            if (ball2[i].vel[0] <= 9.0f || ball2[i].vel[1] <= 9.0f) {
+	        	ball2[i].pos[0] += ball2[i].vel[0];
+	        	ball2[i].pos[1] += ball2[i].vel[1];
+	        	ball2[i].vel[1] -= Gravity;
+	            }
+	        }
         }
     if(g.issa_feature) {
 	if (test_ball.vel[0] < 0) {
@@ -609,13 +632,16 @@ void physics()
     	triangle_collision( t9, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
     }
+
+    flipping(g.map, &ball1[i].pos[0], &ball1[i].pos[1], &ball1[i].vel[0], &ball1[i].vel[1]);
+
     /* Flipper collision */
     if (!leftFlipper) {
-    	triangle_collision( flipper1, &ball1[i].pos[0], &ball1[i].pos[1],
+    triangle_collision( flipper1, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
 	}
     if (!rightFlipper) {	
-    	triangle_collision( flipper2, &ball1[i].pos[0], &ball1[i].pos[1],
+    triangle_collision( flipper2, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
 	}
    
@@ -636,21 +662,13 @@ void physics()
 	ball1[i].vel[1] = -ball1[i].vel[1];
      
     if (ball1[i].pos[1] < - 30) {
-        if (lives > 1) {
-            lives--;
-            ball1[i].ballSpawned = 0;
-        }
-        else {
-            lives = 3;
-            score = 0;
-        }
-
-            ball1[i].pos[0] = 415;
-            ball1[i].pos[1] = 100;
-            ball1[i].vel[0] = 0;
-            ball1[i].vel[1] = 0;
-            ball1[i].init = 0;
-            summonshapes = 0;
+        ball1[i].ballSpawned = 0;
+        ball1[i].pos[0] = 415;
+        ball1[i].pos[1] = 100;
+        ball1[i].vel[0] = 0;
+        ball1[i].vel[1] = 0;
+        ball1[i].init = 0;
+        summonshapes = 0;
     }
         if (ball1[i].vel[0] != 0.0f || ball1[i].vel[1] != 0.0f) {
                 point += 0.01;
@@ -660,100 +678,129 @@ void physics()
                         }
          }
     }
-    }
-     // SECOND
-     if (g.map == 2) {
-    
-        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, start.pos[0],
-            start.pos[1], start.w, start.h, &ball2[0].vel[0], &ball2[0].vel[1]);
-        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, start2.pos[0],
-            start2.pos[1], start2.w, start2.h, &ball2[0].vel[0], &ball2[0].vel[1]);
-        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, out1.pos[0],
-            out1.pos[1], out1.w, out1.h, &ball2[0].vel[0], &ball2[0].vel[1]);
-        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, out2.pos[0],
-            out2.pos[1], out2.w, out2.h, &ball2[0].vel[0], &ball2[0].vel[1]);
-        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, bot1.pos[0],
-            bot1.pos[1], bot1.w, bot1.h, &ball2[0].vel[0], &ball2[0].vel[1]);
-        box_collision(&ball2[0].pos[0], &ball2[0].pos[1], ball2[0].w, bot2.pos[0],
-            bot2.pos[1], bot2.w, bot2.h, &ball2[0].vel[0], &ball2[0].vel[1]);
-
-    circle_collision(&ball2[0].pos[0], &ball2[0].pos[1],circle1.c[0], circle1.c[1],
-            circle1.r, &ball2[0].vel[0], &ball2[0].vel[1]);
-    circle_collision(&ball2[0].pos[0], &ball2[0].pos[1],circle2.c[0], circle2.c[1],
-            circle2.r, &ball2[0].vel[0], &ball2[0].vel[1]);
-    circle_collision(&ball2[0].pos[0], &ball2[0].pos[1],circle3.c[0], circle3.c[1],
-            circle3.r, &ball2[0].vel[0], &ball2[0].vel[1]);
-    circle_collision(&ball2[0].pos[0], &ball2[0].pos[1],circle4.c[0], circle4.c[1],
-            circle4.r, &ball2[0].vel[0], &ball2[0].vel[1]);
-
-    triangle_collision( Gt1, &ball2[0].pos[0], &ball2[0].pos[1], // flipper1
-            &ball2[0].vel[0], &ball2[0].vel[1]);
-    triangle_collision( Gt2, &ball2[0].pos[0], &ball2[0].pos[1], // flipper2
-            &ball2[0].vel[0], &ball2[0].vel[1]);
-    triangle_collision( Gt3, &ball2[0].pos[0], &ball2[0].pos[1], // t1select_map(g.xres, g.yres, e->xbutton.x, g.yres - e->xbutton.y);
-            &ball2[0].vel[0], &ball2[0].vel[1]);
-    triangle_collision( Gt5, &ball2[0].pos[0], &ball2[0].pos[1], // t1
-            &ball2[0].vel[0], &ball2[0].vel[1]);
-    triangle_collision( Gt7, &ball2[0].pos[0], &ball2[0].pos[1], // flipper1
-            &ball2[0].vel[0], &ball2[0].vel[1]);
-    triangle_collision( Gt9, &ball2[0].pos[0], &ball2[0].pos[1], // flipper2
-            &ball2[0].vel[0], &ball2[0].vel[1]);
-    triangle_collision( Gt10, &ball2[0].pos[0], &ball2[0].pos[1], // t1
-            &ball2[0].vel[0], &ball2[0].vel[1]);
-    
-    
-    
-    xtriangle_collision( Gt4, ball2[0].pos[0], ball2[0].pos[1],
-            &ball2[0].vel[0], &ball2[0].vel[1]);
-    xtriangle_collision( Gt6, ball2[0].pos[0], ball2[0].pos[1],
-            &ball2[0].vel[0], &ball2[0].vel[1]);
-    xtriangle_collision( Gt8, ball2[0].pos[0], ball2[0].pos[1],
-            &ball2[0].vel[0], &ball2[0].vel[1]);
-
-                if (ball2[0].pos[0] - ball2[0].w < 0) {
-            ball2[0].vel[0] = -ball2[0].vel[0];
-            points += 5;
+    for (int i = 0; i < MAX_BALLS; i++) {
+        if (ball1[i].ballSpawned == 0) {
+            noBalls = 1;
+        } else {
+            noBalls = 0;
+            break;
         }
+    }
+    if (noBalls == 1) {
+        ball1[0].ballSpawned = 1;
+        lives--;
+        if(lives == 0) {
+            lives = 3;
+            score = 0;
+        }
+    }
+    }
+    // SECOND
+    if (g.map == 2) {
 
-        else if (ball2[0].pos[0] + ball2[0].w > g.xres)
-            ball2[0].vel[0] = -ball2[0].vel[0];
+        for (int i = 0; i < MAX_BALLS; i++) {
+    
+            box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, start.pos[0],
+                start.pos[1], start.w, start.h, &ball2[i].vel[0], &ball2[i].vel[1]);
+            box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, start2.pos[0],
+                start2.pos[1], start2.w, start2.h, &ball2[i].vel[0], &ball2[i].vel[1]);
+            box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, out1.pos[0],
+                out1.pos[1], out1.w, out1.h, &ball2[i].vel[0], &ball2[i].vel[1]);
+            box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, out2.pos[0],
+                out2.pos[1], out2.w, out2.h, &ball2[i].vel[0], &ball2[i].vel[1]);
+            box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, bot1.pos[0],
+                bot1.pos[1], bot1.w, bot1.h, &ball2[i].vel[0], &ball2[i].vel[1]);
+            box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, bot2.pos[0],
+                bot2.pos[1], bot2.w, bot2.h, &ball2[i].vel[0], &ball2[i].vel[1]);
 
-        if (ball2[0].pos[1] + ball2[0].w > g.yres)
-            ball2[0].vel[1] = -ball2[0].vel[1];
+            circle_collision(&ball2[i].pos[0], &ball2[i].pos[1],circle1.c[0], circle1.c[1],
+                    circle1.r, &ball2[i].vel[0], &ball2[i].vel[1]);
+            circle_collision(&ball2[i].pos[0], &ball2[i].pos[1],circle2.c[0], circle2.c[1],
+                    circle2.r, &ball2[i].vel[0], &ball2[i].vel[1]);
+            circle_collision(&ball2[i].pos[0], &ball2[i].pos[1],circle3.c[0], circle3.c[1],
+                    circle3.r, &ball2[i].vel[0], &ball2[i].vel[1]);
+            circle_collision(&ball2[i].pos[0], &ball2[i].pos[1],circle4.c[0], circle4.c[1],
+                    circle4.r, &ball2[i].vel[0], &ball2[i].vel[1]);
 
-     	/*if (ball1[0].pos[1] < - 30) {
-        	if (lives > 1) {
-            	lives--;
-            	ball2[0].ballSpawned = 0;
-        	}
-        	else {
-            	lives = 3;
-            	score = 0;
-        	}
+            flipping(g.map, &ball2[i].pos[0], &ball2[i].pos[1], &ball2[i].vel[0], &ball2[i].vel[1]);
 
-            	ball2[0].pos[0] = 575;
-            	ball2[0].pos[1] = 100;
-            	ball2[0].vel[0] = 0;
-            	ball2[0].vel[1] = 0;
-            	ball2[0].init = 0;
-            	summonshapes = 0;
-    	}
-        if (ball2[0].vel[0] != 0.0f || ball2[0].vel[1] != 0.0f) {
-        	point += 0.01;
-          	if (point >= 0.10f){
-            	score += 1;
-            	point = 0.00f;
-         	}
-         }
-      
-        ball2[0].pos[0] = 575;
-        ball2[0].pos[1] = 100;
-        ball2[0].vel[0] = 0;
-        ball2[0].vel[1] = 0;
-        ball2[0].init = 0;
+            triangle_collision( Gt1, &ball2[i].pos[0], &ball2[i].pos[1], // flipper1
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            triangle_collision( Gt2, &ball2[i].pos[0], &ball2[i].pos[1], // flipper2
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            triangle_collision( Gt3, &ball2[i].pos[0], &ball2[i].pos[1], // t1select_map(g.xres, g.yres, e->xbutton.x, g.yres - e->xbutton.y);
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            triangle_collision( Gt5, &ball2[i].pos[0], &ball2[i].pos[1], // t1
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            triangle_collision( Gt7, &ball2[i].pos[0], &ball2[i].pos[1], // flipper1
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            triangle_collision( Gt9, &ball2[i].pos[0], &ball2[i].pos[1], // flipper2
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            triangle_collision( Gt10, &ball2[i].pos[0], &ball2[i].pos[1], // t1
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+
+            xtriangle_collision( Gt4, ball2[i].pos[0], ball2[i].pos[1],
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            xtriangle_collision( Gt6, ball2[i].pos[0], ball2[i].pos[1],
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            xtriangle_collision( Gt8, ball2[i].pos[0], ball2[i].pos[1],
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+
+            if (ball2[i].pos[0] - ball2[i].w < 0) {
+                ball2[i].vel[0] = -ball2[i].vel[0];
+                points += 5;
+            }
+
+            else if (ball2[i].pos[0] + ball2[i].w > g.xres)
+                ball2[i].vel[0] = -ball2[i].vel[0];
+
+            if (ball2[i].pos[1] + ball2[i].w > g.yres)
+                ball2[i].vel[1] = -ball2[i].vel[1];
+
+            ball2[i].pos[0] = 575;
+            ball2[i].pos[1] = 100;
+            ball2[i].vel[0] = 0;
+            ball2[i].vel[1] = 0;
+            ball2[i].init = 0;
+            summonshapes = 0;
+
+            if (noBalls == 1)
+                lives--;
+
+        if (ball2[i].pos[1] < - 30) {
+        ball2[i].ballSpawned = 0;
+        ball2[i].pos[0] = 575;
+        ball2[i].pos[1] = 100;
+        ball2[i].vel[0] = 0;
+        ball2[i].vel[1] = 0;
+        ball2[i].init = 0;
         summonshapes = 0;
-*/
-     }
+        }
+        if (ball2[i].vel[0] != 0.0f || ball2[i].vel[1] != 0.0f) {
+            point += 0.01;
+            if (point >= 0.10f){
+                score += 1;
+                point = 0.00f;
+            }
+        }
+        }
+        for (int i = 0; i < MAX_BALLS; i++) {
+        if (ball2[i].ballSpawned == 0) {
+            noBalls = 1;
+        } else {
+            noBalls = 0;
+            break;
+        }
+        }
+        if (noBalls == 1) {
+            ball2[0].ballSpawned = 1;
+            lives--;
+            if(lives == 0) {
+                lives = 3;
+                score = 0;
+            }
+        }
+    }
     }
 }
 
@@ -788,7 +835,6 @@ void render()
         return;
     } else if (g.mainmenu == 1) {
 
-
     if (g.issa_feature) {
 	int n = 20;
 	double angle = 0.0;
@@ -813,10 +859,7 @@ void render()
     unsigned char def[3] { 115, 80, 50};
     unsigned char col[3] { 126, 100, 255};
     
-
-    if (g.map == 1) {   
-
-    ball1[0].ballSpawned = 1; 
+    if (g.map == 1) {
 
     glBindTexture(GL_TEXTURE_2D, g.texture);
     glColor3f(1.0, 1.0, 1.0);
@@ -829,7 +872,6 @@ void render()
     glBindTexture(GL_TEXTURE_2D, 0);
 
      // Draw Box
-    unsigned char balldef[3] { 0, 0, 0};
     glBindTexture(GL_TEXTURE_2D, g.rocktxt);
         draw_box(highbox1, def);
         draw_box(highbox2, def);
@@ -861,7 +903,7 @@ void render()
     	draw_triangle(t9, tridef);
     }
 
-    flipping(g.map, &ball1[0].pos[0], &ball1[0].pos[1], &ball1[0].vel[0], &ball1[0].vel[1]);
+    flipperRotate(g.map);
     
 	glBindTexture(GL_TEXTURE_2D, 0);
     /* create right flipper*/
@@ -904,8 +946,6 @@ void render()
     glVertex2f( greenbox.w, -greenbox.h);
     glEnd();
     glPopMatrix();
-
-    draw_box(ball1[0], balldef);
 
 
     glBindTexture(GL_TEXTURE_2D, g.rock2txt);
@@ -954,8 +994,9 @@ void render()
     draw_box(out2, def);
     draw_box(bot1, def);
     draw_box(bot2, def);
-
-	    glBindTexture(GL_TEXTURE_2D, 0);
+    
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
     glPopMatrix();
 
     glBindTexture(GL_TEXTURE_2D, g.rocktxt);
@@ -970,7 +1011,7 @@ void render()
     draw_triangle(Gt9, tridef);
     draw_triangle(Gt10, tridef);
 
-    flipping(g.map, &ball1[0].pos[0], &ball1[0].pos[1], &ball1[0].vel[0], &ball1[0].vel[1]);
+    flipperRotate(g.map);
 
     draw_triangle(GflipL, tridef);
     draw_triangle(GflipR, tridef);
@@ -997,10 +1038,10 @@ void render()
     draw_circle(circle2.r,circle2.c[0],circle2.c[1], cirdef);
     draw_circle(circle3.r,circle3.c[0],circle3.c[1], cirdef);
     draw_circle(circle4.r,circle4.c[0],circle4.c[1], cirdef);
-	glEnd();
-	glBindTexture(GL_TEXTURE_2D, 0);
-    
-	
+    glEnd();
+    glBindTexture(GL_TEXTURE_2D, 0);
+    glPopMatrix();
+
     glBindTexture(GL_TEXTURE_2D, g.texture);
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_QUADS);
@@ -1026,25 +1067,22 @@ void render()
     glBindTexture(GL_TEXTURE_2D, 0);
     show_stats( score, lives, 0); 
 
-    glPushMatrix();
-    glColor3ub(0,0,0);
-    glTranslatef(ball2[0].pos[0], ball2[0].pos[1], 0.0f);
-    glBegin(GL_QUADS);
-    glVertex2f(-ball2[0].w, -ball2[0].h);
-    glVertex2f(-ball2[0].w,  ball2[0].h);
-    glVertex2f( ball2[0].w,  ball2[0].h);
-    glVertex2f( ball2[0].w, -ball2[0].h);
-    glEnd();
-    glPopMatrix();
-
-    renderStats(stats[1], g.xres, g.yres, points);
+    for (int i = 0; i < MAX_BALLS; i++) {
+        if (ball2[i].ballSpawned == 1) {
+            glPushMatrix();
+            glColor3ub(0,0,0);
+            glTranslatef(ball2[i].pos[0], ball2[i].pos[1], 0.0f);
+            glBegin(GL_QUADS);
+            glVertex2f(-ball2[i].w, -ball2[i].h);
+            glVertex2f(-ball2[i].w,  ball2[i].h);
+            glVertex2f( ball2[i].w,  ball2[i].h);
+            glVertex2f( ball2[i].w, -ball2[i].h);
+            glEnd();
+            glPopMatrix();
+        }
+    }
 
     }
+    
 }
 }
-
-
-
-
-
-

@@ -19,11 +19,15 @@ extern float rightAngle;
 extern int flipperFrames;
 extern int x_rotated;
 extern int y_rotated;
-const int MAX_BALLS = 5;
+extern int noBalls;
+const int MAX_BALLS = 3;
+extern bool debugGeorge;
 //extern void rotateFlippersL(bool leftFlipper, int leftFlipperAngle);
 //extern void rotateFlippersR(bool rightFlipper, int rightFlipperAngle);
 
+extern void debugMode(unsigned int mapNum, bool *summoned, float *px, float *py, float *vx, float *vy);
 extern bool makeBall(unsigned int map, bool *summoned, float *px, float *py, float *vy);
+extern void flipperRotate(unsigned int map);
 extern void renderStats(Rect r, int x, int y, int pts);
 extern void rotate_point(float angle, float *x, float *y, float cx, float cy);
 extern void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float *ballvy);
