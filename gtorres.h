@@ -22,6 +22,7 @@ extern int y_rotated;
 extern int noBalls;
 const int MAX_BALLS = 3;
 extern bool debugGeorge;
+extern bool saviorActive;
 //extern void rotateFlippersL(bool leftFlipper, int leftFlipperAngle);
 //extern void rotateFlippersR(bool rightFlipper, int rightFlipperAngle);
 
@@ -31,6 +32,7 @@ extern void flipperRotate(unsigned int map);
 extern void renderStats(Rect r, int x, int y, int pts);
 extern void rotate_point(float angle, float *x, float *y, float cx, float cy);
 extern void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float *ballvy);
+extern void make_particle(int, int);
 extern Triangle GflipL;
 extern Triangle GflipR;
 extern Triangle Gt1;

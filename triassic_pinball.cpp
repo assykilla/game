@@ -6,7 +6,7 @@
 //purpose: get openGL working on your personal computer
 //
 
-//OUSH THIS
+//USH THIS
 #include <iostream>
 using namespace std;
 #include <stdio.h>
@@ -50,6 +50,7 @@ class Global {
     public:
 	int xres, yres;
 	int n;
+    int pr;
     GLuint texture;
     GLuint rocktxt;
     GLuint grassbkg;
@@ -114,10 +115,15 @@ class Box {
     boxes[2],
     start(10.0f, 300.0f, 550.0f, 250.0f, 0.0f, 0.0f),
     start2(10.0f, float(g.yres) , 595.0f, g.yres, 0.0f, 0.0f),
+    start3(10.0f, 75.0f, 550.0f, 600.0f, 0.0f, 0.0f),
     out1(300.0f, 10.0f, 300.0f, 695.0f, 0.0f, 0.0f),
     out2(10.0f, float(g.yres), 5.0f, g.yres, 0.0f, 0.0f),
     bot1(76.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f),
     bot2(76.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f),
+    Obs(15.0f, 15.0f, 125, 650 , 0.0f, 0.0f),
+    safeBox(100.0f, 5.0f, 175.0f, 5.0f, 0.0f, 0.0f),
+    safeBox2(100.0f, 5.0f, 275.0f, 5.0f, 0.0f, 0.0f),
+    particles[1000],
     ball1[MAX_BALLS] {
         Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
         Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
@@ -165,7 +171,7 @@ class Circle {
   circle1(50.0f, 125, 575, 0.0f, 0.0f),
   circle2(30.0f, 200, 425, 0.0f, 0.0f),
   circle3(30.0f, 350, 550, 0.0f, 0.0f),
-  circle4(30.0f, 370, 350, 0.0f, 0.0f);
+  circle4(30.0f, 300, 350, 0.0f, 0.0f);
 
 class X11_wrapper {
     private:
@@ -308,6 +314,15 @@ void X11_wrapper::check_resize(XEvent *e)
     }
 }
 //-----------------------------------------------------------------------------
+void make_particle(int x, int y) { 
+    particles[g.pr].w = 1;
+    particles[g.pr].h = 1;
+    particles[g.pr].pos[0] = x;
+    particles[g.pr].pos[1] = y;
+    particles[g.pr].vel[0] = ((float)rand() / (float)RAND_MAX) - 0.1;
+    particles[g.pr].vel[1] = ((float)rand() / (float)RAND_MAX) * 0.2 - 0.1;
+    ++g.pr;
+}
 
 void X11_wrapper::check_mouse(XEvent *e)
 {
@@ -399,7 +414,7 @@ int X11_wrapper::check_keys(XEvent *e)
 
             }
             else if (g.map == 2) {
-                velocity[1] = 10.5f;
+                velocity[1] = 11.0f;
                 if (ball2[i].ballSpawned == 1 && ball2[i].init == 0) {
                     ball2[i].vel[1] = velocity[1];
                     ball2[i].init = 1;
@@ -416,14 +431,16 @@ int X11_wrapper::check_keys(XEvent *e)
 		}
 		break;
         case XK_m:
-        if (credit <= 0) {
+        //Buy multiball
+        if (score >= 1000) {
             if (g.map == 1) {
                 for (int i = 0; i < MAX_BALLS; i++) {
                     if (ball1[i].ballSpawned == 0) {
                         ball1[i].ballSpawned = 1;
-                        makeBall(i, &ball1[i].ballSpawned, &ball1[i].pos[0], &ball1[i].pos[1], &ball1[i].vel[1]);
-						summonshapes = 0; 
-						more++;
+                        makeBall(i, &ball1[i].ballSpawned, &ball1[i].pos[0], &ball1[i].pos[1], &ball1[i].vel[1]); 
+                        score = score - 1000;
+                        summonshapes = 0;
+                        more++;
                         break;
                     }
                 }
@@ -433,10 +450,42 @@ int X11_wrapper::check_keys(XEvent *e)
                     if (ball2[i].ballSpawned == 0) {
                         ball2[i].ballSpawned = 1;
                         makeBall(i, &ball2[i].ballSpawned, &ball2[i].pos[0], &ball2[i].pos[1], &ball2[i].vel[1]); 
+                        score = score - 1000;
                         break;
                     }
                 }
             }
+        }
+        break;
+        case XK_b:
+        //Boost mode
+        if (score >= 250) {
+            for (int i = 0; i < MAX_BALLS; i++) {
+                if (g.map == 1) {
+                    for (int j = 0; j < 5; j++) {
+                        if (ball1[i].ballSpawned) {
+                            make_particle(ball1[i].pos[0], ball1[i].pos[1]);
+                            ball1[i].vel[1] = 8.0f;
+                        }
+                    }
+                }
+                if (g.map == 2) {
+                    for (int j = 0; j < 5; j++) {
+                        if (ball2[i].ballSpawned) {
+                            make_particle(ball2[i].pos[0], ball2[i].pos[1]);
+                            ball2[i].vel[1] = 10.0f;
+                        }
+                    }
+                }
+            }
+            score = score - 250;
+        }
+        break;
+        case XK_s:
+        //Savior Mode
+        if (saviorActive == 0 && score >= 500) {
+            saviorActive = 1;
+            score = score - 500;
         }
         break;
         case XK_2:
@@ -567,6 +616,16 @@ void physics()
 	}
     }
 
+    for (int i = 0; i < g.pr; i++) {
+        particles[i].pos[0] += particles[i].vel[0];
+        particles[i].pos[1] += particles[i].vel[1];
+        particles[i].vel[1] -= Gravity;
+        //check if particle is off screen...
+        if (particles[i].pos[1] < 0.0) {
+        particles[i] = particles[--g.pr];
+        }
+    }
+
     /* Box collision */
     extern void box_collision(float *ballx, float *bally, int ballw, 
             int boxx, int boxy, int w, int h, float *vx, float *vy);
@@ -589,8 +648,8 @@ void physics()
 		moving_circle(&cir3.c[0], &cir3.c[1], &cir3.vel[0], &cir3.vel[1], d);
 	}
     for (int i = 0; i < MAX_BALLS; i++) {
-    
-	
+
+
     box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, highbox1.pos[0],
         highbox1.pos[1], highbox1.w, highbox1.h, &ball1[i].vel[0], &ball1[i].vel[1]);
     box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, highbox2.pos[0],
@@ -603,6 +662,13 @@ void physics()
         box1.pos[1], box1.w, box1.h, &ball1[i].vel[0], &ball1[i].vel[1]);
     box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, box2.pos[0],
         box2.pos[1], box2.w, box2.h, &ball1[i].vel[0], &ball1[i].vel[1]);
+    
+    if (saviorActive) {
+        if (ball1[i].pos[1] - ball1[i].w <= safeBox.pos[1] + safeBox.h) {
+            ball1[i].vel[1] = 8.0f;
+            saviorActive = 0;
+        }
+    }
 
    /* CIRCLES */
     circle_collision(&ball1[i].pos[0], &ball1[i].pos[1],halfcir.c[0], halfcir.c[1],
@@ -632,7 +698,7 @@ void physics()
             &ball1[i].vel[0], &ball1[i].vel[1]);
     if (ball1[i].pos[0] <= 300.0f && ball1[i].pos[1] >= 395.0f) {
 	    if (!more) {
-			summonshapes = 1;
+	    summonshapes = 1;
 		}
 		else {
     		if (ball1[more].pos[0] <= 300.0f && ball1[more].pos[1] >= 395.0f) {
@@ -720,8 +786,15 @@ void physics()
         for (int i = 0; i < MAX_BALLS; i++) {
 			if (alex_feature) {
 				moving_circle(&circle2.c[0], &circle2.c[1], &circle2.vel[0], &circle2.vel[1], 4);
-				moving_circle(&circle1.c[0], &circle1.c[1], &circle1.vel[0], &circle1.vel[1], 5);
+				moving_circle(&circle3.c[0], &circle3.c[1], &circle3.vel[0], &circle3.vel[1], 5);
 			}
+
+            rotate_point(0.01f, &Obs.pos[0], &Obs.pos[1], 125, 575);
+
+            if (ball2[i].pos[0] < 550.0f) {
+            box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, start3.pos[0],
+                start3.pos[1], start3.w, start3.h, &ball2[i].vel[0], &ball2[i].vel[1]);
+            }
     
             box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, start.pos[0],
                 start.pos[1], start.w, start.h, &ball2[i].vel[0], &ball2[i].vel[1]);
@@ -735,6 +808,15 @@ void physics()
                 bot1.pos[1], bot1.w, bot1.h, &ball2[i].vel[0], &ball2[i].vel[1]);
             box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, bot2.pos[0],
                 bot2.pos[1], bot2.w, bot2.h, &ball2[i].vel[0], &ball2[i].vel[1]);
+            box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, Obs.pos[0],
+                Obs.pos[1], Obs.w, Obs.h, &ball2[i].vel[0], &ball2[i].vel[1]);
+
+            if (saviorActive) {
+                if (ball2[i].pos[1] - ball2[i].w <= safeBox2.pos[1] + safeBox2.h) {
+                    ball2[i].vel[1] = 8.0f;
+                    saviorActive = 0;
+                }
+            }
 
             circle_collision(&ball2[i].pos[0], &ball2[i].pos[1],circle1.c[0], circle1.c[1],
                     circle1.r, &ball2[i].vel[0], &ball2[i].vel[1]);
@@ -793,6 +875,7 @@ void physics()
             point += 0.01;
             if (point >= 0.10f){
                 score += 1;
+                credit += 0;
                 point = 0.00f;
             }
         }
@@ -811,6 +894,7 @@ void physics()
             if(lives == 0) {
                 lives = 3;
                 score = 0;
+                credit = 0;
             }
         }
     }
@@ -886,6 +970,10 @@ void render()
 
      // Draw Box
     glBindTexture(GL_TEXTURE_2D, g.rocktxt);
+        if (saviorActive) {
+            unsigned char safeCol[3] = {255, 255, 0};
+            draw_box(safeBox, safeCol);
+        }
         draw_box(highbox1, def);
         draw_box(highbox2, def);
         draw_box(highbox3, def);
@@ -998,15 +1086,22 @@ void render()
     glTexCoord2f( 1.0f, 1.0f); glVertex2i( g.xres, 0);
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
-   
 
+
+    unsigned char startdef[3] {100, 100, 100};
     glBindTexture(GL_TEXTURE_2D, g.rocktxt);
+    if (saviorActive) {
+        unsigned char safeCol[3] = {255, 255, 0};
+        draw_box(safeBox2, safeCol);
+    }
+    draw_box(start3, startdef);
     draw_box(start, def);
     draw_box(start2, def);
     draw_box(out1, def);
     draw_box(out2, def);
     draw_box(bot1, def);
     draw_box(bot2, def);
+    draw_box(Obs, def);
     
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -1083,7 +1178,7 @@ void render()
     for (int i = 0; i < MAX_BALLS; i++) {
         if (ball2[i].ballSpawned == 1) {
             glPushMatrix();
-            glColor3ub(0,0,0);
+            glColor3ub(135, 189, 255);
             glTranslatef(ball2[i].pos[0], ball2[i].pos[1], 0.0f);
             glBegin(GL_QUADS);
             glVertex2f(-ball2[i].w, -ball2[i].h);
@@ -1098,4 +1193,18 @@ void render()
     }
     
 }
+    //Draw particle.
+    for (int i = 0; i < g.pr; i++) {
+	    glPushMatrix();
+	    glColor3ub(255, 110, 0); // Changed to variables
+        //glColor3f(boxr, boxg, boxb);
+	    glTranslatef(particles[i].pos[0], particles[i].pos[1], 0.0f);
+	    glBegin(GL_QUADS);
+		glVertex2f(-particles[i].w, -particles[i].h);
+		glVertex2f(-particles[i].w,  particles[i].h);
+		glVertex2f( particles[i].w,  particles[i].h);
+		glVertex2f( particles[i].w, -particles[i].h);
+	    glEnd();
+	    glPopMatrix();
+    }
 }
