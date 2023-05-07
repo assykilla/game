@@ -28,6 +28,11 @@ Image img("dinosaurs.jpeg");
 Image lvl2grass("grass1.jpg");
 Image lvl2rock("rock1.jpg");
 Image lvl2rock2("stone2.jpg");
+Image main_background("main_screen.jpg");
+Image leaderboard_background("leaderboard_screen.jpg");
+string leaderboard = "leaderboard.txt";
+string leaderboard_names[10] = {"", "", "", "", "", "", "", "", "", ""};
+string leaderboard_scores[10] = {"", "", "", "", "", "", "", "", "", ""};
 
 extern Triangle t1;
 extern Triangle t2;
@@ -55,6 +60,8 @@ class Global {
     GLuint rocktxt;
     GLuint grassbkg;
     GLuint rock2txt;
+    GLuint background_texture;
+    GLuint leaderboard_texture;
 	unsigned int pause;
 	unsigned int mainmenu;
     unsigned int map;
@@ -215,7 +222,7 @@ int main()
 	    x11.check_mouse(&e);
 	    done = x11.check_keys(&e);
 	    if (g.mainmenu == 4)
-		done = 1;
+            done = 1;
 	}
 	physics();
 	render();
@@ -343,7 +350,7 @@ void X11_wrapper::check_mouse(XEvent *e)
     if (e->type == ButtonPress) {
 	if (e->xbutton.button==1) {
 	    if (g.mainmenu == 0) {
-		g.mainmenu = select_option(e->xbutton.x, g.yres - e->xbutton.y);
+		g.mainmenu = select_option(g.xres, g.yres, e->xbutton.x, g.yres - e->xbutton.y);
 	    } else if (g.mainmenu == 1) {
             if (g.map == 0) {
                 g.map = select_map(g.xres, g.yres, e->xbutton.x, g.yres - e->xbutton.y);
@@ -498,10 +505,6 @@ int X11_wrapper::check_keys(XEvent *e)
             level2 = 0;
         }
         break;
-		if (XK_Shift_L && g.mainmenu != 0) {
-		    g.mainmenu = 0;
-		}
-		break;
             case XK_Left:
                 leftFlipper = 1;
                 break;
@@ -584,6 +587,26 @@ void init_opengl(void)
    	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
   	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
         GL_RGB, GL_UNSIGNED_BYTE, lvl2rock2.data);
+
+    glGenTextures(1, &g.background_texture);
+    w = main_background.width;
+    h = main_background.height;
+    glBindTexture(GL_TEXTURE_2D, g.background_texture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+                            GL_RGB, GL_UNSIGNED_BYTE, main_background.data);
+
+    glGenTextures(1, &g.leaderboard_texture);
+    w = leaderboard_background.width;
+    h = leaderboard_background.height;
+    glBindTexture(GL_TEXTURE_2D, g.leaderboard_texture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+                            GL_RGB, GL_UNSIGNED_BYTE, leaderboard_background.data);
+
+    read_leaderboard(leaderboard, leaderboard_names, leaderboard_scores);
 
 }
 float Gravity = 0.085;
@@ -774,10 +797,10 @@ void physics()
     if (noBalls == 1) {
         ball1[0].ballSpawned = 1;
         lives--;
-        if(lives == 0) {
+        /*if(lives == 0) {
             lives = 3;
             score = 0;
-        }
+        }*/
     }
     }
     // SECOND
@@ -891,11 +914,11 @@ void physics()
         if (noBalls == 1) {
             ball2[0].ballSpawned = 1;
             lives--;
-            if(lives == 0) {
+            /*if(lives == 0) {
                 lives = 3;
                 score = 0;
                 credit = 0;
-            }
+            }*/
         }
     }
     }
@@ -919,15 +942,29 @@ void draw_box(Box box, unsigned char color [])
 
 void render()
 {
+    if (lives <=0 && g.mainmenu == 1) {
+        g.mainmenu = 5;
+    }
     glClear(GL_COLOR_BUFFER_BIT);
     if (g.mainmenu == 0) {
-	prompt titlescreen[4];
+        //Image main_background("main_screen.jpg");
+        //draw background
+        draw_texture(g.background_texture, g.xres, g.yres);
 	Rect titleprompt[5];
 	for (int i=0; i<4; i++) {
-	    render_menu(titlescreen[i], titleprompt[i], i, g.xres, g.yres);
+	    render_menu(titleprompt[i], i, g.xres, g.yres);
 	}
 	render_title(titleprompt[5],g.xres,g.yres);
 	return;
+    } else if (g.mainmenu == 3) {
+        //Image leaderboard_background("leaderboard_screen.jpg");
+        draw_texture(g.leaderboard_texture, g.xres, g.yres);
+        print_leaderboard_boxes(g.xres, g.yres);
+        print_leaderboard(leaderboard_names, leaderboard_scores, g.xres, g.yres);
+        return;
+    } else if (g.mainmenu == 5) {
+        //death screen
+        return;
     } else if (g.mainmenu == 4) {
         return;
     } else if (g.mainmenu == 1) {
