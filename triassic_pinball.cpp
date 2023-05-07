@@ -43,7 +43,7 @@ extern Triangle flipper1;
 extern Triangle flipper2;
 extern void draw_triangle(Triangle triangle, unsigned char color[]);
 extern void draw_circle(float r, float cx, float cy, unsigned char color[]);
-extern void moving_circle(float *r, float *cy, float *vy);
+extern void moving_circle(float *cx, float *cy, float *vx, float *vy, int i);
 extern void show_stats(int score, int lives, int a);
 
 class Global {
@@ -116,8 +116,8 @@ class Box {
     start2(10.0f, float(g.yres) , 595.0f, g.yres, 0.0f, 0.0f),
     out1(300.0f, 10.0f, 300.0f, 695.0f, 0.0f, 0.0f),
     out2(10.0f, float(g.yres), 5.0f, g.yres, 0.0f, 0.0f),
-    bot1(75.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f),
-    bot2(75.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f),
+    bot1(76.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f),
+    bot2(76.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f),
     ball1[MAX_BALLS] {
         Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
         Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
@@ -159,13 +159,13 @@ class Circle {
 } test_ball(10,g.xres/2,g.yres/2,0,0), 
   halfcir(50.0f, 350 ,375, 0.0f, 0.0f),
   cir1(18.0f, 165 ,245, 0.0f, 0.0f),
-  cir2(18.0f, 115 ,210, 0.0f, 0.0f),
-  cir3(18.0f, 215 ,210, 0.0f, 0.0f),
+  cir2(18.0f, 115 ,175, 0.0f, 0.0f),
+  cir3(18.0f, 215 ,175, 0.0f, 0.0f),
   cir4(25.0f, 210 ,400, 0.0f, 0.0f),
   circle1(50.0f, 125, 575, 0.0f, 0.0f),
   circle2(30.0f, 200, 425, 0.0f, 0.0f),
   circle3(30.0f, 350, 550, 0.0f, 0.0f),
-  circle4(30.0f, 300, 350, 0.0f, 0.0f);
+  circle4(30.0f, 370, 350, 0.0f, 0.0f);
 
 class X11_wrapper {
     private:
@@ -361,7 +361,7 @@ void X11_wrapper::check_mouse(XEvent *e)
 	}
     }
 }
-
+int more = 0;
 int X11_wrapper::check_keys(XEvent *e)
 {
     if (e->type != KeyPress && e->type != KeyRelease)
@@ -399,7 +399,7 @@ int X11_wrapper::check_keys(XEvent *e)
 
             }
             else if (g.map == 2) {
-                velocity[1] = 9.5f;
+                velocity[1] = 10.5f;
                 if (ball2[i].ballSpawned == 1 && ball2[i].init == 0) {
                     ball2[i].vel[1] = velocity[1];
                     ball2[i].init = 1;
@@ -421,7 +421,9 @@ int X11_wrapper::check_keys(XEvent *e)
                 for (int i = 0; i < MAX_BALLS; i++) {
                     if (ball1[i].ballSpawned == 0) {
                         ball1[i].ballSpawned = 1;
-                        makeBall(i, &ball1[i].ballSpawned, &ball1[i].pos[0], &ball1[i].pos[1], &ball1[i].vel[1]); 
+                        makeBall(i, &ball1[i].ballSpawned, &ball1[i].pos[0], &ball1[i].pos[1], &ball1[i].vel[1]);
+						summonshapes = 0; 
+						more++;
                         break;
                     }
                 }
@@ -535,7 +537,7 @@ void init_opengl(void)
         GL_RGB, GL_UNSIGNED_BYTE, lvl2rock2.data);
 
 }
-float Gravity = 0.075;
+float Gravity = 0.085;
 
 void physics()
 {
@@ -579,8 +581,13 @@ void physics()
             float bally, float *vx, float *vy);
     // FIRST  
     if (g.map == 1) {
-	if (alex_feature)
-		moving_circle(&cir4.r, &cir4.c[1], &cir4.vel[1]);
+	int a = 0,b = 1,c = 2,d = 3;
+	if (alex_feature) {
+		moving_circle(&cir4.c[0], &cir4.c[1], &cir4.vel[0], &cir4.vel[1], a);
+		moving_circle(&cir2.c[0], &cir2.c[1], &cir2.vel[0], &cir2.vel[1], b);
+		moving_circle(&cir1.c[0], &cir1.c[1], &cir1.vel[0], &cir1.vel[1], c);
+		moving_circle(&cir3.c[0], &cir3.c[1], &cir3.vel[0], &cir3.vel[1], d);
+	}
     for (int i = 0; i < MAX_BALLS; i++) {
     
 	
@@ -623,14 +630,24 @@ void physics()
             &ball1[i].vel[0], &ball1[i].vel[1]);
     triangle_collision( t7, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
-    if (ball1[i].pos[0] <= 300.0f && ball1[i].pos[1] >= 395.0f)
-	    summonshapes = 1;
+    if (ball1[i].pos[0] <= 300.0f && ball1[i].pos[1] >= 395.0f) {
+	    if (!more) {
+			summonshapes = 1;
+		}
+		else {
+    		if (ball1[more].pos[0] <= 300.0f && ball1[more].pos[1] >= 395.0f) {
+				summonshapes = 1;
+			}
+		}
+	}
 
-    if (summonshapes) {
+    if (summonshapes && ball1[i].ballSpawned) {
     	triangle_collision( t8, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
     	triangle_collision( t9, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
+		if (ball1[i].pos[0] >= 350.0f && ball1[i].pos[1] <= 450.0f) 
+			 ball1[i].pos[1] = 450.0f;
     }
 
     flipping(g.map, &ball1[i].pos[0], &ball1[i].pos[1], &ball1[i].vel[0], &ball1[i].vel[1]);
@@ -669,6 +686,8 @@ void physics()
         ball1[i].vel[1] = 0;
         ball1[i].init = 0;
         summonshapes = 0;
+		if (more > 0)
+			more--;
     }
         if (ball1[i].vel[0] != 0.0f || ball1[i].vel[1] != 0.0f) {
                 point += 0.01;
@@ -699,6 +718,10 @@ void physics()
     if (g.map == 2) {
 
         for (int i = 0; i < MAX_BALLS; i++) {
+			if (alex_feature) {
+				moving_circle(&circle2.c[0], &circle2.c[1], &circle2.vel[0], &circle2.vel[1], 4);
+				moving_circle(&circle1.c[0], &circle1.c[1], &circle1.vel[0], &circle1.vel[1], 5);
+			}
     
             box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, start.pos[0],
                 start.pos[1], start.w, start.h, &ball2[i].vel[0], &ball2[i].vel[1]);

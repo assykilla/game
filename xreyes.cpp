@@ -127,7 +127,7 @@ void circle_collision(float *ballx, float *bally, float cx, float cy,
 		score += 100;
 		if ( *bally >= cy + 1 && *bally <= cy - 1) {
 			if (r < 20)
-				*vx = -dist2 * 0.4;
+				*vx = -dist2 * 0.25;
 			else
 				*vx = -dist2 * 0.09;
 		}
@@ -137,31 +137,37 @@ void circle_collision(float *ballx, float *bally, float cx, float cy,
 			if (*ballx < cx) {
 				if (*vy > 0) {
 					if (r < 20)
-						*vx = -dist2 * 0.4;
+						*vx = -dist2 * 0.25;
 					else
 						*vx = -dist2 * 0.09;
 				}
 				else {
-					*vy =  -*vy * 0.3;
-					if (r < 20)
-						*vx = -dist2 * 0.4;
-					else
+					if (r < 20) {
+						*vx = -dist2 * 0.25;
+						*vy =  -dist2 * 0.25;
+					}
+					else {
 						*vx = -dist2 * 0.09;
+						*vy = -dist2 * 0.09;
+					}
 				}
 				// *ballx = *ballx - 5;
 			} else { //ballx > cx && bally > cy
 				if (*vy > 0) {
 					if (r < 20)
-						*vx = dist2 * 0.4;
+						*vx = dist2 * 0.25;
 					else
 						*vx = dist2 * 0.09;
 				}
 				else {
-					*vy =  -*vy * 0.3;
-					if (r < 20)
-						*vx = dist2 * 0.4;
-					else
+					if (r < 20) {
+						*vx = dist2 * 0.25;
+						*vy = dist2 * 0.25;
+					}
+					else {
 						*vx = dist2 * 0.09;
+						*vy = dist2 * 0.09;
+					}
 				}
 				// *ballx = *ballx + 5;
 			}
@@ -172,32 +178,41 @@ void circle_collision(float *ballx, float *bally, float cx, float cy,
 				//*ballx = *ballx + 5 ;
 				//*bally = *bally - 5 ;
 				if (*vy > 0) {
-					*vy =  -*vy * 0.3;
-					if (r < 20)
-						*vx = -dist2 * 0.4;
-					else
+					if (r < 20) {
+						*vx = -dist2 * 0.25;
+						*vy = -dist2 * 0.25;
+}
+					else {
 						*vx = -dist2 * 0.09;
-
+						*vy = -dist2 * 0.09;
+}
 				}
 				else {
-					if (r < 20)
-						*vx = -dist2 * 0.4;
-					else
+					if (r < 20) {
+						*vx = -dist2 * 0.25;
+						*vy = -dist2 * 0.25;
+}
+					else {
 						*vx = -dist2 * 0.09;
+						*vy = -dist2 * 0.09;
+}
 				}
 			} else {    //ballx > cx && bally < cy
 				    // *ballx = *ballx + 5 ;
 				    // *bally = *bally - 5 ;
 				if (*vy > 0) {
-					*vy =  -*vy * 0.3;
-					if (r < 20)
-						*vx = dist2 * 0.4;
-					else
+					if (r < 20) {
+						*vx = dist2 * 0.25;
+						*vy = -dist2 * 0.25;
+}
+					else {
 						*vx = dist2 * 0.09;
+						*vy = -dist2 * 0.09;
+}
 				}
 				else {
 					if (r < 20)
-						*vx = dist2 * 0.4;
+						*vx = dist2 * 0.25;
 					else
 						*vx = dist2 * 0.09;
 				}
@@ -497,7 +512,7 @@ void show_stats(int score, int lives, int a)
  	if (a)
 		scoreboard.left = 500;
 	else 
-		scoreboard.left = 700;
+		scoreboard.left = 675;
 	scoreboard.center = 0;
 	ggprint8b(&scoreboard, 20, 0x00ffff00, "Score: %i", score);
 
@@ -506,7 +521,7 @@ void show_stats(int score, int lives, int a)
 	if (a)
 		life.left = 500;
 	else 
-		life.left = 700;
+		life.left = 675;
 	life.center = 0;
 	ggprint8b(&life, 20, 0x00ffff00, "Lives: %i", lives);
 }
@@ -528,22 +543,91 @@ void lost_ball(float *ballx, float *bally, float *vy, float *vx,
 	summonshapes = 0;
 }
 
-int a = 1;
-void moving_circle(float *r, float *cy, float *vy) 
+int a[5] = {1};
+
+void moving_circle(float *cx, float *cy, float *vx, float *vy, int i)
 {	
-	if (a && *cy <= 550){
-		*vy = 0.75f;
-		if (*cy == 550)
-		    a = 0;
+	if (i == 0) {	
+		if (a[i] && *cy <= 550) {
+			*vy = 0.75f;
+			if (*cy == 550)
+			    a[i] = 0;
+		}
+		else if (!a[i] && *cy >= 400) {
+			*vy = -0.75f;
+			if (*cy == 400)
+			    a[i] = 1;
+		}
 	}
-	else if (!a && *cy >= 400) {
-		*vy = -0.75f;
-		if (*cy == 400)
-		    a = 1;
-	}/*
-	if (*cy < 400) {
-		*vy = 0.0f;
-		*cy = 400;
-	}*/
-		*cy += *vy;	
+	else if ( i == 1) {
+		if (a[i] && *cy <= 300) {
+			*vy = 0.5f;
+			*vx = 0.25f;
+			if (*cy == 300)
+			    a[i] = 0;
+		}
+		else if (!a[i] && *cy >= 175) {
+			*vy = -0.5f;
+			*vx = -0.25f;
+			if (*cy == 175)
+			    a[i] = 1;
+		}
+	}
+	else if ( i == 2) {
+		if (a[i] && *cy <= 340) {
+			*vy = 0.5f;
+			if (*cy == 340)
+			    a[i] = 0;
+		}
+		else if (!a[i] && *cy >= 240) {
+			*vy = -0.5f;
+			if (*cy == 240)
+			    a[i] = 1;
+		}
+	}
+	else if ( i == 3) {
+		if (a[i] && *cy <= 300) {
+			*vy = 0.5f;
+			*vx = -0.25f;
+			if (*cy == 300)
+			    a[i] = 0;
+		}
+		else if (!a[i] && *cy >= 175) {
+			*vy = -0.5f;
+			*vx = 0.25f;
+			if (*cy == 175)
+			    a[i] = 1;
+		}
+	}
+	else if (i == 4) {
+		if (a[i] && *cy >= 250) {
+			*vy = -0.5f;
+			if (*cy == 250)
+			    a[i] = 0;
+		}
+		else if (!a[i] && *cy <= 425) {
+			*vy = 0.5f;
+			if (*cy == 425)
+			    a[i] = 1;
+		}
+
+	}
+	else if (i == 5) {
+		if (a[i] && *cy >= 450) {
+			*vy = -0.5f;
+			*vx = 0.25f;
+			if (*cy == 450)
+			    a[i] = 0;
+		}
+		else if (!a[i] && *cy <= 575) {
+			*vy = 0.5f;
+			*vx = -0.25f;
+			if (*cy == 575)
+			    a[i] = 1;
+		}
+
+	}
+
+	*cy += *vy;	
+	*cx += *vx;	
 }
