@@ -30,6 +30,8 @@ Image lvl2rock("rock1.jpg");
 Image lvl2rock2("stone2.jpg");
 Image main_background("main_screen.jpg");
 Image leaderboard_background("leaderboard_screen.jpg");
+Image control_background("controls_background.jpg");
+Image end_background("end_screen.jpg");
 string leaderboard = "leaderboard.txt";
 string leaderboard_names[10] = {"", "", "", "", "", "", "", "", "", ""};
 string leaderboard_scores[10] = {"", "", "", "", "", "", "", "", "", ""};
@@ -56,16 +58,21 @@ class Global {
 	int xres, yres;
 	int n;
     int pr;
+    int new_highscore;
+    int name_counter;
     GLuint texture;
     GLuint rocktxt;
     GLuint grassbkg;
     GLuint rock2txt;
     GLuint background_texture;
     GLuint leaderboard_texture;
+    GLuint control_texture;
+    GLuint end_texture;
 	unsigned int pause;
 	unsigned int mainmenu;
     unsigned int map;
 	unsigned int issa_feature;
+    bool updated_score;
 	Global(){
 	    xres = 800;
 	    yres = 700;
@@ -74,7 +81,9 @@ class Global {
 	    mainmenu = 0;
         map = 0;
 	    issa_feature = 0;
-
+        updated_score = false;
+        new_highscore = -1;
+        name_counter = 0;
 	}
 } g;
 extern int alex_feature, score, lives, summonshapes;
@@ -390,6 +399,22 @@ int X11_wrapper::check_keys(XEvent *e)
 	return 0;
     int key = XLookupKeysym(&e->xkey, 0);
     if (e->type == KeyPress) {
+        if (g.mainmenu == 5 && g.new_highscore != -1 && key != XK_Escape) {
+            //
+            if (g.name_counter > 2) {
+                //update leaderboard.txt
+                //
+                g.mainmenu = 0;
+                g.map = 0;
+                g.new_highscore = -1;
+                g.name_counter = 0;
+                g.updated_score = false;
+                save_leaderboard(leaderboard, leaderboard_names, leaderboard_scores);
+            }
+            leaderboard_names[g.new_highscore] += key;
+            g.name_counter++;
+
+        } else {
 	switch (key) {
 	    case XK_p:
 		g.pause = manage_pstate(g.pause);
@@ -433,6 +458,7 @@ int X11_wrapper::check_keys(XEvent *e)
         if (XK_Shift_L && g.mainmenu != 0) {
 		    g.mainmenu = 0;
             g.map = 0;
+            g.updated_score = false;
 			score = 0;
 			lives = 3;
 		}
@@ -516,6 +542,7 @@ int X11_wrapper::check_keys(XEvent *e)
 
 		return 1;
 	}
+        }
     }
 
     if (e->type == KeyRelease) {
@@ -605,6 +632,24 @@ void init_opengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
                             GL_RGB, GL_UNSIGNED_BYTE, leaderboard_background.data);
+
+    glGenTextures(1, &g.control_texture);
+    w = control_background.width;
+    h = control_background.height;
+    glBindTexture(GL_TEXTURE_2D, g.control_texture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+                            GL_RGB, GL_UNSIGNED_BYTE, control_background.data);
+    
+    glGenTextures(1, &g.end_texture);
+    w = end_background.width;
+    h = end_background.height;
+    glBindTexture(GL_TEXTURE_2D, g.end_texture);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+                            GL_RGB, GL_UNSIGNED_BYTE, end_background.data);
 
     read_leaderboard(leaderboard, leaderboard_names, leaderboard_scores);
 
@@ -942,8 +987,11 @@ void draw_box(Box box, unsigned char color [])
 
 void render()
 {
+    if (g.issa_feature) {
+    }
     if (lives <=0 && g.mainmenu == 1) {
         g.mainmenu = 5;
+        g.map = 0;
     }
     glClear(GL_COLOR_BUFFER_BIT);
     if (g.mainmenu == 0) {
@@ -956,6 +1004,8 @@ void render()
 	}
 	render_title(titleprompt[5],g.xres,g.yres);
 	return;
+    } else if (g.mainmenu == 2) {
+        draw_texture(g.control_texture, g.xres, g.yres);
     } else if (g.mainmenu == 3) {
         //Image leaderboard_background("leaderboard_screen.jpg");
         draw_texture(g.leaderboard_texture, g.xres, g.yres);
@@ -964,26 +1014,23 @@ void render()
         return;
     } else if (g.mainmenu == 5) {
         //death screen
+        if (!g.updated_score) {
+            g.new_highscore = update_leaderboard(leaderboard_names,
+                    leaderboard_scores, g.xres, g.yres, score);
+            g.updated_score = true;
+        }
+        if (g.new_highscore != -1) {
+            //Congratulate and instruct user
+            //to enter new name for score
+        }
+        draw_texture(g.end_texture, g.xres, g.yres);
+        print_leaderboard_boxes(g.xres, g.yres);
+        print_leaderboard(leaderboard_names, leaderboard_scores, g.xres, g.yres);
         return;
     } else if (g.mainmenu == 4) {
         return;
     } else if (g.mainmenu == 1) {
 
-    if (g.issa_feature) {
-	int n = 20;
-	double angle = 0.0;
-	double inc = (2.0*3.14)/n;
-	glColor3ub(255,255, 100);
-	glBegin(GL_TRIANGLE_FAN);
-	for (int i = 0; i < n; i++) {
-	    test_ball.x = test_ball.r*cos(angle);
-	    test_ball.y = test_ball.r*sin(angle);
-	    glVertex2f(test_ball.x+test_ball.c[0],test_ball.y + test_ball.c[1]);
-	    angle += inc;
-	}
-	glEnd();
-	draw_button(g.xres,g.yres);
-    }
     if (g.map == 0) {
         render_map_select(g.xres, g.yres);
     }

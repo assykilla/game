@@ -30,5 +30,7 @@ extern bool reset_death(int*,int*,bool);
 extern void read_leaderboard(string,string*,string*);
 extern void print_leaderboard_boxes(int,int);
 extern void print_leaderboard(string*,string*,int,int);
+extern int update_leaderboard(string*,string*,int,int,int);
+extern void save_leaderboard(string,string*,string*);
 
 #endif

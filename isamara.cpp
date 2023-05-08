@@ -198,11 +198,6 @@ void push_button(float *velocity, int x, int y)
     
 }
 
-void update_lives(unsigned int lives) 
-{
-
-}
-
 void power_up()
 {
 
@@ -238,7 +233,8 @@ void read_leaderboard(string file, string* name, string* score)
     }
     fin >> line;
     while (!fin.eof()) {
-        char placeholder[4];
+        usleep(1000);
+        char placeholder[10];
         char scoreholder[100];
         strncpy(placeholder, line.c_str(), 3);
         name[counter] = placeholder;
@@ -290,4 +286,45 @@ void print_leaderboard(string* name, string* score, int x, int y)
         create_text(t, leader, temp, xcoord1, ycoord);
         create_text(t, highscore, temp, xcoord2, ycoord);
     }
+}
+
+int update_leaderboard(string* name, string* score, int x, int y, int final_score)
+{
+    int position = -1;
+    string temp_score2;
+    string temp_name;
+    for (int i=0;i<9;i++) {
+        int temp_score = atoi(score[i].c_str());
+        if (final_score > temp_score && position == -1) {
+            position = i;
+            temp_score2 = score[i];
+            temp_name = name[i];
+            score[position] = to_string(final_score);
+            name[position] = "";
+        } 
+        if (position != -1) {
+            string temp_score3 = score[i+1];
+            string temp_name2 = name[i+1];
+            score[i+1] = temp_score2;
+            name[i+1] = temp_name;
+            temp_score2 = temp_score3;
+            temp_name = temp_name2; 
+        }
+    }
+    return position;
+}
+
+void save_leaderboard(string file, string* name, string* score)
+{
+    ofstream fin(file);
+    if (fin.fail()) {
+        cout << "Bad file input, please make sure the file path is correct"
+            << endl;
+    }
+    for (int i=0; i<10; i++) {
+        string line = name[i] + score[i] + "\n";
+        fin << line;
+        usleep(1000);
+    }
+    fin.close();
 }
