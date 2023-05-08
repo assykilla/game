@@ -165,63 +165,6 @@ unsigned int select_map(int x, int y, int xbutton, int ybutton)
     } else {return 0;}
 }
 
-void draw_button(int x, int y)
-{
-    int n = 20;
-    //circle.h will be used for the width
-    //drawing button to be pushed
-    prompt circle;
-    double angle = 0.0;
-    double inc = (2.0*3.14)/n;
-    //glVertex2f(x, y);
-    glColor3ub(100,200, 255);
-    glBegin(GL_TRIANGLE_FAN);
-    for (int i = 0; i < n; i++) {
-        circle.pos[0] = circle.h*cos(angle);
-        circle.pos[1] = circle.h*sin(angle);
-        glVertex2f(x/1.5+circle.pos[0],y/3 + circle.pos[1]);
-        angle += inc;
-    }
-    glEnd();
-}
-
-void push_button(float *velocity, int x, int y)
-{
-    // tries to launch ball similar to how pinball machines work
-    prompt circle;
-    if (y <= y/3 &&
-            x >= -1*circle.h-x/1.5 &&
-            x <= circle.h+x/1.5 &&
-            y >= -y/3) {
-        *velocity = 20.0f;
-    }
-    
-}
-
-void power_up()
-{
-
-}
-
-void check_score(int score, int score_counter, int *lives, int *multiplier)
-{
-    if (score%10000 == 0 && score != 0)
-        lives++;
-        //&lives++;
-
-}
-
-bool reset_death(int *score_counter, int *multiplier, bool death_true)
-{
-    if (!death_true)
-        return false;
-
-    //&score_counter = 0;
-    //&multiplier = 0;
-    return false;
-}
-
-//void read_leaderboard(string file, vector<string> name, vector<string> score)
 void read_leaderboard(string file, string* name, string* score)
 {
     string line;
@@ -248,26 +191,58 @@ void read_leaderboard(string file, string* name, string* score)
     fin.close();
 }
 
-//void print_leaderboard(vector<string> name, vector<string> score, int x, int y)
 void print_leaderboard_boxes(int x, int y)
 {
     prompt n(x/30, y/4, x/8, (y/2));
     prompt s(x/10, y/4, x/2, (y/2));
+    prompt l(x/5, y/20, x/2, y-30);
     Rect t;
     string name = "name";
     string score = "score";
+    string leaderboard = "leaderboard";
     char temp[24];
     float xcoord1 = n.pos[0];
     float xcoord2 = s.pos[0];
+    float xcoord3 = l.pos[0];
     float ycoord = 7*(y/10);
+    float ycoord2 = l.pos[1]-10;
     unsigned char c[3] = {200,200,200};
     n.set_color(c);
     s.set_color(c);
+    l.set_color(c);
     //draw_box(xcoord, ycoord, p.w, p.h, x, y, p.color);
     draw_box(xcoord1, n.pos[1], n.w, n.h, x, y, n.color);
     draw_box(xcoord2, s.pos[1], s.w, s.h, x, y, s.color);
+    draw_box(xcoord3, l.pos[1], l.w, l.h, x, y, l.color);
     create_text(t, name, temp, xcoord1, ycoord);
     create_text(t, score, temp, xcoord2, ycoord);
+    create_text(t, leaderboard, temp, xcoord3, ycoord2);
+}
+
+void print_end_screen(int x, int y, int print)
+{
+    prompt l(x/5, y/30, x/2, y-75);
+    Rect t;
+    string msg1 = "Enter 3 characters to name new score";
+    string msg2 = "Then enter e to return to main menu";
+    string msg3 = "Enter e to return to mainmenu";
+    string msg4 = "New High Score!";
+    string msg5 = "You have failed";
+    char temp[50];
+    float xcoord = l.pos[0];
+    float ycoord = l.pos[1];
+    unsigned char c[3] = {200,200,200};
+    l.set_color(c);
+    draw_box(xcoord, l.pos[1], l.w, l.h, x, y, l.color);
+    if (print == -1) {
+        create_text(t, msg5, temp, xcoord, ycoord+15);
+        create_text(t, msg3, temp, xcoord, ycoord);
+    } else {
+        create_text(t, msg4, temp, xcoord, ycoord+15);
+        create_text(t, msg1, temp, xcoord, ycoord);
+        create_text(t, msg2, temp, xcoord, ycoord-15);
+    }
+
 }
 
 void print_leaderboard(string* name, string* score, int x, int y)
@@ -328,3 +303,4 @@ void save_leaderboard(string file, string* name, string* score)
     }
     fin.close();
 }
+

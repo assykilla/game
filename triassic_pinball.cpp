@@ -364,9 +364,6 @@ void X11_wrapper::check_mouse(XEvent *e)
             if (g.map == 0) {
                 g.map = select_map(g.xres, g.yres, e->xbutton.x, g.yres - e->xbutton.y);
             }
-            if (g.issa_feature) {
-                push_button(&test_ball.vel[0], g.xres, g.yres);
-            }
 	    }
 
 
@@ -435,6 +432,27 @@ int X11_wrapper::check_keys(XEvent *e)
 		    g.issa_feature = !g.issa_feature;
 		}
 		break;
+        case XK_q:
+        if (g.issa_feature) {
+            lives = 0;
+        }
+        break;
+        case XK_t:
+        if (g.issa_feature) {
+            score = atoi(leaderboard_scores[0].c_str()) + 1;
+        }
+        break;
+        case XK_y:
+        if (g.issa_feature) {
+            score = rand()%
+                (atoi(leaderboard_scores[0].c_str()) + 1);
+        }
+        break;
+        case XK_u:
+        if (g.issa_feature) {
+            score = 0;
+        }
+        break;
 	    case XK_space:
         for (int i = 0; i < MAX_BALLS; i++) {
             if (g.map == 1) {
@@ -675,15 +693,6 @@ void physics()
 	            }
 	        }
         }
-    if(g.issa_feature) {
-	if (test_ball.vel[0] < 0) {
-	    test_ball.vel[0] = 0;
-	}
-	if (test_ball.vel[0] > 0) {
-	    test_ball.vel[0] -= Gravity;
-	}
-    }
-
     for (int i = 0; i < g.pr; i++) {
         particles[i].pos[0] += particles[i].vel[0];
         particles[i].pos[1] += particles[i].vel[1];
@@ -987,27 +996,26 @@ void draw_box(Box box, unsigned char color [])
 
 void render()
 {
-    if (g.issa_feature) {
-    }
     if (lives <=0 && g.mainmenu == 1) {
         g.mainmenu = 5;
         g.map = 0;
     }
     glClear(GL_COLOR_BUFFER_BIT);
     if (g.mainmenu == 0) {
-        //Image main_background("main_screen.jpg");
-        //draw background
+        //draw start menu
         draw_texture(g.background_texture, g.xres, g.yres);
-	Rect titleprompt[5];
-	for (int i=0; i<4; i++) {
-	    render_menu(titleprompt[i], i, g.xres, g.yres);
-	}
-	render_title(titleprompt[5],g.xres,g.yres);
-	return;
+        Rect titleprompt[5];
+        for (int i=0; i<4; i++) {
+            render_menu(titleprompt[i], i, g.xres, g.yres);
+        }
+        render_title(titleprompt[5],g.xres,g.yres);
+        return;
     } else if (g.mainmenu == 2) {
+        //controls menu
         draw_texture(g.control_texture, g.xres, g.yres);
+        return;
     } else if (g.mainmenu == 3) {
-        //Image leaderboard_background("leaderboard_screen.jpg");
+        //leaderboard menu
         draw_texture(g.leaderboard_texture, g.xres, g.yres);
         print_leaderboard_boxes(g.xres, g.yres);
         print_leaderboard(leaderboard_names, leaderboard_scores, g.xres, g.yres);
@@ -1019,19 +1027,19 @@ void render()
                     leaderboard_scores, g.xres, g.yres, score);
             g.updated_score = true;
         }
-        if (g.new_highscore != -1) {
-            //Congratulate and instruct user
-            //to enter new name for score
-        }
         draw_texture(g.end_texture, g.xres, g.yres);
         print_leaderboard_boxes(g.xres, g.yres);
+        print_end_screen(g.xres, g.yres, g.new_highscore);
         print_leaderboard(leaderboard_names, leaderboard_scores, g.xres, g.yres);
         return;
     } else if (g.mainmenu == 4) {
+        //exit game
         return;
     } else if (g.mainmenu == 1) {
+        //render actual game
 
     if (g.map == 0) {
+        draw_texture(g.background_texture, g.xres, g.yres);
         render_map_select(g.xres, g.yres);
     }
     Rect r[2];
@@ -1290,5 +1298,32 @@ void render()
 		glVertex2f( particles[i].w, -particles[i].h);
 	    glEnd();
 	    glPopMatrix();
+    }
+
+    if (!g.issa_feature) {
+        string issa_msg = "Press 3 to enter Issa's feature mode";
+        char temp[50];
+        Rect msg;
+        create_text(msg, issa_msg, temp, g.xres-140, g.yres-30);
+    } else if (g.issa_feature) {
+        string issa_msg = "Press 3 to exit Issa's feature mode";
+        string map_msg1 = "This is table 1";
+        string map_msg2 = "This is table 2";
+        string q_key = "Press q to reduce lives to zero";
+        string t_key = "Press t to change score to high score + 1";
+        string y_key = "Press y to change score to random number";
+        string u_key = "Press u to change score to zero";
+        char temp[50];
+        Rect msg;
+        create_text(msg, issa_msg, temp, g.xres-140, g.yres-30);
+        if (g.map == 1) {
+            create_text(msg, map_msg1, temp, g.xres-140, g.yres-45);
+        } else if (g.map == 2) {
+            create_text(msg, map_msg2, temp, g.xres-140, g.yres-45);
+        }
+        create_text(msg, q_key, temp, g.xres-140, g.yres-60);
+        create_text(msg, t_key, temp, g.xres-140, g.yres-75);
+        create_text(msg, y_key, temp, g.xres-140, g.yres-90);
+        create_text(msg, u_key, temp, g.xres-140, g.yres-105);
     }
 }
