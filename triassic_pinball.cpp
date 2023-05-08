@@ -36,6 +36,10 @@ string leaderboard = "leaderboard.txt";
 string leaderboard_names[10] = {"", "", "", "", "", "", "", "", "", ""};
 string leaderboard_scores[10] = {"", "", "", "", "", "", "", "", "", ""};
 
+extern int alex_feature, score, lives, summonshapes, boxcol;
+extern float velocity[2];
+extern bool summonball;
+extern double point;
 extern Triangle t1;
 extern Triangle t2;
 extern Triangle t3;
@@ -52,7 +56,9 @@ extern void draw_triangle(Triangle triangle, unsigned char color[]);
 extern void draw_circle(float r, float cx, float cy, unsigned char color[]);
 extern void moving_circle(float *cx, float *cy, float *vx, float *vy, int i);
 extern void show_stats(int score, int lives, int a);
-
+extern void circle_teleport(float *ballx, float *bally, float csx, float csy,
+                float r, float *vx, float *vy, float crx, float cry);
+extern void box_in_circles(float *boxx, float *boxy, float *vx, float *vy);
 class Global {
     public:
 	int xres, yres;
@@ -86,10 +92,6 @@ class Global {
         name_counter = 0;
 	}
 } g;
-extern int alex_feature, score, lives, summonshapes;
-extern float velocity[2];
-extern bool summonball;
-extern double point;
 class Box {
     public:
 	float w;
@@ -127,6 +129,7 @@ class Box {
     widebox1(230.0f,25.0f, 200, g.yres, 0.0f, 0.0f),
     box1(47.0f ,20.0f ,280, 10, 0.0f, 0.0f),
     box2(47.0f ,20.0f ,60, 10, 0.0f, 0.0f),
+    boxcir(20.0f ,20.0f ,200, 550, 0.0f, 0.0f),
     greenbox(8.0f, 10.0f, 170, 12, 0.0f, 0.0f),
     boxes[2],
     start(10.0f, 300.0f, 550.0f, 250.0f, 0.0f, 0.0f),
@@ -184,6 +187,8 @@ class Circle {
   cir2(18.0f, 115 ,175, 0.0f, 0.0f),
   cir3(18.0f, 215 ,175, 0.0f, 0.0f),
   cir4(25.0f, 210 ,400, 0.0f, 0.0f),
+  cirsnd(20.0f, 60 ,300, 0.0f, 0.0f),
+  cirrcv(15.0f, 50 ,600, 0.0f, 0.0f),
   circle1(50.0f, 125, 575, 0.0f, 0.0f),
   circle2(30.0f, 200, 425, 0.0f, 0.0f),
   circle3(30.0f, 350, 550, 0.0f, 0.0f),
@@ -219,6 +224,7 @@ void render(void);
 int main()
 {
     init_opengl(); 
+    srand(time(NULL));
     ball1[0].ballSpawned = 1;
     ball2[0].ballSpawned = 1;
     //Main loop
@@ -726,7 +732,7 @@ void physics()
 	}
     for (int i = 0; i < MAX_BALLS; i++) {
 
-
+    /* Box Collisions*/
     box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, highbox1.pos[0],
         highbox1.pos[1], highbox1.w, highbox1.h, &ball1[i].vel[0], &ball1[i].vel[1]);
     box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, highbox2.pos[0],
@@ -739,7 +745,14 @@ void physics()
         box1.pos[1], box1.w, box1.h, &ball1[i].vel[0], &ball1[i].vel[1]);
     box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, box2.pos[0],
         box2.pos[1], box2.w, box2.h, &ball1[i].vel[0], &ball1[i].vel[1]);
-    
+    /* Box moving in Circles */
+    	boxcol = 2;
+	if (alex_feature)
+    	box_in_circles(&boxcir.pos[0], &boxcir.pos[1], &boxcir.vel[0], &boxcir.vel[1]); 
+    box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, boxcir.pos[0],
+        boxcir.pos[1], boxcir.w, boxcir.h, &ball1[i].vel[0], &ball1[i].vel[1]);
+	boxcol = 0;
+
     if (saviorActive) {
         if (ball1[i].pos[1] - ball1[i].w <= safeBox.pos[1] + safeBox.h) {
             ball1[i].vel[1] = 8.0f;
@@ -759,7 +772,9 @@ void physics()
             cir3.r, &ball1[i].vel[0], &ball1[i].vel[1]);
     circle_collision(&ball1[i].pos[0], &ball1[i].pos[1],cir4.c[0], cir4.c[1],
             cir4.r, &ball1[i].vel[0], &ball1[i].vel[1]);
-        
+    /* CIRCLE TELEPORTATION */
+    circle_teleport(&ball1[i].pos[0], &ball1[i].pos[1] , cirsnd.c[0], cirsnd.c[1],
+                cirsnd.r, &ball1[i].vel[0], &ball1[i].vel[1], cirrcv.c[0], cirrcv.c[1]);
     /* For hypotenus facing left downwards and facing upwards */
     triangle_collision( t1, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
@@ -1072,6 +1087,7 @@ void render()
         draw_box(widebox1, def);
         draw_box(box1, def);
         draw_box(box2, def);
+        draw_box(boxcir, def);
         int posy = 350;
         for (int i = 0; i < 2; i++) {
                 boxes[i].pos[1] = posy;
@@ -1147,6 +1163,10 @@ void render()
     draw_circle(cir3.r,cir3.c[0],cir3.c[1], cirdef);
     draw_circle(cir4.r,cir4.c[0],cir4.c[1], cirdef);
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+    unsigned char telCol[3] = {0, 0, 0};
+    draw_circle(cirsnd.r,cirsnd.c[0],cirsnd.c[1], telCol);
+    draw_circle(cirrcv.r,cirrcv.c[0], cirrcv.c[1], telCol);
 
     for (int i = 0; i < MAX_BALLS; i++) {
         if (ball1[i].ballSpawned == 1) {

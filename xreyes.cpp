@@ -11,7 +11,7 @@
 #include "gtorres.h"
 #include <cstring>
 #include <unistd.h>
-
+#include <ctime>
 using namespace std;
 int alex_feature;
 float velocity[2] = {0.0f, 0.0f};
@@ -21,8 +21,8 @@ int score = 0;
 int flipcoor = 0;
 int lives = 3;
 double point = 0.00;
+int boxcol = 0;
 extern bool leftFlipper, rightFlipper;
-
 Triangle::Triangle() 
 {
 	vertex1[0] = 0;
@@ -85,7 +85,10 @@ void box_collision(float *ballx, float *bally, int ballw,
 			*ballx  >= boxx - w &&  	// left
 			*ballx <= boxx + w &&   	// right
 			*bally + ballw >= boxy - h) {     	// bottom
-		if (*bally <= boxy + h - 5 &&		// right and left sides
+	    if (boxcol == 2) {
+		score += 250;
+	    }
+	    if (*bally <= boxy + h - 5 &&		// right and left sides
 				*bally >= boxy - h + 5) {
 			if (*ballx > boxx)
 				*ballx = *ballx + 5;
@@ -352,9 +355,9 @@ void triangle_collision( Triangle triangle, float *ballx, float *bally,
 {
 	float u,w,v,x,y;
 	float theta, alpha, hyp, opp;
-	if ( ((*ballx <= triangle.vertex1[0] && *ballx >= triangle.vertex2[0]) ||
-				(*ballx <= triangle.vertex3[0] && *ballx >= triangle.vertex1[0])) &&
-			*bally <= triangle.vertex1[1] && *bally >= triangle.vertex3[1]) {
+	if (((*ballx <= triangle.vertex1[0] && *ballx >= triangle.vertex2[0]) ||
+	(*ballx <= triangle.vertex3[0] && *ballx >= triangle.vertex1[0])) &&
+	*bally <= triangle.vertex1[1] && *bally >= triangle.vertex3[1]) {
 
 		u = vector(triangle.vertex1[0], triangle.vertex1[1], 
 				triangle.vertex2[0], triangle.vertex2[1]);
@@ -630,4 +633,26 @@ void moving_circle(float *cx, float *cy, float *vx, float *vy, int i)
 
 	*cy += *vy;	
 	*cx += *vx;	
+}
+
+void circle_teleport(float *ballx, float *bally, float csx, float csy, 
+		float r, float *vx, float *vy, float crx, float cry)
+{
+	int dist2,xd2,yd2;
+	xd2 = *ballx - csx;
+	yd2 = *bally - csy;
+	dist2 = sqrt((xd2*xd2)+(yd2*yd2));
+	if (dist2 <= r) {
+	    	score += 150;
+		*bally = cry;
+		*ballx = crx;
+		*vy = 0.0f;
+		*vx = rand() % 10;		
+	}
+}
+float counter = 0.0f;
+void box_in_circles(float *boxx, float *boxy, float *vx, float *vy) {
+	*boxx = 0.325*cos(counter) + *boxx;
+	*boxy = 0.325*sin(counter) + *boxy;
+	counter += 0.01;
 }
