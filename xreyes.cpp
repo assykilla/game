@@ -22,6 +22,8 @@ int flipcoor = 0;
 int lives = 3;
 double point = 0.00;
 int boxcol = 0;
+int max_uses=5,max_saves=3;
+
 extern bool leftFlipper, rightFlipper;
 Triangle::Triangle() 
 {
@@ -51,7 +53,7 @@ void Triangle::set_color(unsigned char col[3])
 	memcpy(color, col, sizeof(unsigned char) * 3);
 }
 
-Triangle t1 = Triangle(450.0f,375.0f,450.0f,
+Triangle t1 = Triangle(450.0f,370.0f,450.0f,
 		495.0f, 495.0f, 350.0f);
 Triangle t2 = Triangle(20.0f,20.0f,100.0f,
 		450.0f, 300.0f, 450.0f);
@@ -61,18 +63,18 @@ Triangle flipper2 = Triangle(240.0f, 173.0f, 240.0f,
 		35.0f, 8.0f, 8.0f);
 Triangle t3 = Triangle(20.0f, 20.0f, 110.0f,
 		95.0f, 28.0f, 28.0f);
-Triangle t4 = Triangle(310.0f, 230.0f, 310.0f,
-		95.0f, 28.0f, 28.0f);
+Triangle t4 = Triangle(371.0f, 230.0f, 371.0f,
+		155.0f, 28.0f, 28.0f);
 Triangle t5 = Triangle(20.0f, 20.0f, 100.0f,
 		525.0f, 450.0f, 450.0f);
-Triangle t6 = Triangle(450.0f, 375.0f, 450.0f,
+Triangle t6 = Triangle(450.0f, 370.0f, 450.0f,
 		575.0f, 495.0f, 495.0f);
 Triangle t7 = Triangle(450.0f,350.0f,450.0f,
 		700.0f, 700.0f, 600.0f);
-Triangle t8 = Triangle(380.0f, 300.0f, 380.0f,
-		500.0f, 385.0f, 385.0f);
-Triangle t9 = Triangle(375.0f, 375.0f, 450.0f,
-		495.0f, 385.0f, 385.0f);
+//Triangle t8 = Triangle(380.0f, 300.0f, 380.0f,
+//		500.0f, 385.0f, 385.0f);
+//Triangle t9 = Triangle(370.0f, 370.0f, 450.0f,
+//		495.0f, 385.0f, 385.0f);
 Triangle t10 = Triangle(20.0f,20.0f,100.0f,
 		700.0f, 600.0f, 700.0f);
 Triangle t11 = Triangle(200.0f, 70.0f, 200.0f,
@@ -126,102 +128,142 @@ void circle_collision(float *ballx, float *bally, float cx, float cy,
 	xd2 = *ballx - cx;
 	yd2 = *bally - cy;
 	dist2 = sqrt((xd2*xd2)+(yd2*yd2));
+	double C_angle = 0.0;
+	int touched = 0;
+
 	if (dist2 <= r) {
-		score += 100;
-		if ( *bally >= cy + 1 && *bally <= cy - 1) {
-			if (r < 20)
-				*vx = -dist2 * 0.25;
-			else
-				*vx = -dist2 * 0.09;
-		}
-		else if ( *ballx >= cx + 1 && *ballx <= cx -1)
-			*vy = -*vy;
-		else if ( *bally > cy) {
-			if (*ballx < cx) {
+		touched++;
+		if (touched == 1)
+			score += 100;
+
+		if ( *bally >= cy) {
+			C_angle = asin(yd2/dist2);
+			if (*ballx < cx) { // 2nd quadrant
 				if (*vy > 0) {
-					if (r < 20)
-						*vx = -dist2 * 0.25;
+					if (*vx > 0)
+						*vx = *vx*cos(C_angle);
 					else
-						*vx = -dist2 * 0.09;
+						*vx = -*vx*cos(C_angle);
+					
+					*vy = *vy*sin(C_angle);
+					if (*ballx > cx-r)
+						*ballx = *ballx - 1; 
+					if (*bally < cy+r)
+						*bally = *bally + 1;
+					if (*vx < 0.75f && *vx > -0.75f)
+						*vx = -1.0f; 
 				}
-				else {
-					if (r < 20) {
-						*vx = -dist2 * 0.25;
-						*vy =  -dist2 * 0.25;
+				else { // *vy < 0
+					if (*vx < 0)
+						*vx = *vx*cos(C_angle);
+					else
+						*vx = -*vx*cos(C_angle);
+					*vy = -*vy*sin(C_angle);				
+					if (*ballx > cx-r)
+						*ballx = *ballx - 1; 
+					if (*bally < cy+r)
+						*bally = *bally + 1; 
+					if (*vx < 0.75f && *vx > -0.75f)
+						*vx = -1.0f; 
 					}
-					else {
-						*vx = -dist2 * 0.09;
-						*vy = -dist2 * 0.09;
-					}
-				}
-				// *ballx = *ballx - 5;
-			} else { //ballx > cx && bally > cy
+			} else { //ballx > cx && bally > cy		1st quadrant
 				if (*vy > 0) {
-					if (r < 20)
-						*vx = dist2 * 0.25;
+					if (*vx	< 0)
+						*vx = *vx*cos(C_angle);
 					else
-						*vx = dist2 * 0.09;
+						*vx = -*vx*cos(C_angle);
+					*vy = *vy*sin(C_angle);
+					
+					if (*ballx < cx+r)
+						*ballx = *ballx + 1; 
+					if (*bally < cy+r)
+						*bally = *bally + 1; 
+					if (*vx < 0.75f && *vx > -0.75f)
+						*vx = 1.0f; 
 				}
-				else {
-					if (r < 20) {
-						*vx = dist2 * 0.25;
-						*vy = dist2 * 0.25;
-					}
-					else {
-						*vx = dist2 * 0.09;
-						*vy = dist2 * 0.09;
-					}
+				else { // *vy <0
+					if (*vx	> 0)
+						*vx = *vx*cos(C_angle);
+					else
+						*vx = -*vx*cos(C_angle);
+					*vy = *vy*sin(C_angle);
+					if (*ballx < cx+r)
+						*ballx = *ballx + 1; 
+					if (*bally < cy+r)
+						*bally = *bally + 1; 
+					if (*vx < 0.75f && *vx > -0.75f)
+						*vx = 1.0f; 
 				}
-				// *ballx = *ballx + 5;
 			}
-			//    *bally = *bally + 5;
 		}
 		else { //bally < cy
-			if (*ballx < cx) {
-				//*ballx = *ballx + 5 ;
-				//*bally = *bally - 5 ;
+			C_angle = asin(yd2/-dist2);
+			if (*ballx < cx) {	// 3rd quadrant
 				if (*vy > 0) {
-					if (r < 20) {
-						*vx = -dist2 * 0.25;
-						*vy = -dist2 * 0.25;
-}
-					else {
-						*vx = -dist2 * 0.09;
-						*vy = -dist2 * 0.09;
-}
-				}
-				else {
-					if (r < 20) {
-						*vx = -dist2 * 0.25;
-						*vy = -dist2 * 0.25;
-}
-					else {
-						*vx = -dist2 * 0.09;
-						*vy = -dist2 * 0.09;
-}
-				}
-			} else {    //ballx > cx && bally < cy
-				    // *ballx = *ballx + 5 ;
-				    // *bally = *bally - 5 ;
-				if (*vy > 0) {
-					if (r < 20) {
-						*vx = dist2 * 0.25;
-						*vy = -dist2 * 0.25;
-}
-					else {
-						*vx = dist2 * 0.09;
-						*vy = -dist2 * 0.09;
-}
-				}
-				else {
-					if (r < 20)
-						*vx = dist2 * 0.25;
+					if (*vx	< 0)
+						*vx = -*vx*cos(C_angle);
 					else
-						*vx = dist2 * 0.09;
+						*vx = *vx*cos(C_angle);
+					*vy = -*vy*sin(C_angle);
+					
+					if (*ballx > cx-r)
+						*ballx = *ballx - 1; 
+					if (*bally > cy-r)
+						*bally = *bally - 1; 
+					if (*vx < 0.75f && *vx > -0.75f)
+						*vx = -1.0f; 
+				}
+				else { //*vy <0
+
+
+					if (*vx	> 0)
+						*vx = -*vx*cos(C_angle);
+					else
+						*vx = *vx*cos(C_angle);
+					*vy = *vy*sin(C_angle);
+					
+					if (*ballx < cx-r)
+						*ballx = *ballx - 1; 
+					if (*bally < cy-r)
+						*bally = *bally - 1; 
+					if (*vx < 0.75f && *vx > -0.75f)
+						*vx = -1.0f; 
+				}
+			} else {    //ballx > cx && bally < cy	4th quadrant
+				
+				if (*vy > 0) {
+					if (*vx	> 0)
+						*vx = -*vx*cos(C_angle);
+					else
+						*vx = *vx*cos(C_angle);
+					*vy = -*vy*sin(C_angle);
+					
+					if (*ballx > cx+r)
+						*ballx = *ballx + 1; 
+					if (*bally < cy-r)
+						*bally = *bally - 1; 
+					if (*vx < 0.75f && *vx > -0.75f)
+						*vx = 1.0f; 
+				}
+				else { // *vy < 0 
+					if (*vx	< 0)
+						*vx = -*vx*cos(C_angle);
+					else
+						*vx = *vx*cos(C_angle);
+					*vy = *vy*sin(C_angle);
+					
+					if (*ballx > cx+r)
+						*ballx = *ballx + 1; 
+					if (*bally < cy-r)
+						*bally = *bally - 1; 
+					if (*vx < 0.75f && *vx > -0.75f)
+						*vx = 1.0f; 
 				}
 			}
 		}
 	}
+	else 
+		touched = 0;
 }
 
 void draw_triangle(Triangle triangle, unsigned char color[])
@@ -271,27 +313,27 @@ float vector( float x1, float y1, float x2, float y2)
 
 void flipper1_collision(float *vx, float *vy, float *ballx, float *bally) 
 {
-		if (*vx > 3.0f && *vy <= -6.0f) {
+		if (*vx > 2.0f && *vy <= -4.0f) {
 			*vy = -*vy * 0.8;
 			*bally = *bally + 3;
 		}
-		else if ( *vx < -3.0f && *vy <= -6.0f) {
+		else if ( *vx < -2.0f && *vy <= -4.0f) {
 			*vx = -*vx * 0.9;
 			*vy = -*vy * 0.8;
 			*bally = *bally + 3; 
 		}
-		else if ( *vy > -6.0f && *vy < 0) {
+		else if ( *vy > -4.0f && *vy < 0) {
 			if (*vx < 0)
 				*vx = -*vx * 0.7;
 			*vx = *vx + 0.05;
 			*vy = *vy + 0.125;
 			*bally = *bally + 3; 
 		}
-		else if (*vx < 0 && *vx > -3.0f) {
+		else if (*vx < 0 && *vx > -2.0f) {
 			*vx = -*vx;
 			*bally = *bally + 3; 
 		}
-		else if (*vx > 0 && *vx < 3.0f) {
+		else if (*vx > 0 && *vx < 2.0f) {
 			*vx = *vx * 1.1;
 			*vy = *vy * 0.08;
 			*bally = *bally + 3; 
@@ -309,28 +351,28 @@ void flipper1_collision(float *vx, float *vy, float *ballx, float *bally)
 }
 void flipper2_collision(float *vx, float *vy, float *ballx, float *bally) 
 {
-	if (*vx > 3.0f && *vy <= -6.0f) {
+	if (*vx > 2.0f && *vy <= -4.0f) {
 		*vx = -*vx * 0.9;
 		*vy = -*vy * 0.8;
 		*bally = *bally + 3;
 	}
-	else if ( *vx <-3.0f && *vy <= -6.0f) { 
+	else if ( *vx <-2.0f && *vy <= -4.0f) { 
 		*vy = -*vy; 
 		*bally = *bally + 3;
 	}
-	else if ( *vy > -6.0f && *vy < 0){
+	else if ( *vy > -4.0f && *vy < 0){
 		if (*vx > 0)
 			*vx = -*vx * 0.7;
 		*vx = *vx - 0.05;
 		*vy = *vy + 0.125;
 		*bally = *bally + 3;
 	}
-	else if (*vx < 0 && *vx > -3.0f) {
+	else if (*vx < 0 && *vx > -2.0f) {
 		*bally = *bally + 3; 
 		*vx = *vx * 1.1;
 		*vy = *vy * 0.8;
 	}
-	else if (*vx > 0 && *vx < 3.0f) {
+	else if (*vx > 0 && *vx < 2.0f) {
 		*bally = *bally + 3; 
 		*vx = -*vx;
 	}
@@ -404,18 +446,21 @@ void triangle_collision( Triangle triangle, float *ballx, float *bally,
 			}
 			else { 		// t1
 
-				if (*vx == 0) 
-					*vx = -*vy;
+				if (*vx == 0) { 
+					*vx = -*vy + 1;
+					*vy = *vy * 0.75f;
+					*bally = *bally - 3; 
+				}
 				else if (*vy == 0)
 					*vy = -*vx;
 				else if (*vy < 0)
 					*vx = -*vx;
-				else if (*vx < 0 && *vx > -3.0f) {
+				else if (*vx < 0 && *vx > -2.0f) {
 					*bally = *bally - 3; 
 					*vx = *vx * 1.1;
 					*vy = *vy * 0.8;
 				}
-				else if (*vx > 0 && *vx < 3.0f) {
+				else if (*vx > 0 && *vx < 2.0f) {
 					*bally = *bally - 3; 
 					*vx = -*vx;
 				}
@@ -427,27 +472,27 @@ void triangle_collision( Triangle triangle, float *ballx, float *bally,
 		}
 	}
 }
-void xtriangle_collision( Triangle triangle, float ballx, float bally, 
+void xtriangle_collision( Triangle triangle, float *ballx, float *bally, 
 		float *vx, float *vy)
 {
 	float opp, hyp,x,y;
 	float theta, alpha;
 
-	if ( ballx >= triangle.vertex1[0] && ballx <= triangle.vertex3[0] && 
-			bally <= triangle.vertex1[1] && bally >= triangle.vertex2[1]) {
+	if ( *ballx >= triangle.vertex1[0] && *ballx <= triangle.vertex3[0] && 
+			*bally <= triangle.vertex1[1] && *bally >= triangle.vertex2[1]) {
 
 		opp = vector(triangle.vertex1[0], triangle.vertex1[1], 
 				triangle.vertex2[0], triangle.vertex2[1]);
 		hyp = vector(triangle.vertex2[0], triangle.vertex2[1], 
 				triangle.vertex3[0], triangle.vertex3[1]);
 
-		x = vector(triangle.vertex3[0],triangle.vertex3[1], ballx, bally);
-		y = (triangle.vertex1[1]-bally);
+		x = vector(triangle.vertex3[0],triangle.vertex3[1], *ballx, *bally);
+		y = (triangle.vertex1[1]-*bally);
 
 		theta = asin(opp/hyp);
 		alpha = asin(y/x);
 		if (alpha <= theta) {
-			if (*vx == 0) 
+			/*if (*vx == 0) 
 				*vx = -*vy;
 			else if (*vy == 0)
 				*vy = -*vx;
@@ -458,6 +503,28 @@ void xtriangle_collision( Triangle triangle, float ballx, float bally,
 			else {
 				*vx = -*vx ;
 				*vy = -*vy ;
+			}
+			if (*vx == 0) { 
+					*vx = -*vy + 1;
+					*vy = *vy * 0.75f;
+					*bally = *bally - 3; 
+			}*/
+			if (*vy == 0)
+				*vy = -*vx;
+			else if (*vy < 0)
+				*vx = -*vx;
+			else if (*vx < 0 && *vx > -2.0f) {
+				*bally = *bally - 3; 
+				*vx = -*vx * 1.1;
+				*vy = *vy * 0.8;
+			}
+			else if (*vx > 0 && *vx < 2.0f) {
+				*bally = *bally - 3; 
+				*vx = *vx;
+			}
+			else {
+				*vx = -*vx;
+				*vy = -*vy;	
 			}
 		}
 	}
@@ -527,6 +594,25 @@ void show_stats(int score, int lives, int a)
 		life.left = 675;
 	life.center = 0;
 	ggprint8b(&life, 20, 0x00ffff00, "Lives: %i", lives);
+
+	Rect boosts;
+	boosts.bot = 245;
+	if (a)
+		boosts.left = 500;
+	else 
+		boosts.left = 675;
+	boosts.center = 0;
+	ggprint8b(&boosts, 20, 0x00ffff00, "Boosts: %i", max_uses);
+	
+	Rect savior;
+	savior.bot = 195;
+	if (a)
+		savior.left = 485;
+	else 
+		savior.left = 660;
+	savior.center = 0;
+	ggprint8b(&savior, 20, 0x00ffff00, "Saves Boxes: %i", max_saves);
+
 }
 
 void lost_ball(float *ballx, float *bally, float *vy, float *vx, 
@@ -551,27 +637,27 @@ int a[5] = {1};
 void moving_circle(float *cx, float *cy, float *vx, float *vy, int i)
 {	
 	if (i == 0) {	
-		if (a[i] && *cy <= 550) {
-			*vy = 0.75f;
-			if (*cy == 550)
+		if (a[i] && *cy <= 500) {
+			*vy = 0.5f;
+			if (*cy == 500)
 			    a[i] = 0;
 		}
 		else if (!a[i] && *cy >= 400) {
-			*vy = -0.75f;
+			*vy = -0.5f;
 			if (*cy == 400)
 			    a[i] = 1;
 		}
 	}
 	else if ( i == 1) {
-		if (a[i] && *cy <= 300) {
+		if (a[i] && *cy <= 275) {
 			*vy = 0.5f;
-			*vx = 0.25f;
-			if (*cy == 300)
+			*vx = 0.15f;
+			if (*cy == 275)
 			    a[i] = 0;
 		}
 		else if (!a[i] && *cy >= 175) {
 			*vy = -0.5f;
-			*vx = -0.25f;
+			*vx = -0.15f;
 			if (*cy == 175)
 			    a[i] = 1;
 		}
@@ -589,27 +675,27 @@ void moving_circle(float *cx, float *cy, float *vx, float *vy, int i)
 		}
 	}
 	else if ( i == 3) {
-		if (a[i] && *cy <= 300) {
+		if (a[i] && *cy <= 275) {
 			*vy = 0.5f;
-			*vx = -0.25f;
-			if (*cy == 300)
+			*vx = -0.15f;
+			if (*cy == 275)
 			    a[i] = 0;
 		}
 		else if (!a[i] && *cy >= 175) {
 			*vy = -0.5f;
-			*vx = 0.25f;
+			*vx = 0.15f;
 			if (*cy == 175)
 			    a[i] = 1;
 		}
 	}
 	else if (i == 4) {
 		if (a[i] && *cy >= 250) {
-			*vy = -0.5f;
+			*vy = -0.25f;
 			if (*cy == 250)
 			    a[i] = 0;
 		}
 		else if (!a[i] && *cy <= 425) {
-			*vy = 0.5f;
+			*vy = 0.25f;
 			if (*cy == 425)
 			    a[i] = 1;
 		}
@@ -647,12 +733,12 @@ void circle_teleport(float *ballx, float *bally, float csx, float csy,
 		*bally = cry;
 		*ballx = crx;
 		*vy = 0.0f;
-		*vx = rand() % 10;		
+		*vx = rand() % 6 + 1;		
 	}
 }
 float counter = 0.0f;
 void box_in_circles(float *boxx, float *boxy, float *vx, float *vy) {
-	*boxx = 0.325*cos(counter) + *boxx;
+	*boxx = 0.525*cos(counter) + *boxx;
 	*boxy = 0.325*sin(counter) + *boxy;
 	counter += 0.01;
 }

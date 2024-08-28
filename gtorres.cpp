@@ -55,7 +55,7 @@ extern bool makeBall(unsigned int map, bool *summoned, float *px, float *py, flo
             *px = 415;
             *py = 100;
             *summoned = 1;
-            *vy = 8.0f;
+            *vy = 4.0f;
             return 1;
         }
         if (map == 2) {
@@ -63,7 +63,7 @@ extern bool makeBall(unsigned int map, bool *summoned, float *px, float *py, flo
             *px = 575;
             *py = 100;
             *summoned = 1;
-            *vy = 9.5f;
+            *vy = 5.25f;
             return 1;
         }
     }
@@ -95,11 +95,24 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
         if (leftFlipper == 1) { //LEFT IS PRESSED
             if (leftFlipperFrame <= flipperFrames) { //MOVING UP
                 if (TriangleCol(flipper1, *ballx, *bally)) {
-                    *ballvy  = 8.0f;
+                    *ballvy  = 4.0f;
+					*bally = *bally+1.0f;
                 }
             } else if (leftFlipperFrame == flipperFrames + 1) { //FLIPPER PEAK
                 if (TriangleCol(flipper1, *ballx, *bally)) {
-                    *ballvy = *ballvx * 0.8;
+					if (*ballvy <= 0.5) {
+                    	*ballvy = *ballvy * -0.8f;
+                    	*bally = *bally+1.0f;
+                    	*ballx = *ballx-0.075f;
+					}
+					else
+						*ballvy = *ballvy * 0.9f;
+
+                    *ballvx = *ballvx - 0.02;
+					if (*ballvy < 2.0) {
+                   		*bally = *bally+1.0f;
+                    	*ballx = *ballx-0.075f;
+					}
                 }
             }
         }
@@ -119,12 +132,25 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
         if (rightFlipper == 1) { //RIGHT IS PRESSED
             if (rightFlipperFrame <= flipperFrames) { //MOVING UP
                 if (TriangleCol(flipper2, *ballx, *bally)) {
-                    *ballvy  = 8.0f;
+                    *ballvy  = 4.0f;
+					*bally = *bally+1.0f;
                 }
             } else if (rightFlipperFrame == flipperFrames + 1) { //FLIPPER PEAK
                 rightAngle = 0;
                 if (TriangleCol(flipper2, *ballx, *bally)) {
-                    *ballvy = *ballvx * -0.8;
+					if (*ballvy <= 0.5){
+                    	*ballvy = *ballvy * -0.8f;
+                    	*bally = *bally+1.0f;
+                    	*ballx = *ballx-0.075f;
+					}
+					else
+						*ballvy = *ballvy * 0.9f;
+
+                    *ballvx = *ballvx - 0.02;
+					if (*ballvy > 2.0) {
+                    	*bally = *bally+1.0f;
+                    	*ballx = *ballx+0.075f;
+					}
                 }
             }
         }
@@ -143,11 +169,24 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
         if (leftFlipper == 1) { //LEFT IS PRESSED
             if (leftFlipperFrame <= flipperFrames2) { //MOVING UP
                 if (TriangleCol(GflipL, *ballx, *bally)) {
-                    *ballvy  = 10.0f;
+                    *ballvy  = 5.0f;
+					*bally = *bally+1.2f;
                 }
             } else if (leftFlipperFrame == flipperFrames2 + 1) { //PEAK
                 if (TriangleCol(GflipL, *ballx, *bally)) {
-                    *ballvy = *ballvx + 0.01f;
+					if (*ballvy <= 0.75) {
+                    	*ballvy = *ballvy * -0.85f;
+                    	*bally = *bally+1.2f;
+                    	*ballx = *ballx-0.075f;
+					}
+					else
+						*ballvy = *ballvy * 0.95f;
+
+                    *ballvx = *ballvx - 0.02;
+					if (*ballvy < 2.5) {
+                   		*bally = *bally+1.2f;
+                    	*ballx = *ballx-0.075f;
+					}
                 }
             }
         }
@@ -165,12 +204,25 @@ void flipping(unsigned int map, float *ballx, float *bally, float *ballvx, float
         if (rightFlipper == 1) { //RIGHT IS PRESSED
             if (rightFlipperFrame <= flipperFrames2) { //MOVING UP
                 if (TriangleCol(GflipR, *ballx, *bally)) {
-                    *ballvy  = 10.0f;
+                    *ballvy  = 5.0f;
+                    	*bally = *bally+1.2f;
             }
             } else if (rightFlipperFrame == flipperFrames2 + 1) { //FLIPPER PEAK
                 rightAngle = 0;
                 if (TriangleCol(GflipR, *ballx, *bally)) {
-                    *ballvy = *ballvx * -0.8;
+					if (*ballvy <= 0.75){
+                    	*ballvy = *ballvy * -0.85f;
+                    	*bally = *bally+1.2f;
+                    	*ballx = *ballx-0.075f;
+					}
+					else
+						*ballvy = *ballvy * 0.95f;
+
+                    *ballvx = *ballvx - 0.02;
+					if (*ballvy > 2.25) {
+                    	*bally = *bally+1.2f;
+                    	*ballx = *ballx+0.075f;
+					}
                 }
             }
         }
@@ -328,12 +380,20 @@ Triangle Gt8 = Triangle (5.0f, 5.0f, 80.0f,
                         450.0f ,200.0f ,450.0f);
 Triangle Gt9 = Triangle (545.0f,420.0f, 545.0f, 
                         550.0f ,400.0f ,400.0f);
-Triangle Gt10 = Triangle (545.0f,420.0f, 545.0f, 
-                        400.0f ,400.0f ,150.0f);
-Triangle Gt11 = Triangle (150.0f,60.0f, 60.0f, 
-                        100.0f ,135.0f ,275.0f);
-Triangle Gt12 = Triangle (490.0f,490.0f, 400.0f, 
-                        275.0f ,135.0f ,100.0f);
+Triangle Gt10 = Triangle (540.0f,420.0f, 540.0f, 
+                        400.0f ,400.0f ,200.0f);
+Triangle Gt11 = Triangle (60.0f,60.0f, 140.0f, 
+                        210.0f ,130.0f ,130.0f);
+Triangle Gt12 = Triangle (490.0f,410.0f, 490.0f, 
+                        210.0f ,130.0f ,130.0f);
+Triangle Gt13 = Triangle (96.0f,41.0f, 96.0f, 
+                        130.0f ,130.0f ,100.0f);
+Triangle Gt14 = Triangle (96.0f,96.0f, 140.0f, 
+                        130.0f ,100.0f ,130.0f);
+Triangle Gt15 = Triangle (456.0f,410.0f, 456.0f, 
+                        130.0f ,130.0f ,100.0f);
+Triangle Gt16 = Triangle (456.0f,456.0f, 509.0f, 
+                        130.0f ,100.0f ,130.0f);
 
 
 void addScore(int amount)

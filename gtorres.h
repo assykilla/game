@@ -47,6 +47,10 @@ extern Triangle Gt9;
 extern Triangle Gt10;
 extern Triangle Gt11;
 extern Triangle Gt12;
+extern Triangle Gt13;
+extern Triangle Gt14;
+extern Triangle Gt15;
+extern Triangle Gt16;
 
 
 #endif

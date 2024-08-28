@@ -13,13 +13,19 @@ class Triangle
 	unsigned char color[3];
         void set_color(unsigned char col[3]);
 };
-/*Triangle t1;
-Triangle t2;
-Triangle t3;
-Triangle t4;
-Triangle t5;
-Triangle flipper1;
-Triangle flipper2;*/
+
+extern Triangle t1;
+extern Triangle t2;
+extern Triangle t3;
+extern Triangle t4;
+extern Triangle t5;
+extern Triangle t6;
+extern Triangle t7;
+extern Triangle t8;
+extern Triangle t9;
+extern Triangle t10;
+extern Triangle flipper1;
+extern Triangle flipper2;
 class Image { 
     public: 
 	int width, height; 

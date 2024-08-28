@@ -37,10 +37,11 @@ string leaderboard_names[10] = {"", "", "", "", "", "", "", "", "", ""};
 string leaderboard_scores[10] = {"", "", "", "", "", "", "", "", "", ""};
 
 extern int alex_feature, score, lives, summonshapes, boxcol;
+extern int max_uses,max_saves;
 extern float velocity[2];
 extern bool summonball;
 extern double point;
-extern Triangle t1;
+/*extern Triangle t1;
 extern Triangle t2;
 extern Triangle t3;
 extern Triangle t4;
@@ -51,7 +52,7 @@ extern Triangle t8;
 extern Triangle t9;
 extern Triangle t10;
 extern Triangle flipper1;
-extern Triangle flipper2;
+extern Triangle flipper2;*/
 extern void draw_triangle(Triangle triangle, unsigned char color[]);
 extern void draw_circle(float r, float cx, float cy, unsigned char color[]);
 extern void moving_circle(float *cx, float *cy, float *vx, float *vy, int i);
@@ -123,7 +124,7 @@ class Box {
 	    vel[0] = v0;
 	    vel[1] = v1;
 	}
-} highbox1(50.0f,375.0f, 350, 10, 0.0f, 0.0f), 
+} highbox1(15.0f,375.0f, 385, 10, 0.0f, 0.0f), 
     highbox2(20.0f,float(g.yres), 0, 10, 0.0f, 0.0f),
     highbox3(10.0f,float(g.yres), 440, 10, 0.0f, 0.0f),
     widebox1(230.0f,25.0f, 200, g.yres, 0.0f, 0.0f),
@@ -131,17 +132,22 @@ class Box {
     box2(47.0f ,20.0f ,60, 10, 0.0f, 0.0f),
     boxcir(20.0f ,20.0f ,200, 550, 0.0f, 0.0f),
     greenbox(8.0f, 10.0f, 170, 12, 0.0f, 0.0f),
-    boxes[2],
+    boxes[4],
     start(10.0f, 300.0f, 550.0f, 250.0f, 0.0f, 0.0f),
     start2(10.0f, float(g.yres) , 595.0f, g.yres, 0.0f, 0.0f),
     start3(10.0f, 75.0f, 550.0f, 600.0f, 0.0f, 0.0f),
     out1(300.0f, 10.0f, 300.0f, 695.0f, 0.0f, 0.0f),
     out2(10.0f, float(g.yres), 5.0f, g.yres, 0.0f, 0.0f),
-    bot1(76.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f),
-    bot2(76.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f),
+    bot1(77.0f, 50.0f, 75.0f, 0.0f, 0.0f, 0.0f),
+    bot2(77.0f, 50.0f, 475.0f, 0.0f, 0.0f, 0.0f),
     Obs(15.0f, 15.0f, 125, 650 , 0.0f, 0.0f),
     safeBox(100.0f, 5.0f, 175.0f, 5.0f, 0.0f, 0.0f),
     safeBox2(100.0f, 5.0f, 275.0f, 5.0f, 0.0f, 0.0f),
+    collBox1(10.0f, 40.0f, 56.0f, 165.0f, 0.0f, 0.0f),
+    collBox2(10.0f, 40.0f, 496.0f, 165.0f, 0.0f, 0.0f),
+    blockbox1(15.0f,60.0f, 385, 435, 0.0f, 0.0f), 
+	rightboxm1(15.0f, 100.0f, 325, 275, 0.0f, 0.0f), 
+	blackRboxm1(15.0f, 5.0f, 355, 369, 0.0f, 0.0f), 
     particles[1000],
     ball1[MAX_BALLS] {
         Box(5.0f,5.0f, 415, 100, velocity[0], velocity[1]),
@@ -182,7 +188,7 @@ class Circle {
 	}
 
 } test_ball(10,g.xres/2,g.yres/2,0,0), 
-  halfcir(50.0f, 350 ,375, 0.0f, 0.0f),
+  halfcir(15.0f, 325 ,374, 0.0f, 0.0f),
   cir1(18.0f, 165 ,245, 0.0f, 0.0f),
   cir2(18.0f, 115 ,175, 0.0f, 0.0f),
   cir3(18.0f, 215 ,175, 0.0f, 0.0f),
@@ -215,14 +221,21 @@ class X11_wrapper {
 void init_opengl(void);
 void physics(void);
 void render(void);
-
-
+int sleepdelay = 3000;
+int initial = 0;
+//int max_uses = 5;
+//int max_saves = 3;
 
 //=====================================
 // MAIN FUNCTION IS HERE
 //=====================================
 int main()
 {
+	/*cout << "Choose usleep int above 2000: ";
+	cin >> sleepdelay;
+	if (sleepdelay<2000)
+		sleepdelay = 2000;
+*/
     init_opengl(); 
     srand(time(NULL));
     ball1[0].ballSpawned = 1;
@@ -242,7 +255,7 @@ int main()
 	physics();
 	render();
 	x11.swapBuffers();
-	usleep(2000);
+	usleep(sleepdelay);
     }
     cleanup_fonts();
     return 0;
@@ -396,12 +409,66 @@ void X11_wrapper::check_mouse(XEvent *e)
     }
 }
 int more = 0;
+int pressing = 0;
+int whichmap=0;
+int timer_function() {//XEvent *e) {	
+	int timer = 0;
+    //int key = XLookupKeysym(&e->xkey, 0);
+	while (timer < 10000)
+		timer++;
+	
+	//key = XK_space;
+	return timer;
+}
+
+void ball_initialization() {
+ 	for (int i = 0; i < MAX_BALLS; i++) {
+  		if (g.map == 1) {
+           	velocity[1] = (rand() % 2) + 4.0f + ((rand() % 5) * 0.1);
+           	if (ball1[i].ballSpawned == 1 && ball1[i].init == 0) {
+               	ball1[i].vel[1] = velocity[1];
+               	ball1[i].init = 1;
+   				initial = 1;
+           	}
+
+       	}
+       	else if (g.map == 2) {
+           	velocity[1] = (rand() % 3) + 5.5f + ((rand() % 10) * 0.1);
+           	if (ball2[i].ballSpawned == 1 && ball2[i].init == 0) {
+              	ball2[i].vel[1] = velocity[1];
+               	ball2[i].init = 1;
+   				initial = 1;
+           	}
+       	}
+   	}
+}
+
+int timer_key = 0;
+
+
 int X11_wrapper::check_keys(XEvent *e)
-{
-    if (e->type != KeyPress && e->type != KeyRelease)
+{	
+	if (more > 0) {
+	for (int i = 0;i<MAX_BALLS;i++) {
+        if (g.map == 1) {
+    		if (ball1[i].ballSpawned == 1 && ball1[i].init == 0)  
+				timer_key = timer_function();
+		}
+		if (g.map == 2) {		
+			if (ball2[i].ballSpawned == 1 && ball2[i].init == 0) 
+				timer_key = timer_function();
+		}
+	}
+	}	
+    if ((e->type != KeyPress && e->type != KeyRelease))
 	return 0;
+    
     int key = XLookupKeysym(&e->xkey, 0);
-    if (e->type == KeyPress) {
+	if (timer_key == 10000) {
+       	ball_initialization(); 
+		timer_key = 0;
+	}
+	if (e->type == KeyPress) {
         if (g.mainmenu == 5 && g.new_highscore != -1 && key != XK_Escape) {
             //
             if (g.name_counter > 2) {
@@ -413,7 +480,11 @@ int X11_wrapper::check_keys(XEvent *e)
                 g.name_counter = 0;
                 g.updated_score = false;
                 save_leaderboard(leaderboard, leaderboard_names, leaderboard_scores);
-            }
+            }	
+			score = 0;
+			lives = 3;
+            leftFlipper = 0;
+            rightFlipper = 0;
             leaderboard_names[g.new_highscore] += key;
             g.name_counter++;
 
@@ -460,32 +531,30 @@ int X11_wrapper::check_keys(XEvent *e)
         }
         break;
 	    case XK_space:
-        for (int i = 0; i < MAX_BALLS; i++) {
-            if (g.map == 1) {
-                velocity[1] = 8.0f;
-                if (ball1[i].ballSpawned == 1 && ball1[i].init == 0) {
-		            ball1[i].vel[1] = velocity[1];
-                    ball1[i].init = 1;
-                }
-
-            }
-            else if (g.map == 2) {
-                velocity[1] = 11.0f;
-                if (ball2[i].ballSpawned == 1 && ball2[i].init == 0) {
-                    ball2[i].vel[1] = velocity[1];
-                    ball2[i].init = 1;
-                }
-            }
-        }
+       	ball_initialization(); 
 		break;
 	    case XK_e:
+		
+		if	(XK_Right || XK_Left) {
+			e->type = KeyRelease;
+			leftFlipper = 0;
+			rightFlipper = 0;
+			pressing = 1;
+			if (whichmap==1||whichmap==2)
+				for (int i=0;i<100;i++)
+					flipperRotate(whichmap);
+		}	
         if (XK_Shift_L && g.mainmenu != 0) {
+        //if (g.mainmenu != 0) {
 		    g.mainmenu = 0;
             g.map = 0;
             g.updated_score = false;
 			score = 0;
 			lives = 3;
+			max_uses = 5;	
+			max_saves = 3;
 		}
+		
 		break;
         case XK_m:
         //Buy multiball
@@ -516,13 +585,13 @@ int X11_wrapper::check_keys(XEvent *e)
         break;
         case XK_b:
         //Boost mode
-        if (score >= 250) {
+        if (score >= 250 && max_uses > 0 && initial) {
             for (int i = 0; i < MAX_BALLS; i++) {
                 if (g.map == 1) {
                     for (int j = 0; j < 5; j++) {
                         if (ball1[i].ballSpawned) {
                             make_particle(ball1[i].pos[0], ball1[i].pos[1]);
-                            ball1[i].vel[1] = 8.0f;
+                            ball1[i].vel[1] = 4.0f;
                         }
                     }
                 }
@@ -530,37 +599,43 @@ int X11_wrapper::check_keys(XEvent *e)
                     for (int j = 0; j < 5; j++) {
                         if (ball2[i].ballSpawned) {
                             make_particle(ball2[i].pos[0], ball2[i].pos[1]);
-                            ball2[i].vel[1] = 10.0f;
+                            ball2[i].vel[1] = 5.0f;
                         }
                     }
                 }
             }
             score = score - 250;
+			max_uses--;
         }
         break;
         case XK_s:
         //Savior Mode
-        if (saviorActive == 0 && score >= 500) {
+        if (saviorActive == 0 && score >= 500 && max_saves > 0) {
             saviorActive = 1;
             score = score - 500;
+			max_saves--;
         }
         break;
         case XK_2:
-        if (level1 == 1) {
-            level2 = 1;
-            level1 = 0;
-        }
-        else {
-            level1 = 1;
-            level2 = 0;
-        }
+        	if (level1 == 1) {
+            	level2 = 1;
+            	level1 = 0;
+        	}
+       	 	else {
+            	level1 = 1;
+            	level2 = 0;
+        	}
+       	break;
+        
+		case XK_Left:
+				if (!pressing)
+                	leftFlipper = 1;
+       	break;
+        
+		case XK_Right:
+				if (!pressing)
+                	rightFlipper = 1;
         break;
-            case XK_Left:
-                leftFlipper = 1;
-                break;
-            case XK_Right:
-                rightFlipper = 1;
-                break;
 	    case XK_Escape:
 		//Escape key was pressed
 
@@ -678,21 +753,25 @@ void init_opengl(void)
     read_leaderboard(leaderboard, leaderboard_names, leaderboard_scores);
 
 }
-float Gravity = 0.085;
-
+float Gravity;
+int moving[3] = {0};
 void physics()
 {
+	if (g.map == 1)
+		Gravity = 0.0222;
+	if (g.map == 2) 
+		Gravity = 0.0232;
     if(!g.pause){
         for (int i = 0; i < MAX_BALLS; i++) {
             if (ball1[i].init == 1) {
-	            if (ball1[i].vel[0] <= 9.0f || ball1[i].vel[1] <= 9.0f) {
+	            if (ball1[i].vel[0] <= 4.5f || ball1[i].vel[1] <= 4.5f) {
 	        	ball1[i].pos[0] += ball1[i].vel[0];
 	        	ball1[i].pos[1] += ball1[i].vel[1];
 	        	ball1[i].vel[1] -= Gravity;
 	            }
 	        }
             if (ball2[i].init == 1) {
-	            if (ball2[i].vel[0] <= 9.0f || ball2[i].vel[1] <= 9.0f) {
+	            if (ball2[i].vel[0] <= 5.0f || ball2[i].vel[1] <= 5.0f) {
 	        	ball2[i].pos[0] += ball2[i].vel[0];
 	        	ball2[i].pos[1] += ball2[i].vel[1];
 	        	ball2[i].vel[1] -= Gravity;
@@ -719,8 +798,8 @@ void physics()
     extern void triangle_collision( Triangle triangle, float *ballx,
             float *bally, float *vx, float *vy); 
     /* For hypotenus facing right downwards */
-    extern void xtriangle_collision( Triangle triangle, float ballx,
-            float bally, float *vx, float *vy);
+    extern void xtriangle_collision( Triangle triangle, float *ballx,
+            float *bally, float *vx, float *vy);
     // FIRST  
     if (g.map == 1) {
 	int a = 0,b = 1,c = 2,d = 3;
@@ -745,6 +824,15 @@ void physics()
         box1.pos[1], box1.w, box1.h, &ball1[i].vel[0], &ball1[i].vel[1]);
     box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, box2.pos[0],
         box2.pos[1], box2.w, box2.h, &ball1[i].vel[0], &ball1[i].vel[1]);
+    box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, rightboxm1.pos[0],
+        rightboxm1.pos[1], rightboxm1.w, rightboxm1.h, &ball1[i].vel[0], &ball1[i].vel[1]);
+	
+	//rightboxm1(15.0f, 100.0f, 325, 275, 0.0f, 0.0f), 
+	//highbox1(15.0f,375.0f, 385, 10, 0.0f, 0.0f), 
+	if (ball1[i].pos[0] >= 339  && ball1[i].pos[1] <= 375 && 
+		ball1[i].pos[0] <= 359 && ball1[i].pos[1] >= 371 ) {
+		score+=300;
+	}
     /* Box moving in Circles */
     	boxcol = 2;
 	if (alex_feature)
@@ -755,7 +843,7 @@ void physics()
 
     if (saviorActive) {
         if (ball1[i].pos[1] - ball1[i].w <= safeBox.pos[1] + safeBox.h) {
-            ball1[i].vel[1] = 8.0f;
+            ball1[i].vel[1] = 4.0f;
             saviorActive = 0;
         }
     }
@@ -788,24 +876,40 @@ void physics()
             &ball1[i].vel[0], &ball1[i].vel[1]);
     triangle_collision( t7, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
-    if (ball1[i].pos[0] <= 300.0f && ball1[i].pos[1] >= 395.0f) {
-	    if (!more) {
-	    summonshapes = 1;
+    if ((ball1[i].pos[0] <= 350.0f && ball1[i].pos[1] >= 385.0f) ||
+		(ball1[more].ballSpawned && more > 0)) {
+		
+	    if (!more || !moving[more]) {
+	    	summonshapes = 1;
 		}
 		else {
-    		if (ball1[more].pos[0] <= 300.0f && ball1[more].pos[1] >= 395.0f) {
+    		if (ball1[i].pos[0] <= 350.0f && ball1[i].pos[1] >= 385.0f &&
+				ball1[i].pos[0] >= 340.f) {
 				summonshapes = 1;
 			}
 		}
+		
+		if 	(ball1[i].vel[1] != 0.0f && more > 0 && 
+			ball1[i].pos[1] < 385.0f && ball1[i].pos[0] > 360.0f)  {
+			moving[more] = 1;
+			summonshapes = 0;	
+		}
+	}
+    if ((ball1[i].pos[0] >= 380.0f && ball1[i].pos[1] <= 285.0f &&
+		ball1[i].vel[1] < 0.0f)) {
+		ball1[i].pos[1] = 550.0f;
+		ball1[i].vel[0] = -1 * (rand() % 4);		
 	}
 
     if (summonshapes && ball1[i].ballSpawned) {
-    	triangle_collision( t8, &ball1[i].pos[0], &ball1[i].pos[1],
+    	/*triangle_collision( t8, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
     	triangle_collision( t9, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
 		if (ball1[i].pos[0] >= 350.0f && ball1[i].pos[1] <= 450.0f) 
-			 ball1[i].pos[1] = 450.0f;
+			 ball1[i].pos[1] = 550.0f;*/	
+    box_collision(&ball1[i].pos[0], &ball1[i].pos[1], ball1[i].w, blockbox1.pos[0],
+        blockbox1.pos[1], blockbox1.w, blockbox1.h, &ball1[i].vel[0], &ball1[i].vel[1]);
     }
 
     flipping(g.map, &ball1[i].pos[0], &ball1[i].pos[1], &ball1[i].vel[0], &ball1[i].vel[1]);
@@ -822,9 +926,9 @@ void physics()
    
     
     /* For hypotenus facing right downwards */
-    xtriangle_collision( t2, ball1[i].pos[0], ball1[i].pos[1],
+    xtriangle_collision( t2, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
-    xtriangle_collision( t10, ball1[i].pos[0], ball1[i].pos[1],
+    xtriangle_collision( t10, &ball1[i].pos[0], &ball1[i].pos[1],
             &ball1[i].vel[0], &ball1[i].vel[1]);
     // Checking for wall collision
     if (ball1[i].pos[0] - ball1[i].w < 0)
@@ -844,11 +948,14 @@ void physics()
         ball1[i].vel[1] = 0;
         ball1[i].init = 0;
         summonshapes = 0;
-		if (more > 0)
+		if (more > 0) 
+		{
+			moving[more] = 0;
 			more--;
+		}
     }
         if (ball1[i].vel[0] != 0.0f || ball1[i].vel[1] != 0.0f) {
-                point += 0.01;
+                point += 0.001;
                         if (point >= 0.10f){
                                 score += 1;
                                 point = 0.00f;
@@ -866,11 +973,15 @@ void physics()
     if (noBalls == 1) {
         ball1[0].ballSpawned = 1;
         lives--;
+		max_uses = 5;
+		initial = 0;
+		more=0;
+		moving[3] = {0};
         /*if(lives == 0) {
             lives = 3;
             score = 0;
         }*/
-    }
+    	}
     }
     // SECOND
     if (g.map == 2) {
@@ -902,13 +1013,29 @@ void physics()
                 bot2.pos[1], bot2.w, bot2.h, &ball2[i].vel[0], &ball2[i].vel[1]);
             box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, Obs.pos[0],
                 Obs.pos[1], Obs.w, Obs.h, &ball2[i].vel[0], &ball2[i].vel[1]);
+            box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, collBox1.pos[0],
+                collBox1.pos[1], collBox1.w, collBox1.h, &ball2[i].vel[0], &ball2[i].vel[1]);
+            box_collision(&ball2[i].pos[0], &ball2[i].pos[1], ball2[i].w, collBox2.pos[0],
+                collBox2.pos[1], collBox2.w, collBox2.h, &ball2[i].vel[0], &ball2[i].vel[1]);
 
             if (saviorActive) {
                 if (ball2[i].pos[1] - ball2[i].w <= safeBox2.pos[1] + safeBox2.h) {
-                    ball2[i].vel[1] = 8.0f;
+                    ball2[i].vel[1] = 4.5f;
                     saviorActive = 0;
                 }
             }
+
+			
+    		//collBox1(10.0f, 40.0f, 56.0f, 165.0f, 0.0f, 0.0f),
+			//collBox2(10.0f, 40.0f, 496.0f, 165.0f, 0.0f, 0.0f),
+			if ((ball2[i].pos[0] >= 10  && ball2[i].pos[1] <= 210 && 
+				ball2[i].pos[0] <= 47 && ball2[i].pos[1] >= 205) || 
+				(ball2[i].pos[0] >= 505  && ball2[i].pos[1] <= 210 && 
+				ball2[i].pos[0] <= 540 && ball2[i].pos[1] >= 205))  {
+    			score+=300;
+			}	
+
+			
 
             circle_collision(&ball2[i].pos[0], &ball2[i].pos[1],circle1.c[0], circle1.c[1],
                     circle1.r, &ball2[i].vel[0], &ball2[i].vel[1]);
@@ -925,7 +1052,7 @@ void physics()
                     &ball2[i].vel[0], &ball2[i].vel[1]);
             triangle_collision( Gt2, &ball2[i].pos[0], &ball2[i].pos[1], // flipper2
                     &ball2[i].vel[0], &ball2[i].vel[1]);
-            triangle_collision( Gt3, &ball2[i].pos[0], &ball2[i].pos[1], // t1select_map(g.xres, g.yres, e->xbutton.x, g.yres - e->xbutton.y);
+            triangle_collision( Gt3, &ball2[i].pos[0], &ball2[i].pos[1], // t1
                     &ball2[i].vel[0], &ball2[i].vel[1]);
             triangle_collision( Gt5, &ball2[i].pos[0], &ball2[i].pos[1], // t1
                     &ball2[i].vel[0], &ball2[i].vel[1]);
@@ -935,12 +1062,24 @@ void physics()
                     &ball2[i].vel[0], &ball2[i].vel[1]);
             triangle_collision( Gt10, &ball2[i].pos[0], &ball2[i].pos[1], // t1
                     &ball2[i].vel[0], &ball2[i].vel[1]);
+            triangle_collision( Gt11, &ball2[i].pos[0], &ball2[i].pos[1],
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            triangle_collision( Gt12, &ball2[i].pos[0], &ball2[i].pos[1],
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            triangle_collision( Gt13, &ball2[i].pos[0], &ball2[i].pos[1], 
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            triangle_collision( Gt15, &ball2[i].pos[0], &ball2[i].pos[1], 
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
 
-            xtriangle_collision( Gt4, ball2[i].pos[0], ball2[i].pos[1],
+            xtriangle_collision( Gt4, &ball2[i].pos[0], &ball2[i].pos[1],
                     &ball2[i].vel[0], &ball2[i].vel[1]);
-            xtriangle_collision( Gt6, ball2[i].pos[0], ball2[i].pos[1],
+            xtriangle_collision( Gt6, &ball2[i].pos[0], &ball2[i].pos[1],
                     &ball2[i].vel[0], &ball2[i].vel[1]);
-            xtriangle_collision( Gt8, ball2[i].pos[0], ball2[i].pos[1],
+            xtriangle_collision( Gt8, &ball2[i].pos[0], &ball2[i].pos[1],
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            xtriangle_collision( Gt14, &ball2[i].pos[0], &ball2[i].pos[1], 
+                    &ball2[i].vel[0], &ball2[i].vel[1]);
+            xtriangle_collision( Gt16, &ball2[i].pos[0], &ball2[i].pos[1], 
                     &ball2[i].vel[0], &ball2[i].vel[1]);
 
             if (ball2[i].pos[0] - ball2[i].w < 0) {
@@ -964,7 +1103,7 @@ void physics()
         summonshapes = 0;
         }
         if (ball2[i].vel[0] != 0.0f || ball2[i].vel[1] != 0.0f) {
-            point += 0.01;
+            point += 0.001;
             if (point >= 0.10f){
                 score += 1;
                 credit += 0;
@@ -973,23 +1112,19 @@ void physics()
         }
         }
         for (int i = 0; i < MAX_BALLS; i++) {
-        if (ball2[i].ballSpawned == 0) {
-            noBalls = 1;
-        } else {
-            noBalls = 0;
-            break;
-        }
+        	if (ball2[i].ballSpawned == 0) {
+            	noBalls = 1;
+        	} else {
+            	noBalls = 0;
+            	break;
+        	}
         }
         if (noBalls == 1) {
             ball2[0].ballSpawned = 1;
             lives--;
-            /*if(lives == 0) {
-                lives = 3;
-                score = 0;
-                credit = 0;
-            }*/
-        }
-    }
+			max_uses = 5;
+        	}
+    	}
     }
 }
 
@@ -1060,11 +1195,14 @@ void render()
     Rect r[2];
     unsigned char tridef[3] { 115, 80, 50};
     unsigned char cirdef[3] { 150, 150, 150};
+    unsigned char block[3] { 150, 250, 150};
     unsigned char def[3] { 115, 80, 50};
     unsigned char col[3] { 126, 100, 255};
+    unsigned char telCol[3] = {0, 0, 0};
     
     if (g.map == 1) {
-
+	whichmap = 1;
+	pressing = 0;
     glBindTexture(GL_TEXTURE_2D, g.texture);
     glColor3f(1.0, 1.0, 1.0);
     glBegin(GL_QUADS);
@@ -1074,59 +1212,14 @@ void render()
     glTexCoord2f( 1.0f, 1.0f); glVertex2i( g.xres, 0);
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
-
-     // Draw Box
-    glBindTexture(GL_TEXTURE_2D, g.rocktxt);
-        if (saviorActive) {
-            unsigned char safeCol[3] = {255, 255, 0};
-            draw_box(safeBox, safeCol);
-        }
-        draw_box(highbox1, def);
-        draw_box(highbox2, def);
-        draw_box(highbox3, def);
-        draw_box(widebox1, def);
-        draw_box(box1, def);
-        draw_box(box2, def);
-        draw_box(boxcir, def);
-        int posy = 350;
-        for (int i = 0; i < 2; i++) {
-                boxes[i].pos[1] = posy;
-                boxes[i].pos[0] = 525;
-                draw_box(boxes[i], col);
-                posy = posy - 50;
-                boxes[i].w = 50;
-                boxes[i].h = 15;
-        }
-     
-    /* create triangle*/
-    draw_triangle(t1, tridef);
-    draw_triangle(t2, tridef);
-    draw_triangle(t3, tridef);
-    draw_triangle(t4, tridef);
-    draw_triangle(t5, tridef);
-    draw_triangle(t6, tridef);
-    draw_triangle(t7, tridef);
-    draw_triangle(t10, tridef);
-    if (summonshapes) {
-    	draw_triangle(t8, tridef);
-    	draw_triangle(t9, tridef);
-    }
-
-    flipperRotate(g.map);
-    
-	glBindTexture(GL_TEXTURE_2D, 0);
-    /* create right flipper*/
-    draw_triangle(flipper1, tridef);
-    /* create left flipper*/
-    draw_triangle(flipper2, tridef);
-
-    //Draw Half Circle
+	
+	//Draw Half Circle
     int n = 40; 
     double angle = 0.0;
     double inc = (2.0*3.14)/n;
     //glVertex2f(x, y);
     glBindTexture(GL_TEXTURE_2D, g.rocktxt);
-    glColor3ub(115, 80, 50);
+    glColor3ub(150, 150, 150);
     glBegin(GL_TRIANGLE_FAN);
     for (int i = 0; i < n/2+1; i++) {
 	halfcir.x = halfcir.r*cos(angle);
@@ -1137,7 +1230,59 @@ void render()
     }
     glEnd();
 	glBindTexture(GL_TEXTURE_2D, 0);
-	
+
+     // Draw Box
+    glBindTexture(GL_TEXTURE_2D, g.rocktxt);
+        if (saviorActive) {
+            unsigned char safeCol[3] = {255, 255, 0};
+            draw_box(safeBox, safeCol);
+        }
+		draw_box(blackRboxm1, telCol);
+		draw_box(blockbox1, cirdef);
+        draw_box(highbox1, def);
+        draw_box(highbox2, def);
+        draw_box(highbox3, def);
+        draw_box(widebox1, def);
+        draw_box(box1, def);
+        draw_box(box2, def);
+        draw_box(boxcir, def);
+        draw_box(rightboxm1, def);
+        int posy = 350;
+        for (int i = 0; i < 4; i++) {
+                boxes[i].pos[1] = posy;
+                boxes[i].pos[0] = 525;
+                draw_box(boxes[i], col);
+                posy = posy - 50;
+                boxes[i].w = 50;
+                boxes[i].h = 15;
+        }
+    if (summonshapes) 
+        draw_box(blockbox1, block);
+     
+    /* create triangle*/
+    draw_triangle(t1, tridef);
+    draw_triangle(t2, tridef);
+    draw_triangle(t3, tridef);
+    draw_triangle(t4, tridef);
+    draw_triangle(t5, tridef);
+    draw_triangle(t6, tridef);
+    draw_triangle(t7, tridef);
+    draw_triangle(t10, tridef);
+    //if (summonshapes) {
+    //    draw_box(blockbox1, block);
+    //	draw_triangle(t8, tridef);
+    //	draw_triangle(t9, tridef);
+    //}
+
+    flipperRotate(g.map);
+    
+	glBindTexture(GL_TEXTURE_2D, 0);
+    /* create right flipper*/
+    draw_triangle(flipper1, tridef);
+    /* create left flipper*/
+    draw_triangle(flipper2, tridef);
+
+    	
     r[1].bot = g.yres-35;
     r[1].left = g.xres/2;
     r[1].center = -5;
@@ -1164,7 +1309,6 @@ void render()
     draw_circle(cir4.r,cir4.c[0],cir4.c[1], cirdef);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-    unsigned char telCol[3] = {0, 0, 0};
     draw_circle(cirsnd.r,cirsnd.c[0],cirsnd.c[1], telCol);
     draw_circle(cirrcv.r,cirrcv.c[0], cirrcv.c[1], telCol);
 
@@ -1186,7 +1330,9 @@ void render()
     }
 
     if (g.map == 2) {
-    
+		
+	whichmap = 2;
+	pressing = 0;
     glClear(GL_COLOR_BUFFER_BIT);
 
     glBindTexture(GL_TEXTURE_2D, g.grassbkg);
@@ -1214,6 +1360,8 @@ void render()
     draw_box(bot1, def);
     draw_box(bot2, def);
     draw_box(Obs, def);
+    draw_box(collBox1, def);
+    draw_box(collBox2, def);
     
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
@@ -1230,14 +1378,18 @@ void render()
     draw_triangle(Gt8, tridef);
     draw_triangle(Gt9, tridef);
     draw_triangle(Gt10, tridef);
+    draw_triangle(Gt11, tridef);
+    draw_triangle(Gt12, tridef);
+    draw_triangle(Gt13, tridef);
+    draw_triangle(Gt14, tridef);
+    draw_triangle(Gt15, tridef);
+    draw_triangle(Gt16, tridef);
 
     flipperRotate(g.map);
 
     draw_triangle(GflipL, tridef);
     draw_triangle(GflipR, tridef);
 
-    /*draw_triangle(Gt11, tridef);
-    draw_triangle(Gt12, tridef);*/
     glEnd();
     glBindTexture(GL_TEXTURE_2D, 0);
     glPopMatrix();
@@ -1275,7 +1427,7 @@ void render()
 	glBindTexture(GL_TEXTURE_2D, g.rocktxt);
 	int posy = 350;
 	int posx = 700;
-        for (int i = 0; i < 2; i++) {
+        for (int i = 0; i < 4; i++) {
                 boxes[i].pos[1] = posy;
                 boxes[i].pos[0] = posx;
                 draw_box(boxes[i], col);

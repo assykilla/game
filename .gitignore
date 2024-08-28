@@ -1,0 +1,11 @@
+#ignore executables
+*.out
+*.exe
+#ignore leaderboard.txt
+leaderboard.txt*
+leaderboard.*
+'leaderboard.*
+#ignore hidden "dot" files
+.*
+#whitelist specific "dot" files
+!.gitignore
