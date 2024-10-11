@@ -24,14 +24,14 @@ using namespace std;
 #include "xreyes.h"
 #include "gtorres.h"
 //some structures
-Image img("dinosaurs.jpeg");
-Image lvl2grass("grass1.jpg");
-Image lvl2rock("rock1.jpg");
-Image lvl2rock2("stone2.jpg");
-Image main_background("main_screen.jpg");
-Image leaderboard_background("leaderboard_screen.jpg");
-Image control_background("controls_background.jpg");
-Image end_background("end_screen.jpg");
+Image img("images/dinosaurs.jpeg");
+Image lvl2grass("images/grass1.jpg");
+Image lvl2rock("images/rock1.jpg");
+Image lvl2rock2("images/stone2.jpg");
+Image main_background("images/main_screen.jpg");
+Image leaderboard_background("images/leaderboard_screen.jpg");
+Image control_background("images/controls_background.jpg");
+Image end_background("images/end_screen.jpg");
 string leaderboard = "leaderboard.txt";
 string leaderboard_names[10] = {"", "", "", "", "", "", "", "", "", ""};
 string leaderboard_scores[10] = {"", "", "", "", "", "", "", "", "", ""};
