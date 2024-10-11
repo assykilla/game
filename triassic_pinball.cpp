@@ -18,11 +18,11 @@ using namespace std;
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
-#include "fonts.h"
-#include "abotello.h"
-#include "isamara.h"
-#include "xreyes.h"
-#include "gtorres.h"
+#include "group/fonts.h"
+#include "group/abotello.h"
+#include "group/isamara.h"
+#include "group/xreyes.h"
+#include "group/gtorres.h"
 //some structures
 Image img("images/dinosaurs.jpeg");
 Image lvl2grass("images/grass1.jpg");
